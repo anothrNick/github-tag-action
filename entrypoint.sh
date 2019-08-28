@@ -21,3 +21,5 @@ case "$log" in
 esac
 
 echo $new
+
+git push origin $new
