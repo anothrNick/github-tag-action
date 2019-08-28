@@ -1,6 +1,6 @@
 # github-tag-action
 
-A Github Action to automatically bumps and tags a github repository, on merge, with the latest semver formatted version.
+A Github Action to automatically bump and tag a github repository, on merge, with the latest semver formatted version.
 
 ### Usage
 
