@@ -30,18 +30,12 @@ repo=$(basename -s .git `git config --get remote.origin.url`)
 
 echo "pushing tag $new to repo $REPO_OWNER/$repo"
 
-curl -0 -v -X POST https://api.github.com/repos/$REPO_OWNER/$repo/git/tags \
+curl -0 -v -X POST https://api.github.com/repos/$REPO_OWNER/$repo/git/refs \
 -H "Authorization: token $GITHUB_TOKEN" \
 -d @- << EOF
 
 {
-  "tag": "$new",
-  "message": "Bump version to $new",
-  "object": "$commit",
-  "type": "commit",
-  "tagger": {
-    "name": "anothrNick/github-tag-action",
-    "date": "$dt"
-  }
+  "ref": "refs/heads/master"
+  "sha": "$commit"
 }
 EOF

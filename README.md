@@ -22,7 +22,9 @@ jobs:
         REPO_OWNER: anothrNick
 ```
 
-Be sure to set the *REPO_OWNER* environment variable so that your tag your repo.
+Be sure to set the *REPO_OWNER* environment variable so that the action tags your repo.
+
+*NOTE:* This creates a [lightweight tag](https://developer.github.com/v3/git/refs/#create-a-reference)
 
 ### Credits
 
