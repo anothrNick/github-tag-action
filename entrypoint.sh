@@ -24,7 +24,6 @@ case "$log" in
 esac
 
 echo $new
-echo $GITHUB_TOKEN
 
 dt=$(date '+%Y-%m-%dT%H:%M:%SZ')
 repo=$(basename -s .git `git config --get remote.origin.url`)
@@ -32,7 +31,7 @@ repo=$(basename -s .git `git config --get remote.origin.url`)
 echo "pushing tag $new to repo $REPO_OWNER/$repo"
 
 curl -0 -v -X POST https://api.github.com/repos/$REPO_OWNER/$repo/git/tags \
--H "Authorization: token $ACCESS_TOKEN" \
+-H "Authorization: token $GITHUB_TOKEN" \
 -d @- << EOF
 
 {
