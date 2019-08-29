@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # get latest tag
-t=$(git describe --tags `git rev-list --tags --max-count=1` &> /dev/null)
+t=$(git describe --tags `git rev-list --tags --max-count=1`)
 
 # get current commit hash for tag
 commit=$(git rev-parse HEAD)
