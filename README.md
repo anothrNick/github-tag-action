@@ -30,6 +30,16 @@ Be sure to set the *REPO_OWNER* environment variable so that the action tags you
 
 Any commit message with `#major`, `#minor`, or `patch` will trigger the respective version bump.
 
+### Workflow
+
+* Add this action to your repo
+* Commit some changes
+* Either push to master or open a PR
+* On push(or merge) to master, Action will:
+  * Get latest tag
+  * Bump tag with minor version unless any commit message contains `#major` or `#patch`
+  * Pushes tag to github
+
 ### Credits
 
 [fsaintjacques/semver-tool](https://github.com/fsaintjacques/semver-tool)
