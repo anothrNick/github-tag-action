@@ -18,9 +18,9 @@ fi
 # get commit logs and determine home to bump the version
 # supports #major, #minor, #patch (anything else will be 'minor')
 case "$log" in
-    *#major* ) new=$(./contrib/semver bump major $t);;
-    *#patch* ) new=$(./contrib/semver bump patch $t);;
-    * ) new=$(./contrib/semver bump minor $t);;
+    *#major* ) new=$(semver bump major $t);;
+    *#patch* ) new=$(semver bump patch $t);;
+    * ) new=$(semver bump minor $t);;
 esac
 
 echo $new

@@ -13,6 +13,6 @@ RUN apt-get update && \
     apt-get install -y curl
 
 COPY ./contrib/semver ./contrib/semver
-RUN chmod +x ./contrib/semver
+RUN install ./contrib/semver /usr/local/bin
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
