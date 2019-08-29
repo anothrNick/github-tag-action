@@ -12,6 +12,6 @@ RUN apt-get update && \
     apt-get install -y git && \
     apt-get install -y curl
 
-ADD ./contrib/semver /contrib/semver
+ADD ./contrib/semver ./contrib/semver
 ADD entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
