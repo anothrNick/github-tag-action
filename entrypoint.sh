@@ -38,10 +38,6 @@ curl -0 -v -X POST https://api.github.com/repos/$REPO_OWNER/$repo/git/tags \
   "tag": "$new",
   "message": "Bump version to $new",
   "object": "$commit",
-  "type": "commit",
-  "tagger": {
-    "name": "anothrNick/github-tag-action",
-    "date": "$dt"
-  }
+  "type": "commit"
 }
 EOF
