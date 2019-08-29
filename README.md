@@ -2,6 +2,9 @@
 
 A Github Action to automatically bump and tag master, on merge, with the latest semver formatted version.
 
+[![Build Status](https://github.com/anothrNick/github-tag-action/workflows/Bump%20version/badge.svg)](https://github.com/anothrNick/github-tag-action/workflows/Bump%20version/badge.svg)
+[![Stable Version](https://img.shields.io/github/v/tag/anothrNick/github-tag-action)](https://img.shields.io/github/v/tag/anothrNick/github-tag-action)
+
 ### Usage
 
 ```Dockerfile
