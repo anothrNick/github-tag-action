@@ -6,7 +6,10 @@ A Github Action to automatically bump and tag a github repository, on merge, wit
 
 ```Dockerfile
 name: Bump version
-on: [push]
+on:
+  push:
+    branches:
+      - master
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,6 +19,7 @@ jobs:
       uses: anothrNick/github-tag-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        REPO_OWNER: anothrNick
 ```
 
 ### Credits

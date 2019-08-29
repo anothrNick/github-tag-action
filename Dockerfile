@@ -9,7 +9,8 @@ LABEL "maintainer"="Nick Sjostrom"
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y git
+    apt-get install -y git && \
+    apt-get install curl
 
 ADD ./contrib/semver /contrib/semver
 ADD entrypoint.sh /entrypoint.sh
