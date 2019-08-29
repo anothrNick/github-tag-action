@@ -30,7 +30,7 @@ repo=$(basename -s .git `git config --get remote.origin.url`)
 
 echo "$dt: **pushing tag $new to repo $REPO_OWNER/$repo"
 
-curl -0 -v -X POST https://api.github.com/repos/$REPO_OWNER/$repo/git/refs \
+curl -s -X POST https://api.github.com/repos/$REPO_OWNER/$repo/git/refs \
 -H "Authorization: token $GITHUB_TOKEN" \
 -d @- << EOF
 
