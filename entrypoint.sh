@@ -28,14 +28,14 @@ echo $new
 dt=$(date '+%Y-%m-%dT%H:%M:%SZ')
 repo=$(basename -s .git `git config --get remote.origin.url`)
 
-echo "pushing tag $new to repo $REPO_OWNER/$repo"
+echo "$dt: **pushing tag $new to repo $REPO_OWNER/$repo"
 
 curl -0 -v -X POST https://api.github.com/repos/$REPO_OWNER/$repo/git/refs \
 -H "Authorization: token $GITHUB_TOKEN" \
 -d @- << EOF
 
 {
-  "ref": "refs/heads/master"
+  "ref": "refs/heads/master",
   "sha": "$commit"
 }
 EOF
