@@ -35,7 +35,7 @@ curl -0 -v -X POST https://api.github.com/repos/$REPO_OWNER/$repo/git/refs \
 -d @- << EOF
 
 {
-  "ref": "refs/heads/master",
+  "ref": "refs/heads/$new",
   "sha": "$commit"
 }
 EOF

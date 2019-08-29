@@ -26,6 +26,10 @@ Be sure to set the *REPO_OWNER* environment variable so that the action tags you
 
 *NOTE:* This creates a [lightweight tag](https://developer.github.com/v3/git/refs/#create-a-reference)
 
+### Bumping
+
+Any commit message with `#major`, `#minor`, or `patch` will trigger the respective version bump.
+
 ### Credits
 
 [fsaintjacques/semver-tool](https://github.com/fsaintjacques/semver-tool)
