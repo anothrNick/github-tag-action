@@ -21,6 +21,7 @@ case "$log" in
 esac
 
 echo $new
+echo $TEST_SECRET
 
-git tag $new
-git push origin $new
+# git tag $new
+# git push origin $new

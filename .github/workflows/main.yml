@@ -1,5 +1,8 @@
 name: Bump version
-on: [push]
+on:
+  push:
+    branches:
+      - master
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -9,3 +12,4 @@ jobs:
       uses: anothrNick/github-tag-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TEST_SECRET: ${{ secrets.TEST_SECRET }}
