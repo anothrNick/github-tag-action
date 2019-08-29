@@ -1,6 +1,6 @@
 # github-tag-action
 
-A Github Action to automatically bump and tag a github repository, on merge, with the latest semver formatted version.
+A Github Action to automatically bump and tag master, on merge, with the latest semver formatted version.
 
 ### Usage
 
@@ -21,6 +21,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         REPO_OWNER: anothrNick
 ```
+
+Be sure to set the *REPO_OWNER* environment variable so that your tag your repo.
 
 ### Credits
 
