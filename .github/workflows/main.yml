@@ -12,4 +12,4 @@ jobs:
       uses: anothrNick/github-tag-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        TEST_SECRET: ${{ secrets.TEST_SECRET }}
+        REPO_OWNER: anothrNick
