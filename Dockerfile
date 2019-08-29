@@ -7,6 +7,10 @@ LABEL "com.github.actions.color"="gray-dark"
 LABEL "repository"="https://github.com/anothrNick/github-tag-action"
 LABEL "maintainer"="Nick Sjostrom"
 
-ADD ./contrib/semver /semver
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y git
+
+ADD ./contrib/semver /contrib/semver
 ADD entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
