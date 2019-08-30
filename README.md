@@ -46,3 +46,11 @@ Any commit message with `#major`, `#minor`, or `patch` will trigger the respecti
 ### Credits
 
 [fsaintjacques/semver-tool](https://github.com/fsaintjacques/semver-tool)
+
+### Projects using github-tag-action
+
+A list of projects using github-tag-action for reference.
+
+* [anothrNick/json-tree-service](https://github.com/anothrNick/json-tree-service)
+
+  > Access JSON structure with HTTP path parameters as keys/indices to the JSON.
