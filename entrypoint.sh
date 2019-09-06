@@ -26,7 +26,7 @@ esac
 echo $new
 
 dt=$(date '+%Y-%m-%dT%H:%M:%SZ')
-repo=$(basename -s .git `git config --get remote.origin.url`)
+repo=$(basename `git rev-parse --show-toplevel`)
 
 echo "$dt: **pushing tag $new to repo $REPO_OWNER/$repo"
 
