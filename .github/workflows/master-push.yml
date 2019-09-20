@@ -1,4 +1,4 @@
-name: Bump version
+name: Tag Release
 on:
   push:
     branches:
@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - name: Bump version and push tag
+    - name: Tag Release
       uses: reececomo/auto-tag-release@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
