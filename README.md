@@ -1,10 +1,12 @@
-# github-tag-action
+# auto-tag-release
 
 A Github Action to automatically bump and tag master, on merge, with the latest semver formatted version.
 
-[![Build Status](https://github.com/anothrNick/github-tag-action/workflows/Bump%20version/badge.svg)](https://github.com/anothrNick/github-tag-action/workflows/Bump%20version/badge.svg)
-[![Stable Version](https://img.shields.io/github/v/tag/anothrNick/github-tag-action)](https://img.shields.io/github/v/tag/anothrNick/github-tag-action)
-[![Latest Release](https://img.shields.io/github/v/release/anothrNick/github-tag-action?color=%233D9970)](https://img.shields.io/github/v/release/anothrNick/github-tag-action?color=%233D9970)
+* Modified version of [anothrNick/github-tag-action](https://github.com/anothrNick/github-tag-action)
+
+[![Build Status](https://github.com/reececomo/auto-tag-release/workflows/Bump%20version/badge.svg)](https://github.com/reececomo/auto-tag-release/workflows/Bump%20version/badge.svg)
+[![Stable Version](https://img.shields.io/github/v/tag/reececomo/auto-tag-release)](https://img.shields.io/github/v/tag/reececomo/auto-tag-release)
+[![Latest Release](https://img.shields.io/github/v/release/reececomo/auto-tag-release?color=%233D9970)](https://img.shields.io/github/v/release/reececomo/auto-tag-release?color=%233D9970)
 
 > Medium Post: [Creating A Github Action to Tag Commits](https://itnext.io/creating-a-github-action-to-tag-commits-2722f1560dec)
 
@@ -13,7 +15,7 @@ A Github Action to automatically bump and tag master, on merge, with the latest 
 ### Usage
 
 ```Dockerfile
-name: Bump version
+name: Tag Release
 on:
   push:
     branches:
@@ -23,20 +25,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - name: Bump version and push tag
-      uses: anothrNick/github-tag-action@master
+    - name: Tag Release
+      uses: reececomo/auto-tag-release@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        REPO_OWNER: anothrNick
+        REPO_OWNER: reececomo
+        DEFAULT_BUMP: major
 ```
 
-Be sure to set the *REPO_OWNER* environment variable so that the action tags your repo.
+### Options
+
+* `REPO_OWNER` **[Required]** - Be sure to set the *REPO_OWNER* environment variable so that the action tags your repo.
+* `GITHUB_TOKEN` **[Required]** - Used to authorize the tag
+* `DEFAULT_BUMP` _[Optional]_ - Which type of version bump to default to if no override is supplied. Default is `minor`.
 
 *NOTE:* This creates a [lightweight tag](https://developer.github.com/v3/git/refs/#create-a-reference)
 
-### Bumping
+### Prevent Duplicate Tags/Commits
 
-Any commit message with `#major`, `#minor`, or `patch` will trigger the respective version bump.
+It will not bump the tag version if an existing tag already exists for the HEAD commit.
+
+### Override Bumping
+
+Any commit message with `#major`, `#minor`, or `#patch` in the commit message will trigger the respective version bump.
 
 ### Workflow
 
@@ -46,18 +57,9 @@ Any commit message with `#major`, `#minor`, or `patch` will trigger the respecti
 * On push(or merge) to master, Action will:
   * Get latest tag
   * Bump tag with minor version unless any commit message contains `#major` or `#patch`
-  * Pushes tag to github
+  * Pushes tag to GitHub
 
 ### Credits
 
-[fsaintjacques/semver-tool](https://github.com/fsaintjacques/semver-tool)
-
-### Projects using github-tag-action
-
-A list of projects using github-tag-action for reference.
-
-* another/github-tag-action (uses itself to create tags)
-
-* [anothrNick/json-tree-service](https://github.com/anothrNick/json-tree-service)
-
-  > Access JSON structure with HTTP path parameters as keys/indices to the JSON.
+* [fsaintjacques/semver-tool](https://github.com/fsaintjacques/semver-tool)
+* [anothrNick/github-tag-action](https://github.com/anothrNick/github-tag-action)

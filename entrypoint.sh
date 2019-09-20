@@ -1,26 +1,35 @@
 #!/bin/bash
 
+# Config
+default_bump=$(DEFAULT_BUMP:-minor)
+
 # get latest tag
-t=$(git describe --tags `git rev-list --tags --max-count=1`)
+tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+t_commit=$(git rev-list -n 1 $tagag)
 
 # get current commit hash for tag
 commit=$(git rev-parse HEAD)
 
+if [ "$tag_commit" == "$commit" ]; then
+    echo "No new commits since previous tag."
+    exit 0
+fi
+
 # if there are none, start tags at 0.0.0
-if [ -z "$t" ]
+if [ -z "$tag" ]
 then
     log=$(git log --pretty=oneline)
     t=0.0.0
 else
-    log=$(git log $t..HEAD --pretty=oneline)
+    log=$(git log $tag..HEAD --pretty=oneline)
 fi
 
 # get commit logs and determine home to bump the version
 # supports #major, #minor, #patch (anything else will be 'minor')
 case "$log" in
-    *#major* ) new=$(semver bump major $t);;
-    *#patch* ) new=$(semver bump patch $t);;
-    * ) new=$(semver bump minor $t);;
+    *#major* ) new=$(semver bump major $tag);;
+    *#patch* ) new=$(semver bump patch $tag);;
+    * ) new=$(semver bump minor $tag);;
 esac
 
 echo $new
