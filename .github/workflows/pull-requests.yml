@@ -1,0 +1,14 @@
+name: Tag Release
+on:
+  pull_request
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Tag Release
+      uses: reececomo/auto-tag-release@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        REPO_OWNER: reececomo
+        DRY_RUN: true
