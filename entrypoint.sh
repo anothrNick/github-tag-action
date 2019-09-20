@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Config
-default_semvar_bump=$(DEFAULT_BUMP:-minor)
-dry_run_mode=$(DRY_RUN:-false)
+default_semvar_bump=${DEFAULT_BUMP:-minor}
+dry_run_mode=${DRY_RUN:-false}
 
 # get latest tag
 tag=$(git describe --tags `git rev-list --tags --max-count=1`)
