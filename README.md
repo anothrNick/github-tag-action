@@ -36,20 +36,22 @@ jobs:
 * **REPO_OWNER** ***(required)*** - Required to target the repo to tag.
 * **DEFAULT_BUMP** *(optional)* - Which type of bump to use when none explicitly provided (default: `minor`).
 
-*NOTE:* This creates a [lightweight tag](https://developer.github.com/v3/git/refs/#create-a-reference)
+> ***Note:*** This action creates a [lightweight tag](https://developer.github.com/v3/git/refs/#create-a-reference).
 
 ### Bumping
 
-Any commit message with `#major`, `#minor`, or `#patch` will trigger the respective version bump. If two or more are present, the biggest one will take preference.
+**Manual Bumping:** Any commit message that includes `#major`, `#minor`, or `#patch` will trigger the respective version bump. If two or more are present, the highest-ranking one will take precedence.
 
-This **will not** attempt to tag a commit that has already has a tag.
+**Automatic Bumping:** If no `#major`, `#minor` or `#patch` tag is contained in the commit messages, it will bump whichever `DEFAULT_BUMP` is set to (which is `minor` by default).
+
+> ***Note:*** This action **will not** bump the tag if the `HEAD` commit has already been tagged.
 
 ### Workflow
 
 * Add this action to your repo
 * Commit some changes
 * Either push to master or open a PR
-* On push(or merge) to master, Action will:
+* On push (or merge) to `master`, the action will:
   * Get latest tag
   * Bump tag with minor version unless any commit message contains `#major` or `#patch`
   * Pushes tag to github
