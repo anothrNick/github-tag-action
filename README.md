@@ -1,6 +1,6 @@
 # github-tag-action
 
-A Github Action to automatically bump and tag master, on merge, with the latest semver formatted version.
+A Github Action to automatically bump and tag master, on merge, with the latest SemVer formatted version.
 
 [![Build Status](https://github.com/anothrNick/github-tag-action/workflows/Bump%20version/badge.svg)](https://github.com/anothrNick/github-tag-action/workflows/Bump%20version/badge.svg)
 [![Stable Version](https://img.shields.io/github/v/tag/anothrNick/github-tag-action)](https://img.shields.io/github/v/tag/anothrNick/github-tag-action)
@@ -30,13 +30,17 @@ jobs:
         REPO_OWNER: anothrNick
 ```
 
-Be sure to set the *REPO_OWNER* environment variable so that the action tags your repo.
+#### Options
+
+* **REPO_OWNER** ***(required)*** - Required so the action knows which repo to tag.
+* **GITHUB_TOKEN** ***(required)*** - Required for permission permissions.
+* **DEFAULT_BUMP** *(optional)* - (default: `minor`) Which type of SemVar bump to use if none provided.
 
 *NOTE:* This creates a [lightweight tag](https://developer.github.com/v3/git/refs/#create-a-reference)
 
 ### Bumping
 
-Any commit message with `#major`, `#minor`, or `patch` will trigger the respective version bump.
+Any commit message with `#major`, `#minor`, or `#patch` will trigger the respective version bump. If two or more are present, the biggest one will take preference.
 
 ### Workflow
 
