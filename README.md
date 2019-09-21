@@ -32,15 +32,17 @@ jobs:
 
 #### Options
 
-* **REPO_OWNER** ***(required)*** - Required so the action knows which repo to tag.
-* **GITHUB_TOKEN** ***(required)*** - Required for permission permissions.
-* **DEFAULT_BUMP** *(optional)* - (default: `minor`) Which type of SemVar bump to use if none provided.
+* **GITHUB_TOKEN** ***(required)*** - Required for permission to tag the repo.
+* **REPO_OWNER** ***(required)*** - Required to target the repo to tag.
+* **DEFAULT_BUMP** *(optional)* - Which type of bump to use when none explicitly provided (default: `minor`).
 
 *NOTE:* This creates a [lightweight tag](https://developer.github.com/v3/git/refs/#create-a-reference)
 
 ### Bumping
 
 Any commit message with `#major`, `#minor`, or `#patch` will trigger the respective version bump. If two or more are present, the biggest one will take preference.
+
+This **will not** attempt to tag a commit that has already has a tag.
 
 ### Workflow
 
