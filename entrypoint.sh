@@ -5,7 +5,7 @@ default_semvar_bump=${DEFAULT_BUMP:-minor}
 
 # get latest tag
 tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-tag_commit=commit=$(git rev-list -n 1 $tagag)
+tag_commit=$(git rev-list -n 1 $tag)
 
 # get current commit hash for tag
 commit=$(git rev-parse HEAD)
