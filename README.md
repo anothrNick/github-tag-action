@@ -1,6 +1,6 @@
 # github-tag-action
 
-A Github Action to automatically bump and tag master, on merge, with the latest semver formatted version.
+A Github Action to automatically bump and tag master, on merge, with the latest SemVer formatted version.
 
 [![Build Status](https://github.com/anothrNick/github-tag-action/workflows/Bump%20version/badge.svg)](https://github.com/anothrNick/github-tag-action/workflows/Bump%20version/badge.svg)
 [![Stable Version](https://img.shields.io/github/v/tag/anothrNick/github-tag-action)](https://img.shields.io/github/v/tag/anothrNick/github-tag-action)
@@ -30,20 +30,28 @@ jobs:
         REPO_OWNER: anothrNick
 ```
 
-Be sure to set the *REPO_OWNER* environment variable so that the action tags your repo.
+#### Options
 
-*NOTE:* This creates a [lightweight tag](https://developer.github.com/v3/git/refs/#create-a-reference)
+* **GITHUB_TOKEN** ***(required)*** - Required for permission to tag the repo.
+* **REPO_OWNER** ***(required)*** - Required to target the repo to tag.
+* **DEFAULT_BUMP** *(optional)* - Which type of bump to use when none explicitly provided (default: `minor`).
+
+> ***Note:*** This action creates a [lightweight tag](https://developer.github.com/v3/git/refs/#create-a-reference).
 
 ### Bumping
 
-Any commit message with `#major`, `#minor`, or `patch` will trigger the respective version bump.
+**Manual Bumping:** Any commit message that includes `#major`, `#minor`, or `#patch` will trigger the respective version bump. If two or more are present, the highest-ranking one will take precedence.
+
+**Automatic Bumping:** If no `#major`, `#minor` or `#patch` tag is contained in the commit messages, it will bump whichever `DEFAULT_BUMP` is set to (which is `minor` by default).
+
+> ***Note:*** This action **will not** bump the tag if the `HEAD` commit has already been tagged.
 
 ### Workflow
 
 * Add this action to your repo
 * Commit some changes
 * Either push to master or open a PR
-* On push(or merge) to master, Action will:
+* On push (or merge) to `master`, the action will:
   * Get latest tag
   * Bump tag with minor version unless any commit message contains `#major` or `#patch`
   * Pushes tag to github
