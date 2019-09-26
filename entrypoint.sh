@@ -2,6 +2,7 @@
 
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
+with_v=${WITH_V:-false}
 
 # get latest tag
 tag=$(git describe --tags `git rev-list --tags --max-count=1`)
@@ -32,6 +33,11 @@ case "$log" in
     *#patch* ) new=$(semver bump patch $tag);;
     * ) new=$(semver bump `echo $default_semvar_bump` $tag);;
 esac
+
+if $with_v
+then
+    new="v$new"
+fi
 
 echo $new
 
