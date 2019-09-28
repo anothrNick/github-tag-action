@@ -42,12 +42,12 @@ fi
 echo $new
 
 dt=$(date '+%Y-%m-%dT%H:%M:%SZ')
-remote=$(git config --get remote.origin.url)
-repo=$(basename $remote .git)
+full_name=$GITHUB_REPOSITORY
+git_refs_url=$(jq .repository.git_refs_url $GITHUB_EVENT_PATH | tr -d '"' | sed 's/{\/sha}//g')
 
-echo "$dt: **pushing tag $new to repo $REPO_OWNER/$repo"
+echo "$dt: **pushing tag $new to repo $full_name"
 
-curl -s -X POST https://api.github.com/repos/$REPO_OWNER/$repo/git/refs \
+curl -s -X POST $git_refs_url \
 -H "Authorization: token $GITHUB_TOKEN" \
 -d @- << EOF
 

@@ -27,13 +27,11 @@ jobs:
       uses: anothrNick/github-tag-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        REPO_OWNER: anothrNick
 ```
 
 #### Options
 
 * **GITHUB_TOKEN** ***(required)*** - Required for permission to tag the repo.
-* **REPO_OWNER** ***(required)*** - Required to target the repo to tag.
 * **DEFAULT_BUMP** *(optional)* - Which type of bump to use when none explicitly provided (default: `minor`).
 * **WITH_V** *(optional)* - Tag version with `v` character.
 
