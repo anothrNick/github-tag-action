@@ -34,6 +34,7 @@ case "$log" in
     * ) new=$(semver bump `echo $default_semvar_bump` $tag);;
 esac
 
+# prefix with 'v'
 if $with_v
 then
     new="v$new"
@@ -41,6 +42,10 @@ fi
 
 echo $new
 
+# set output
+echo ::set-output name=new_tag::$new
+
+# push new tag ref to github
 dt=$(date '+%Y-%m-%dT%H:%M:%SZ')
 full_name=$GITHUB_REPOSITORY
 git_refs_url=$(jq .repository.git_refs_url $GITHUB_EVENT_PATH | tr -d '"' | sed 's/{\/sha}//g')
