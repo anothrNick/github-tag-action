@@ -31,9 +31,15 @@ jobs:
 
 #### Options
 
+**Environment Variables**
+
 * **GITHUB_TOKEN** ***(required)*** - Required for permission to tag the repo.
 * **DEFAULT_BUMP** *(optional)* - Which type of bump to use when none explicitly provided (default: `minor`).
 * **WITH_V** *(optional)* - Tag version with `v` character.
+
+#### Outputs
+
+* **new_tag** - The value of the newly created tag.
 
 > ***Note:*** This action creates a [lightweight tag](https://developer.github.com/v3/git/refs/#create-a-reference).
 

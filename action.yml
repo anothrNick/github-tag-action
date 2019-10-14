@@ -1,0 +1,12 @@
+name: 'Github Tag Bump'
+description: 'Bump and push git tag on merge'
+author: 'Nick Sjostrom'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+outputs:
+  new_tag:
+    description: 'Generated tag'
+branding:
+  icon: 'git-merge'  
+  color: 'purple'
