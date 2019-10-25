@@ -36,6 +36,7 @@ jobs:
 * **GITHUB_TOKEN** ***(required)*** - Required for permission to tag the repo.
 * **DEFAULT_BUMP** *(optional)* - Which type of bump to use when none explicitly provided (default: `minor`).
 * **WITH_V** *(optional)* - Tag version with `v` character.
+* **PRE_RELEASE** *(optional)* - Postfixes the version with the commit hash and does not tag
 
 #### Outputs
 
