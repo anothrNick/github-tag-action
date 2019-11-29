@@ -4,6 +4,7 @@
 default_semvar_bump=${DEFAULT_BUMP:-minor}
 with_v=${WITH_V:-false}
 release_branches=${RELEASE_BRANCHES:-master}
+custom_tag=${CUSTOM_TAG}
 
 pre_release="true"
 IFS=',' read -ra branch <<< "$release_branches"
@@ -55,6 +56,11 @@ fi
 if $pre_release
 then
     new="$new-${commit:0:7}"
+fi
+
+if [ ! -z $custom_tag ]
+then
+    new="$custom_tag"
 fi
 
 echo $new
