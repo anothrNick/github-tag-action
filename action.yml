@@ -7,6 +7,8 @@ runs:
 outputs:
   new_tag:
     description: 'Generated tag'
+  tag:
+    description: 'The latest tag after running this action'
 branding:
   icon: 'git-merge'  
   color: 'purple'
