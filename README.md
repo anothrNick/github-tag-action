@@ -42,7 +42,7 @@ jobs:
 #### Outputs
 
 * **new_tag** - The value of the newly created tag.
-* **tag** - The value of the latest tag after runing this action.
+* **tag** - The value of the latest tag after running this action.
 
 > ***Note:*** This action creates a [lightweight tag](https://developer.github.com/v3/git/refs/#create-a-reference).
 
