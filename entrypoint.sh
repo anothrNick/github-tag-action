@@ -26,6 +26,7 @@ commit=$(git rev-parse HEAD)
 
 if [ "$tag_commit" == "$commit" ]; then
     echo "No new commits since previous tag. Skipping..."
+    echo ::set-output name=tag::$tag
     exit 0
 fi
 
@@ -65,8 +66,9 @@ fi
 
 echo $new
 
-# set output
+# set outputs
 echo ::set-output name=new_tag::$new
+echo ::set-output name=tag::$new
 
 if $pre_release
 then
