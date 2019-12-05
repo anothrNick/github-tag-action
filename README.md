@@ -27,6 +27,7 @@ jobs:
       uses: anothrNick/github-tag-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        WITH_V: true
 ```
 
 #### Options
