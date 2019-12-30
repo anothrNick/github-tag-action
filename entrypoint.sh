@@ -7,7 +7,7 @@ release_branches=${RELEASE_BRANCHES:-master}
 custom_tag=${CUSTOM_TAG}
 source=${SOURCE:-.}
 
-cd $source
+cd ${GITHUB_WORKSPACE}/${source}
 
 pre_release="true"
 IFS=',' read -ra branch <<< "$release_branches"
