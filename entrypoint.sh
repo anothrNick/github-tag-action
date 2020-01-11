@@ -5,6 +5,9 @@ default_semvar_bump=${DEFAULT_BUMP:-minor}
 with_v=${WITH_V:-false}
 release_branches=${RELEASE_BRANCHES:-master}
 custom_tag=${CUSTOM_TAG}
+source=${SOURCE:-.}
+
+cd ${GITHUB_WORKSPACE}/${source}
 
 pre_release="true"
 IFS=',' read -ra branch <<< "$release_branches"

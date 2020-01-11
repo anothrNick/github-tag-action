@@ -39,6 +39,7 @@ jobs:
 * **WITH_V** *(optional)* - Tag version with `v` character.
 * **RELEASE_BRANCHES** *(optional)* - Comma separated list of branches (bash reg exp accepted) that will generate the release tags. Other branches and pull-requests generate versions postfixed with the commit hash and do not generate any tag. Examples: `master` or `.*` or `release.*,hotfix.*,master` ...
 * **CUSTOM_TAG** *(optional)* - Set a custom tag, useful when generating tag based on f.ex FROM image in a docker image. **Setting this tag will invalidate any other settings set!**
+* **SOURCE** *(optional)* - Operate on a relative path under $GITHUB_WORKSPACE.
 
 #### Outputs
 
