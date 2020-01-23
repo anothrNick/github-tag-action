@@ -23,8 +23,8 @@ echo "pre_release = $pre_release"
 # fetch tags
 git fetch --tags
 
-# get latest tag
-tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+# get latest tag that looks like a semver (with or without v)
+tag=$(git for-each-ref --sort=-v:refname --count=1 --format '%(refname)' refs/tags/[0-9]*.[0-9]*.[0-9]* refs/tags/v[0-9]*.[0-9]*.[0-9]* | cut -d / -f 3-)
 tag_commit=$(git rev-list -n 1 $tag)
 
 # get current commit hash for tag
@@ -54,15 +54,19 @@ case "$log" in
     * ) new=$(semver bump `echo $default_semvar_bump` $tag);;
 esac
 
-# prefix with 'v'
-if $with_v
+# did we get a new tag?
+if [ ! -z "$new" ]
 then
-    new="v$new"
-fi
+	# prefix with 'v'
+	if $with_v
+	then
+			new="v$new"
+	fi
 
-if $pre_release
-then
-    new="$new-${commit:0:7}"
+	if $pre_release
+	then
+			new="$new-${commit:0:7}"
+	fi
 fi
 
 if [ ! -z $custom_tag ]
