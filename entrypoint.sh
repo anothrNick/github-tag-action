@@ -20,6 +20,8 @@ for b in "${branch[@]}"; do
 done
 echo "pre_release = $pre_release"
 
+# fetch commits
+git fetch
 # fetch tags
 git fetch --tags
 
