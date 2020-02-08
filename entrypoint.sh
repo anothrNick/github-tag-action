@@ -45,6 +45,8 @@ else
     log=$(git log $tag..HEAD --pretty=oneline)
 fi
 
+echo $log
+
 # get commit logs and determine home to bump the version
 # supports #major, #minor, #patch (anything else will be 'minor')
 case "$log" in
