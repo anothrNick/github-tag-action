@@ -6,6 +6,7 @@ with_v=${WITH_V:-false}
 release_branches=${RELEASE_BRANCHES:-master}
 custom_tag=${CUSTOM_TAG}
 source=${SOURCE:-.}
+dryrun=${DRY_RUN:-false}
 
 cd ${GITHUB_WORKSPACE}/${source}
 
@@ -80,7 +81,16 @@ echo $new
 
 # set outputs
 echo ::set-output name=new_tag::$new
+
+# use dry run to determine the next tag
+if $dryrun
+then
+    echo ::set-output name=tag::$tag
+    exit 0
+fi 
+
 echo ::set-output name=tag::$new
+
 
 if $pre_release
 then
