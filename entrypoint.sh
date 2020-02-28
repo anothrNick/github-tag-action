@@ -82,6 +82,7 @@ echo $new
 # set outputs
 echo ::set-output name=new_tag::$new
 
+# use dry run to determine the next tag
 if $dryrun
 then
     echo ::set-output name=tag::$tag
