@@ -10,11 +10,13 @@ dryrun=${DRY_RUN:-false}
 
 cd ${GITHUB_WORKSPACE}/${source}
 
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+
 pre_release="true"
 IFS=',' read -ra branch <<< "$release_branches"
 for b in "${branch[@]}"; do
-    echo "Is $b a match for ${GITHUB_REF#'refs/heads/'}"
-    if [[ "${GITHUB_REF#'refs/heads/'}" =~ $b ]]
+    echo "Is $b a match for ${current_branch}"
+    if [[ "${current_branch}" =~ $b ]]
     then
         pre_release="false"
     fi
