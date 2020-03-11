@@ -1,7 +1,7 @@
 FROM alpine
-LABEL "repository"="https://github.com/anothrNick/github-tag-action"
-LABEL "homepage"="https://github.com/anothrNick/github-tag-action"
-LABEL "maintainer"="Nick Sjostrom"
+LABEL "repository"="https://github.com/catawiki/github-tag-action"
+LABEL "homepage"="https://github.com/catawiki/github-tag-action"
+LABEL "maintainer"="Dmytro Budnyk"
 
 COPY entrypoint.sh /entrypoint.sh
 
