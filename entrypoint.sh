@@ -46,7 +46,7 @@ else
     log=$(git log $tag..HEAD --pretty=oneline)
 fi
 
-echo $log
+echo "Log: $log"
 
 # get commit logs and determine home to bump the version
 # supports #major, #minor, #patch (anything else will be 'minor')
@@ -77,7 +77,7 @@ then
     new="$custom_tag"
 fi
 
-echo $new
+echo "new: $new"
 
 # set outputs
 echo ::set-output name=new_tag::$new
