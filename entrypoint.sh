@@ -54,9 +54,14 @@ if [[ $log =~ [0-9]+\.[0-9]+\.[0-9]+ ]]; then
   new=${BASH_REMATCH[0]}
   echo "Found commit with semver informations"
   if [ $new == $tag ]; then
-    echo "new and old tag same! Fallback to automatic semver process"
-    new=$(semver bump `echo $default_semvar_bump` $tag)
+    echo "new and old tag same! Skipping..."
+    echo ::set-output name=tag::$tag
+    exit 0
   fi
+  else
+    echo "No semver information found in last commits. Skipping..."
+    echo ::set-output name=tag::$tag
+    exit 0
 fi
 
 
