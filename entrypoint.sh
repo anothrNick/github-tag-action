@@ -53,9 +53,10 @@ echo "Commit Logs: $log"
 if [[ $log =~ [0-9]+\.[0-9]+\.[0-9]+ ]]; then
   new=${BASH_REMATCH[0]}
   echo "Found commit with semver informations"
-  if [ $new == $tag ]
+  if [ $new == $tag ]; then
     echo "new and old tag same! Fallback to automatic semver process"
     new=$(semver bump `echo $default_semvar_bump` $tag)
+  fi
 fi
 
 
