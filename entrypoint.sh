@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # config
-default_semvar_bump=${DEFAULT_BUMP:-minor}
+default_semvar_bump=${DEFAULT_BUMP:-patch}
 with_v=${WITH_V:-false}
 release_branches=${RELEASE_BRANCHES:-master}
 custom_tag=${CUSTOM_TAG}
@@ -46,16 +46,18 @@ else
     log=$(git log $tag..HEAD --pretty=oneline)
 fi
 
-echo "Log: $log"
+echo "Commit Logs: $log"
 
 # get commit logs and determine home to bump the version
-# supports #major, #minor, #patch (anything else will be 'minor')
-case "$log" in
-    *#major* ) new=$(semver bump major $tag);;
-    *#minor* ) new=$(semver bump minor $tag);;
-    *#patch* ) new=$(semver bump patch $tag);;
-    * ) new=$(semver bump `echo $default_semvar_bump` $tag);;
-esac
+# search last commits logs that looks like a semver
+if [[ $log =~ [0-9]+\.[0-9]+\.[0-9]+ ]]; then
+  new=${BASH_REMATCH[0]}
+  echo "Found commit with semver informations"
+  if [ $new == $tag ]
+    echo "new and old tag same! Fallback to automatic semver process"
+    new=$(semver bump `echo $default_semvar_bump` $tag)
+fi
+
 
 # did we get a new tag?
 if [ ! -z "$new" ]
@@ -77,7 +79,7 @@ then
     new="$custom_tag"
 fi
 
-echo "new: $new"
+echo "new Tag is: $new"
 
 # set outputs
 echo ::set-output name=new_tag::$new
@@ -87,7 +89,7 @@ if $dryrun
 then
     echo ::set-output name=tag::$tag
     exit 0
-fi 
+fi
 
 echo ::set-output name=tag::$new
 
