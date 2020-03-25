@@ -43,7 +43,7 @@ then
     log=$(git log --pretty='%B')
     tag=0.0.0
 else
-    log=$(git log $tag..HEAD --pretty=oneline)
+    log=$(git log $tag..HEAD --pretty='%B')
 fi
 
 echo $log
