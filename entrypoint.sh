@@ -40,7 +40,7 @@ fi
 # if there are none, start tags at 0.0.0
 if [ -z "$tag" ]
 then
-    log=$(git log --pretty=oneline)
+    log=$(git log --pretty='%B')
     tag=0.0.0
 else
     log=$(git log $tag..HEAD --pretty=oneline)
