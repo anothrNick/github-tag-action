@@ -122,3 +122,12 @@ curl -s -X POST $git_refs_url \
   "sha": "$commit"
 }
 EOF
+
+if [ $? -eq 0 ]
+then
+  echo "Success"
+  exit 0
+else
+  echo "curl failed" >&2
+  exit 1
+fi
