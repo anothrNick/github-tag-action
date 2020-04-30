@@ -48,13 +48,23 @@ fi
 
 echo $log
 
+# this will bump the semvar using the default bump level,
+# or it will simply pass if the default was "none"
+function default-bump {
+  if [ "$default_semvar_bump" == "none" ]; then
+    return
+  else
+    semver bump "${default_semvar_bump}" $tag
+  fi
+}
+
 # get commit logs and determine home to bump the version
 # supports #major, #minor, #patch (anything else will be 'minor')
 case "$log" in
     *#major* ) new=$(semver bump major $tag);;
     *#minor* ) new=$(semver bump minor $tag);;
     *#patch* ) new=$(semver bump patch $tag);;
-    * ) new=$(semver bump `echo $default_semvar_bump` $tag);;
+    * ) new=$(default-bump);;
 esac
 
 # did we get a new tag?
