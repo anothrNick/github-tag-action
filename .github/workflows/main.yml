@@ -14,3 +14,4 @@ jobs:
       uses: endrjuskr/github-tag-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        INITIAL_VERSION: 0.2.0

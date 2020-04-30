@@ -58,6 +58,8 @@ case "$log" in
     * ) new=$(semver bump `echo $default_semvar_bump` $tag); part=$default_semvar_bump;;
 esac
 
+echo $part
+
 # did we get a new tag?
 if [ ! -z "$new" ]
 then
