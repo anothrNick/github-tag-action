@@ -45,11 +45,13 @@ _NOTE: set the fetch-depth for `actions/checkout@master` to be sure you retrieve
 * **CUSTOM_TAG** *(optional)* - Set a custom tag, useful when generating tag based on f.ex FROM image in a docker image. **Setting this tag will invalidate any other settings set!**
 * **SOURCE** *(optional)* - Operate on a relative path under $GITHUB_WORKSPACE.
 * **DRY_RUN** *(optional)* - Determine the next version without tagging the branch. The workflow can use the outputs `new_tag` and `tag` in subsequent steps. Possible values are ```true``` and ```false``` (default). 
+* **INITIAL_VERSION** *(optional)* - Set initial version before bump. Default `0.0.0`.
 
 #### Outputs
 
 * **new_tag** - The value of the newly created tag.
 * **tag** - The value of the latest tag after running this action.
+* **part** - The part of version which was bumped.
 
 > ***Note:*** This action creates a [lightweight tag](https://developer.github.com/v3/git/refs/#create-a-reference).
 

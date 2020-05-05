@@ -7,6 +7,7 @@ release_branches=${RELEASE_BRANCHES:-master}
 custom_tag=${CUSTOM_TAG}
 source=${SOURCE:-.}
 dryrun=${DRY_RUN:-false}
+initial_version=${INITIAL_VERSION:-0.0.0}
 
 cd ${GITHUB_WORKSPACE}/${source}
 
@@ -39,11 +40,11 @@ if [ "$tag_commit" == "$commit" ]; then
     exit 0
 fi
 
-# if there are none, start tags at 0.0.0
+# if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
 if [ -z "$tag" ]
 then
     log=$(git log --pretty='%B')
-    tag=0.0.0
+    tag="$initial_version"
 else
     log=$(git log $tag..HEAD --pretty='%B')
 fi
@@ -53,11 +54,13 @@ echo $log
 # get commit logs and determine home to bump the version
 # supports #major, #minor, #patch (anything else will be 'minor')
 case "$log" in
-    *#major* ) new=$(semver bump major $tag);;
-    *#minor* ) new=$(semver bump minor $tag);;
-    *#patch* ) new=$(semver bump patch $tag);;
-    * ) new=$(semver bump `echo $default_semvar_bump` $tag);;
+    *#major* ) new=$(semver bump major $tag); part="major";;
+    *#minor* ) new=$(semver bump minor $tag); part="minor";;
+    *#patch* ) new=$(semver bump patch $tag); part="patch";;
+    * ) new=$(semver bump `echo $default_semvar_bump` $tag); part=$default_semvar_bump;;
 esac
+
+echo $part
 
 # did we get a new tag?
 if [ ! -z "$new" ]
@@ -83,6 +86,7 @@ echo $new
 
 # set outputs
 echo ::set-output name=new_tag::$new
+echo ::set-output name=part::$part
 
 # use dry run to determine the next tag
 if $dryrun
