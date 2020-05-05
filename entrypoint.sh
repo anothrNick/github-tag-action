@@ -53,7 +53,7 @@ echo $log
 function default-bump {
   if [ "$default_semvar_bump" == "none" ]; then
     echo "Default bump was set to none. Skipping..."
-    return
+    exit 0
   else
     semver bump "${default_semvar_bump}" $tag
   fi
