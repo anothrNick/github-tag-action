@@ -8,6 +8,7 @@ custom_tag=${CUSTOM_TAG}
 source=${SOURCE:-.}
 dryrun=${DRY_RUN:-false}
 initial_version=${INITIAL_VERSION:-0.0.0}
+tag_context=${TAG_CONTEXT:-repo}
 
 cd ${GITHUB_WORKSPACE}/${source}
 
@@ -28,10 +29,16 @@ echo "pre_release = $pre_release"
 git fetch --tags
 
 # get latest tag that looks like a semver (with or without v)
-tag=$(git for-each-ref --sort=-v:refname --count=1 --format '%(refname)' refs/tags/[0-9]*.[0-9]*.[0-9]* refs/tags/v[0-9]*.[0-9]*.[0-9]* | cut -d / -f 3-)
-tag_commit=$(git rev-list -n 1 $tag)
+case "$tag_context" in
+    *repo*) tag=$(git for-each-ref --sort=-v:refname --count=1 --format '%(refname)' refs/tags/[0-9]*.[0-9]*.[0-9]* refs/tags/v[0-9]*.[0-9]*.[0-9]* | cut -d / -f 3-);;
+    *branch*) tag=$(git describe --tags --match "*[v0-9].*[0-9\.]" --abbrev=0);;
+    * ) echo "Unrecognised context"; exit 1;;
+esac
 
 # get current commit hash for tag
+tag_commit=$(git rev-list -n 1 $tag)
+
+# get current commit hash
 commit=$(git rev-parse HEAD)
 
 if [ "$tag_commit" == "$commit" ]; then
