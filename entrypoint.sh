@@ -8,6 +8,7 @@ custom_tag=${CUSTOM_TAG}
 source=${SOURCE:-.}
 dryrun=${DRY_RUN:-false}
 initial_version=${INITIAL_VERSION:-0.0.0}
+github_url=${GITHUB_SERVER_URL:-https://github.com}
 
 cd ${GITHUB_WORKSPACE}/${source}
 
@@ -25,7 +26,12 @@ done
 echo "pre_release = $pre_release"
 
 # fetch tags
-git fetch --tags
+if [ ! -z "${GITHUB_TOKEN}" ]
+then
+    git fetch --tags
+else
+    git -c http.${github_url}/.extraheader="AUTHORIZATION: basic ${GITHUB_TOKEN}" fetch --tags
+fi
 
 # get latest tag that looks like a semver (with or without v)
 tag=$(git for-each-ref --sort=-v:refname --count=1 --format '%(refname)' refs/tags/[0-9]*.[0-9]*.[0-9]* refs/tags/v[0-9]*.[0-9]*.[0-9]* | cut -d / -f 3-)
