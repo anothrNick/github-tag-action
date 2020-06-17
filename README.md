@@ -44,9 +44,9 @@ _NOTE: set the fetch-depth for `actions/checkout@master` to be sure you retrieve
 * **RELEASE_BRANCHES** *(optional)* - Comma separated list of branches (bash reg exp accepted) that will generate the release tags. Other branches and pull-requests generate versions postfixed with the commit hash and do not generate any tag. Examples: `master` or `.*` or `release.*,hotfix.*,master` ...
 * **CUSTOM_TAG** *(optional)* - Set a custom tag, useful when generating tag based on f.ex FROM image in a docker image. **Setting this tag will invalidate any other settings set!**
 * **SOURCE** *(optional)* - Operate on a relative path under $GITHUB_WORKSPACE.
-* **DRY_RUN** *(optional)* - Determine the next version without tagging the branch. The workflow can use the outputs `new_tag` and `tag` in subsequent steps. Possible values are ```true``` and ```false``` (default). 
+* **DRY_RUN** *(optional)* - Determine the next version without tagging the branch. The workflow can use the outputs `new_tag` and `tag` in subsequent steps. Possible values are ```true``` and ```false``` (default).
 * **INITIAL_VERSION** *(optional)* - Set initial version before bump. Default `0.0.0`.
-* **TAG_CONTEXT** *(optional)* - Set the comtext of the previous tag. Possible values are `repo` (default) or `branch`.
+* **TAG_CONTEXT** *(optional)* - Set the context of the previous tag. Possible values are `repo` (default) or `branch`.
 
 #### Outputs
 
