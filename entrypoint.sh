@@ -72,9 +72,33 @@ function default-bump {
 # get commit logs and determine home to bump the version
 # supports #major, #minor, #patch (anything else will be 'minor')
 case "$log" in
-    *#major* ) new=$(semver bump major $tag); part="major";;
-    *#minor* ) new=$(semver bump minor $tag); part="minor";;
-    *#patch* ) new=$(semver bump patch $tag); part="patch";;
+    *#major* ) 
+        exit 0
+        # new=$(semver bump major $tag);
+        # part="major"
+    ;;
+    *#minor* ) 
+        if ["$current_branch" == "develop"]; then
+            echo ">>>>>>>>>>>>>>>> minor"
+            commit=$(git rev-parse --short ${commit})
+            new=$(semver bump minor $tag);
+            new="$new-$commit" 
+            part="minor"
+        else 
+            exit 0
+        fi
+    ;;
+    *#patch* )
+        if ["$current_branch" == "develop"]; then
+            echo ">>>>>>>>>>>>>>>> patch"
+            commit=$(git rev-parse --short ${commit})
+            new=$(semver bump minor $tag);
+            new="$new-$commit" 
+            part="minor"
+        else 
+            exit 0
+         fi
+    ;;
     * ) new=$(default-bump); part=$default_semvar_bump;;
 esac
 
@@ -84,14 +108,9 @@ echo $part
 if [ ! -z "$new" ]
 then
 	# prefix with 'v'
-	if $with_v
+	if [$with_v && "$current_branch" == "master"]
 	then
 			new="v$new"
-	fi
-
-	if $pre_release
-	then
-			new="$new-${commit:0:7}"
 	fi
 fi
 
