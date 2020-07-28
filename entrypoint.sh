@@ -9,6 +9,7 @@ source=${SOURCE:-.}
 dryrun=${DRY_RUN:-false}
 initial_version=${INITIAL_VERSION:-0.0.0}
 tag_context=${TAG_CONTEXT:-repo}
+tag_prefix=${TAG-PREFIX}
 
 cd ${GITHUB_WORKSPACE}/${source}
 
@@ -30,7 +31,7 @@ git fetch --tags
 
 # get latest tag that looks like a semver (with or without v)
 case "$tag_context" in
-    *repo*) tag=$(git for-each-ref --sort=-v:refname --count=1 --format '%(refname)' refs/tags/[0-9]*.[0-9]*.[0-9]* refs/tags/v[0-9]*.[0-9]*.[0-9]* | cut -d / -f 3-);;
+    *repo*) tag=$(git for-each-ref --sort=-v:refname --count=1 --format '%(refname)' refs/tags/[0-9]*.[0-9]*.[0-9]* refs/tags/[0-9A-Za-z-]*[0-9]*.[0-9]*.[0-9]* | cut -d / -f 3-);;
     *branch*) tag=$(git describe --tags --match "*[v0-9].*[0-9\.]" --abbrev=0);;
     * ) echo "Unrecognised context"; exit 1;;
 esac
@@ -83,8 +84,12 @@ echo $part
 # did we get a new tag?
 if [ ! -z "$new" ]
 then
+	if $tag_prefix
+	then
+			new="$tag_prefix$new"
+	fi
 	# prefix with 'v'
-	if $with_v
+	elif $with_v
 	then
 			new="v$new"
 	fi
