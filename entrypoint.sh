@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -o pipefail
+
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
 with_v=${WITH_V:-false}
@@ -35,6 +37,15 @@ case "$tag_context" in
     * ) echo "Unrecognised context"; exit 1;;
 esac
 
+# if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
+if [ -z "$tag" ]
+then
+    log=$(git log --pretty='%B')
+    tag="$initial_version"
+else
+    log=$(git log $tag..HEAD --pretty='%B')
+fi
+
 # get current commit hash for tag
 tag_commit=$(git rev-list -n 1 $tag)
 
@@ -45,15 +56,6 @@ if [ "$tag_commit" == "$commit" ]; then
     echo "No new commits since previous tag. Skipping..."
     echo ::set-output name=tag::$tag
     exit 0
-fi
-
-# if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
-if [ -z "$tag" ]
-then
-    log=$(git log --pretty='%B')
-    tag="$initial_version"
-else
-    log=$(git log $tag..HEAD --pretty='%B')
 fi
 
 echo $log
@@ -129,6 +131,7 @@ git_refs_url=$(jq .repository.git_refs_url $GITHUB_EVENT_PATH | tr -d '"' | sed 
 
 echo "$dt: **pushing tag $new to repo $full_name"
 
+git_refs_response=$(
 curl -s -X POST $git_refs_url \
 -H "Authorization: token $GITHUB_TOKEN" \
 -d @- << EOF
@@ -138,3 +141,14 @@ curl -s -X POST $git_refs_url \
   "sha": "$commit"
 }
 EOF
+)
+
+git_ref_posted=$( echo "${git_refs_response}" | jq .ref | tr -d '"' )
+
+echo "::debug::${git_refs_response}"
+if [ "${git_ref_posted}" = "refs/tags/${new}" ]; then
+  exit 0
+else
+  echo "::error::Tag was not created properly."
+  exit 1
+fi
