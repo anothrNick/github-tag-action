@@ -124,6 +124,9 @@ then
     exit 0
 fi
 
+# create local git tag
+git tag $new
+
 # push new tag ref to github
 dt=$(date '+%Y-%m-%dT%H:%M:%SZ')
 full_name=$GITHUB_REPOSITORY
