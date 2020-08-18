@@ -82,6 +82,11 @@ esac
 
 echo $part
 
+if [ "$new" == "Default bump was set to none. Skipping..." ]; then
+    echo "$new"
+    exit 0
+fi
+
 # did we get a new tag?
 if [ ! -z "$new" ]
 then
