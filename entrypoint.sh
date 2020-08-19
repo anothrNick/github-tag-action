@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -o pipefail
+
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
 with_v=${WITH_V:-false}
@@ -30,10 +32,19 @@ git fetch --tags
 
 # get latest tag that looks like a semver (with or without v)
 case "$tag_context" in
-    *repo*) tag=$(git for-each-ref --sort=-v:refname --count=1 --format '%(refname)' refs/tags/[0-9]*.[0-9]*.[0-9]* refs/tags/v[0-9]*.[0-9]*.[0-9]* | cut -d / -f 3-);;
-    *branch*) tag=$(git describe --tags --match "*[v0-9].*[0-9\.]" --abbrev=0);;
+    *repo*) tag=$(git for-each-ref --sort=-v:refname --format '%(refname)' | cut -d / -f 3- | grep -E '^v?[0-9]+.[0-9]+.[0-9]+$' | head -n1);;
+    *branch*) tag=$(git tag --list --merged HEAD --sort=-committerdate | grep -E '^v?[0-9]+.[0-9]+.[0-9]+$' | head -n1);;
     * ) echo "Unrecognised context"; exit 1;;
 esac
+
+# if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
+if [ -z "$tag" ]
+then
+    log=$(git log --pretty='%B')
+    tag="$initial_version"
+else
+    log=$(git log $tag..HEAD --pretty='%B')
+fi
 
 # get current commit hash for tag
 tag_commit=$(git rev-list -n 1 $tag)
@@ -47,27 +58,7 @@ if [ "$tag_commit" == "$commit" ]; then
     exit 0
 fi
 
-# if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
-if [ -z "$tag" ]
-then
-    log=$(git log --pretty='%B')
-    tag="$initial_version"
-else
-    log=$(git log $tag..HEAD --pretty='%B')
-fi
-
 echo $log
-
-# this will bump the semvar using the default bump level,
-# or it will simply pass if the default was "none"
-function default-bump {
-  if [ "$default_semvar_bump" == "none" ]; then
-    echo "Default bump was set to none. Skipping..."
-    exit 0
-  else
-    semver bump "${default_semvar_bump}" $tag
-  fi
-}
 
 # get commit logs and determine home to bump the version
 # supports #major, #minor, #patch (anything else will be 'minor')
@@ -75,7 +66,11 @@ case "$log" in
     *#major* ) new=$(semver bump major $tag); part="major";;
     *#minor* ) new=$(semver bump minor $tag); part="minor";;
     *#patch* ) new=$(semver bump patch $tag); part="patch";;
-    * ) new=$(default-bump); part=$default_semvar_bump;;
+    * ) if [ "$default_semvar_bump" == "none" ]; then; 
+            echo "Default bump was set to none. Skipping..."; exit 0; 
+        else 
+            new=$(semver bump "${default_semvar_bump}" $tag); part=$default_semvar_bump 
+        fi ;;
 esac
 
 echo $part
@@ -122,6 +117,9 @@ then
     exit 0
 fi
 
+# create local git tag
+git tag $new
+
 # push new tag ref to github
 dt=$(date '+%Y-%m-%dT%H:%M:%SZ')
 full_name=$GITHUB_REPOSITORY
@@ -129,6 +127,7 @@ git_refs_url=$(jq .repository.git_refs_url $GITHUB_EVENT_PATH | tr -d '"' | sed 
 
 echo "$dt: **pushing tag $new to repo $full_name"
 
+git_refs_response=$(
 curl -s -X POST $git_refs_url \
 -H "Authorization: token $GITHUB_TOKEN" \
 -d @- << EOF
@@ -138,3 +137,14 @@ curl -s -X POST $git_refs_url \
   "sha": "$commit"
 }
 EOF
+)
+
+git_ref_posted=$( echo "${git_refs_response}" | jq .ref | tr -d '"' )
+
+echo "::debug::${git_refs_response}"
+if [ "${git_ref_posted}" = "refs/tags/${new}" ]; then
+  exit 0
+else
+  echo "::error::Tag was not created properly."
+  exit 1
+fi
