@@ -66,11 +66,13 @@ case "$log" in
     *#major* ) new=$(semver bump major $tag); part="major";;
     *#minor* ) new=$(semver bump minor $tag); part="minor";;
     *#patch* ) new=$(semver bump patch $tag); part="patch";;
-    * ) if [ "$default_semvar_bump" == "none" ]; then; 
-            echo "Default bump was set to none. Skipping..."; exit 0; 
+    * ) 
+        if [ "$default_semvar_bump" == "none" ]; then
+            echo "Default bump was set to none. Skipping..."; exit 0 
         else 
             new=$(semver bump "${default_semvar_bump}" $tag); part=$default_semvar_bump 
-        fi ;;
+        fi 
+        ;;
 esac
 
 echo $part
