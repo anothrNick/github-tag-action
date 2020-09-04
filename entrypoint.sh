@@ -80,6 +80,10 @@ case "$log" in
     * ) new=$(default-bump); part=$default_semvar_bump;;
 esac
 
+if [ "$current_branch" == "production" ]; then
+  new=$(semver bump minor $tag); part="minor"
+fi
+
 echo $part
 
 # did we get a new tag?
