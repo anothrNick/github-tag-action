@@ -82,7 +82,8 @@ case "$log" in
         ;;
 esac
 
-if [ $pre_release ]; then
+if $pre_release
+then
     # Already a prerelease available, bump it
     if [[ "$pre_tag" == *"$new"* ]]; then
         new=$(semver -i prerelease $pre_tag --preid $suffix); part="pre-$part"
