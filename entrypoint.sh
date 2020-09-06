@@ -33,8 +33,14 @@ git fetch --tags
 
 # get latest tag that looks like a semver (with or without v)
 case "$tag_context" in
-    *repo*) tag=$(git for-each-ref --sort=-v:refname --format '%(refname)' | cut -d / -f 3- | grep -E "^v?[0-9]+.[0-9]+.[0-9]+(-$suffix.[0-9]+)?$" | head -n1);;
-    *branch*) tag=$(git tag --list --merged HEAD --sort=-committerdate | grep -E "^v?[0-9]+.[0-9]+.[0-9]+(-$suffix.[0-9]+)?$" | head -n1);;
+    *repo*) 
+        tag=$(git for-each-ref --sort=-v:refname --format '%(refname)' | cut -d / -f 3- | grep -E "^v?[0-9]+.[0-9]+.[0-9]+$" | head -n1)
+        pre_tag=$(git for-each-ref --sort=-v:refname --format '%(refname)' | cut -d / -f 3- | grep -E "^v?[0-9]+.[0-9]+.[0-9]+(-$suffix.[0-9]+)?$" | head -n1)
+        ;;
+    *branch*) 
+        tag=$(git tag --list --merged HEAD --sort=-committerdate | grep -E "^v?[0-9]+.[0-9]+.[0-9]+$" | head -n1)
+        pre_tag=$(git tag --list --merged HEAD --sort=-committerdate | grep -E "^v?[0-9]+.[0-9]+.[0-9]+(-$suffix.[0-9]+)?$" | head -n1)
+        ;;
     * ) echo "Unrecognised context"; exit 1;;
 esac
 
@@ -43,6 +49,7 @@ if [ -z "$tag" ]
 then
     log=$(git log --pretty='%B')
     tag="$initial_version"
+    pre_tag="$initial_version"
 else
     log=$(git log $tag..HEAD --pretty='%B')
 fi
@@ -61,30 +68,26 @@ fi
 
 echo $log
 
-if [[ "$tag" == *"$suffix"* ]] && [ $pre_release ]
-then
-    # there's a pre-release version, bump it
-    new=$(semver bump prerel $suffix $tag ); part="prerelease"
-else
-    # get commit logs and determine home to bump the version
-    # supports #major, #minor, #patch (anything else will be 'minor')
-    case "$log" in
-        *#major* ) new=$(semver bump major $tag); part="major";;
-        *#minor* ) new=$(semver bump minor $tag); part="minor";;
-        *#patch* ) new=$(semver bump patch $tag); part="patch";;
-        * ) 
-            if [ "$default_semvar_bump" == "none" ]; then
-                echo "Default bump was set to none. Skipping..."; exit 0 
-            else 
-                new=$(semver bump "${default_semvar_bump}" $tag); part=$default_semvar_bump 
-            fi 
-            ;;
-    esac
+case "$log" in
+    *#major* ) new=$(semver bump major $tag); part="major";;
+    *#minor* ) new=$(semver bump minor $tag); part="minor";;
+    *#patch* ) new=$(semver bump patch $tag); part="patch";;
+    * ) 
+        if [ "$default_semvar_bump" == "none" ]; then
+            echo "Default bump was set to none. Skipping..."; exit 0 
+        else 
+            new=$(semver bump "${default_semvar_bump}" $tag); part=$default_semvar_bump 
+        fi 
+        ;;
+esac
 
-    # if pre-release, add suffix
-    if [ $pre_release ]
-    then
-        new="$new.$suffix-1"; part="prerelease"
+if [ $pre_release ]; then
+    pre_tag_version=$(echo $pre_tag | sed -e "s/-$suffix.[0-9]//g")
+    # Already a prerelease available, bump it
+    if [[ "$pre_tag_version" == "$new" ]]; then
+        new=$(semver bump prerel $suffix $pre_tag ); part="pre-$part"
+    else
+        new="$new-$suffix.1"; part="pre-$part"
     fi
 fi
 
