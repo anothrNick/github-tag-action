@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -o pipefail
+npm install -g semver
 
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
@@ -67,30 +68,25 @@ if [ "$tag_commit" == "$commit" ]; then
 fi
 
 echo $log
-semver -h
 
 case "$log" in
-    *#major* ) new=$(semver bump major $tag); part="major";;
-    *#minor* ) new=$(semver bump minor $tag); part="minor";;
-    *#patch* ) new=$(semver bump patch $tag); part="patch";;
+    *#major* ) new=$(semver -i major $tag); part="major";;
+    *#minor* ) new=$(semver -i minor $tag); part="minor";;
+    *#patch* ) new=$(semver -i patch $tag); part="patch";;
     * ) 
         if [ "$default_semvar_bump" == "none" ]; then
             echo "Default bump was set to none. Skipping..."; exit 0 
         else 
-            new=$(semver bump "${default_semvar_bump}" $tag); part=$default_semvar_bump 
+            new=$(semver -i "${default_semvar_bump}" $tag); part=$default_semvar_bump 
         fi 
         ;;
 esac
 
 if [ $pre_release ]; then
-    pre_tag_version=$(echo $pre_tag | sed -e "s/-$suffix.[0-9]//g")
-    echo "Pre-tag: $pre_tag, $pre_tag_version"
     # Already a prerelease available, bump it
-    if [[ "$pre_tag_version" == "$new" ]]; then
-    	echo "Bumping $pre_tag"
-        new=$(semver bump prerel $suffix $pre_tag ); part="pre-$part"
+    if [[ "$pre_tag" == *"$new"* ]]; then
+        new=$(semver -i prerelease $pre_tag --preid $suffix); part="pre-$part"
     else
-    	echo "first pre-release"
         new="$new-$suffix.1"; part="pre-$part"
     fi
 fi
