@@ -67,6 +67,7 @@ if [ "$tag_commit" == "$commit" ]; then
 fi
 
 echo $log
+semver -h
 
 case "$log" in
     *#major* ) new=$(semver bump major $tag); part="major";;
