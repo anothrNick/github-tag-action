@@ -86,8 +86,10 @@ if [ $pre_release ]; then
     echo "Pre-tag: $pre_tag, $pre_tag_version"
     # Already a prerelease available, bump it
     if [[ "$pre_tag_version" == "$new" ]]; then
+    	echo "Bumping $pre_tag"
         new=$(semver bump prerel $suffix $pre_tag ); part="pre-$part"
     else
+    	echo "first pre-release"
         new="$new-$suffix.1"; part="pre-$part"
     fi
 fi
