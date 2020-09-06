@@ -83,6 +83,7 @@ esac
 
 if [ $pre_release ]; then
     pre_tag_version=$(echo $pre_tag | sed -e "s/-$suffix.[0-9]//g")
+    echo "Pre-tag: $pre_tag, $pre_tag_version"
     # Already a prerelease available, bump it
     if [[ "$pre_tag_version" == "$new" ]]; then
         new=$(semver bump prerel $suffix $pre_tag ); part="pre-$part"
