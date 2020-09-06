@@ -64,19 +64,19 @@ echo $log
 if [[ "$tag" == *"$suffix"* ]] && [ $pre_release ]
 then
     # there's a pre-release version, bump it
-    new=$(semver -i prerelease $tag --preid $suffix); part="prerelease"
+    new=$(semver bump prerel $suffix $tag ); part="prerelease"
 else
     # get commit logs and determine home to bump the version
     # supports #major, #minor, #patch (anything else will be 'minor')
     case "$log" in
-        *#major* ) new=$(semver -i major $tag); part="major";;
-        *#minor* ) new=$(semver -i minor $tag); part="minor";;
-        *#patch* ) new=$(semver -i patch $tag); part="patch";;
+        *#major* ) new=$(semver bump major $tag); part="major";;
+        *#minor* ) new=$(semver bump minor $tag); part="minor";;
+        *#patch* ) new=$(semver bump patch $tag); part="patch";;
         * ) 
             if [ "$default_semvar_bump" == "none" ]; then
                 echo "Default bump was set to none. Skipping..."; exit 0 
             else 
-                new=$(semver -i "${default_semvar_bump}" $tag); part=$default_semvar_bump 
+                new=$(semver bump "${default_semvar_bump}" $tag); part=$default_semvar_bump 
             fi 
             ;;
     esac
