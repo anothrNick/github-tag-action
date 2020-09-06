@@ -39,7 +39,7 @@ case "$tag_context" in
         ;;
     *branch*) 
         tag=$(git tag --list --merged HEAD --sort=-committerdate | grep -E "^v?[0-9]+.[0-9]+.[0-9]+$" | head -n1)
-        pre_tag=$(git tag --list --merged HEAD --sort=-committerdate | grep -E "^v?[0-9]+.[0-9]+.[0-9]+(-$suffix.[0-9]+)?$" | head -n1)
+        pre_tag=$(git tag --list --sort=-committerdate | grep -E "^v?[0-9]+.[0-9]+.[0-9]+(-$suffix.[0-9]+)?$" | head -n1)
         ;;
     * ) echo "Unrecognised context"; exit 1;;
 esac
@@ -83,8 +83,6 @@ esac
 
 if [ $pre_release ]; then
     pre_tag_version=$(echo $pre_tag | sed -e "s/-$suffix.[0-9]//g")
-    echo $pre_tag
-    echo $pre_tag_version
     # Already a prerelease available, bump it
     if [[ "$pre_tag_version" == "$new" ]]; then
         new=$(semver bump prerel $suffix $pre_tag ); part="pre-$part"
