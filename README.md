@@ -47,6 +47,7 @@ _NOTE: set the fetch-depth for `actions/checkout@master` to be sure you retrieve
 * **DRY_RUN** *(optional)* - Determine the next version without tagging the branch. The workflow can use the outputs `new_tag` and `tag` in subsequent steps. Possible values are ```true``` and ```false``` (default).
 * **INITIAL_VERSION** *(optional)* - Set initial version before bump. Default `0.0.0`.
 * **TAG_CONTEXT** *(optional)* - Set the context of the previous tag. Possible values are `repo` (default) or `branch`.
+* **PRERELEASE_SUFFIX** *(optional)* - Suffix for your prerelease versions, `beta` by default. Note this will only be used if a prerelease branch.
 
 #### Outputs
 
@@ -69,10 +70,12 @@ _NOTE: set the fetch-depth for `actions/checkout@master` to be sure you retrieve
 * Add this action to your repo
 * Commit some changes
 * Either push to master or open a PR
-* On push (or merge) to `master`, the action will:
+* On push (or merge), the action will:
   * Get latest tag
   * Bump tag with minor version unless any commit message contains `#major` or `#patch`
   * Pushes tag to github
+  * If triggered on your repo's default branch (`master` if unchanged), the bump version will be a release tag.
+  * If triggered on any other branch, a prerelease will be generated, depending on the bump, starting with `*-<PRERELEASE_SUFFIX>.1`, `*-<PRERELEASE_SUFFIX>.2`, ...
 
 ### Credits
 
