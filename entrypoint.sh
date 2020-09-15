@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -o pipefail
-npm install -g semver
 
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
