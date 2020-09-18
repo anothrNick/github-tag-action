@@ -15,6 +15,17 @@ suffix=${PRERELEASE_SUFFIX:-beta}
 
 cd ${GITHUB_WORKSPACE}/${source}
 
+echo "*** CONFIGURATION ***"
+echo -e "\tDEFAULT_BUMP: ${default_semvar_bump}"
+echo -e "\tWITH_V: ${with_v}"
+echo -e "\tRELEASE_BRANCHES: ${release_branches}"
+echo -e "\tCUSTOM_TAG: ${custom_tag}"
+echo -e "\tSOURCE: ${source}"
+echo -e "\tDRY_RUN: ${dryrun}"
+echo -e "\tINITIAL_VERSION: ${initial_version}"
+echo -e "\tTAG_CONTEXT: ${tag_context}"
+echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
+
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
 pre_release="true"
