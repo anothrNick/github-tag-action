@@ -22,7 +22,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v2
       with:
         fetch-depth: '0'
     - name: Bump version and push tag
@@ -32,7 +32,7 @@ jobs:
         WITH_V: true
 ```
 
-_NOTE: set the fetch-depth for `actions/checkout@master` to be sure you retrieve all commits to look for the semver commit message._
+_NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all commits to look for the semver commit message._
 
 #### Options
 
