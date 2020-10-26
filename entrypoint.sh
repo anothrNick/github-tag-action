@@ -12,6 +12,7 @@ dryrun=${DRY_RUN:-false}
 initial_version=${INITIAL_VERSION:-0.0.0}
 tag_context=${TAG_CONTEXT:-repo}
 suffix=${PRERELEASE_SUFFIX:-beta}
+verbose=${VERBOSE:-true}
 
 cd ${GITHUB_WORKSPACE}/${source}
 
@@ -25,6 +26,7 @@ echo -e "\tDRY_RUN: ${dryrun}"
 echo -e "\tINITIAL_VERSION: ${initial_version}"
 echo -e "\tTAG_CONTEXT: ${tag_context}"
 echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
+echo -e "\tVERBOSE: ${verbose}"
 
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
@@ -77,7 +79,11 @@ if [ "$tag_commit" == "$commit" ]; then
     exit 0
 fi
 
-echo $log
+# echo log if verbose is wanted
+if $verbose
+then
+  echo $log
+fi
 
 case "$log" in
     *#major* ) new=$(semver -i major $tag); part="major";;

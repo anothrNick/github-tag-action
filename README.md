@@ -48,6 +48,7 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all
 * **INITIAL_VERSION** *(optional)* - Set initial version before bump. Default `0.0.0`.
 * **TAG_CONTEXT** *(optional)* - Set the context of the previous tag. Possible values are `repo` (default) or `branch`.
 * **PRERELEASE_SUFFIX** *(optional)* - Suffix for your prerelease versions, `beta` by default. Note this will only be used if a prerelease branch.
+* **VERBOSE** *(optional)* - Print git logs. For some projects these logs may be very large. Possible values are ```true``` (default) and ```false```. 
 
 #### Outputs
 
