@@ -4,7 +4,7 @@ set -o pipefail
 
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
-with_v=${WITH_V:-false}
+prefix=${PREFIX}
 release_branches=${RELEASE_BRANCHES:-master}
 custom_tag=${CUSTOM_TAG}
 source=${SOURCE:-.}
@@ -18,7 +18,7 @@ cd ${GITHUB_WORKSPACE}/${source}
 
 echo "*** CONFIGURATION ***"
 echo -e "\tDEFAULT_BUMP: ${default_semvar_bump}"
-echo -e "\tWITH_V: ${with_v}"
+echo -e "\tPREFIX: ${prefix}"
 echo -e "\tRELEASE_BRANCHES: ${release_branches}"
 echo -e "\tCUSTOM_TAG: ${custom_tag}"
 echo -e "\tSOURCE: ${source}"
@@ -47,12 +47,12 @@ git fetch --tags
 # get latest tag that looks like a semver (with or without v)
 case "$tag_context" in
     *repo*) 
-        tag=$(git for-each-ref --sort=-v:refname --format '%(refname)' | cut -d / -f 3- | grep -E "^v?[0-9]+.[0-9]+.[0-9]+$" | head -n1)
-        pre_tag=$(git for-each-ref --sort=-v:refname --format '%(refname)' | cut -d / -f 3- | grep -E "^v?[0-9]+.[0-9]+.[0-9]+(-$suffix.[0-9]+)?$" | head -n1)
+        tag=$(git for-each-ref --sort=-v:refname --format '%(refname)' | cut -d / -f 3- | grep -E "^($prefix)?[0-9]+.[0-9]+.[0-9]+$" | head -n1)
+        pre_tag=$(git for-each-ref --sort=-v:refname --format '%(refname)' | cut -d / -f 3- | grep -E "^($prefix)?[0-9]+.[0-9]+.[0-9]+(-$suffix.[0-9]+)?$" | head -n1)
         ;;
     *branch*) 
-        tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^v?[0-9]+.[0-9]+.[0-9]+$" | head -n1)
-        pre_tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^v?[0-9]+.[0-9]+.[0-9]+(-$suffix.[0-9]+)?$" | head -n1)
+        tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^($prefix)?[0-9]+.[0-9]+.[0-9]+$" | head -n1)
+        pre_tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^($prefix)?[0-9]+.[0-9]+.[0-9]+(-$suffix.[0-9]+)?$" | head -n1)
         ;;
     * ) echo "Unrecognised context"; exit 1;;
 esac
@@ -85,15 +85,16 @@ then
   echo $log
 fi
 
+tagWithoutPrefix=${tag#"$prefix"}
 case "$log" in
-    *#major* ) new=$(semver -i major $tag); part="major";;
-    *#minor* ) new=$(semver -i minor $tag); part="minor";;
-    *#patch* ) new=$(semver -i patch $tag); part="patch";;
+    *#major* ) new=$(semver -i major $tagWithoutPrefix); part="major";;
+    *#minor* ) new=$(semver -i minor $tagWithoutPrefix); part="minor";;
+    *#patch* ) new=$(semver -i patch $tagWithoutPrefix); part="patch";;
     * ) 
         if [ "$default_semvar_bump" == "none" ]; then
             echo "Default bump was set to none. Skipping..."; exit 0 
         else 
-            new=$(semver -i "${default_semvar_bump}" $tag); part=$default_semvar_bump 
+            new=$(semver -i "${default_semvar_bump}" $tagWithoutPrefix); part=$default_semvar_bump 
         fi 
         ;;
 esac
@@ -114,9 +115,9 @@ echo $part
 if [ ! -z "$new" ]
 then
 	# prefix with 'v'
-	if $with_v
+	if [ ! -z "$prefix" ]
 	then
-		new="v$new"
+		new="$prefix$new"
 	fi
 fi
 
@@ -133,7 +134,13 @@ else
 fi
 
 # set outputs
+new_tag_without_prefix=${new#"$prefix"}
+echo "New tag without prefix: $new_tag_without_prefix"
+echo "Prefix: $prefix"
+echo "new_tag: $new_tag"
+
 echo ::set-output name=new_tag::$new
+echo ::set-output name=new_tag_without_prefix::$new_tag_without_prefix
 echo ::set-output name=part::$part
 
 # use dry run to determine the next tag
