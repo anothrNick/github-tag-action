@@ -4,7 +4,7 @@ set -o pipefail
 
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
-with_v=${WITH_V:-false}
+prefix=${PREFIX}
 release_branches=${RELEASE_BRANCHES:-master,main}
 custom_tag=${CUSTOM_TAG}
 source=${SOURCE:-.}
@@ -18,7 +18,7 @@ cd ${GITHUB_WORKSPACE}/${source}
 
 echo "*** CONFIGURATION ***"
 echo -e "\tDEFAULT_BUMP: ${default_semvar_bump}"
-echo -e "\tWITH_V: ${with_v}"
+echo -e "\tPREFIX: ${prefix}"
 echo -e "\tRELEASE_BRANCHES: ${release_branches}"
 echo -e "\tCUSTOM_TAG: ${custom_tag}"
 echo -e "\tSOURCE: ${source}"
@@ -85,6 +85,7 @@ then
   echo $log
 fi
 
+tagWithoutPrefix=${tag#"$prefix"}
 case "$log" in
     *#major* ) new=$(semver -i major $tag); part="major";;
     *#minor* ) new=$(semver -i minor $tag); part="minor";;
@@ -95,7 +96,7 @@ case "$log" in
         if [ "$default_semvar_bump" == "none" ]; then
             echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0 
         else 
-            new=$(semver -i "${default_semvar_bump}" $tag); part=$default_semvar_bump 
+            new=$(semver -i "${default_semvar_bump}" $tagWithoutPrefix); part=$default_semvar_bump 
         fi 
         ;;
 esac
@@ -116,9 +117,9 @@ echo $part
 if [ ! -z "$new" ]
 then
 	# prefix with 'v'
-	if $with_v
+	if [ ! -z "$prefix" ]
 	then
-		new="v$new"
+		new="$prefix$new"
 	fi
 fi
 
@@ -136,6 +137,7 @@ fi
 
 # set outputs
 echo ::set-output name=new_tag::$new
+echo ::set-output name=new_tag_without_prefix::$tagWithoutPrefix
 echo ::set-output name=part::$part
 
 # use dry run to determine the next tag
