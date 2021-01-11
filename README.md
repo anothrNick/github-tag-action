@@ -75,7 +75,7 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all
   * Get latest tag
   * Bump tag with minor version unless any commit message contains `#major` or `#patch`
   * Pushes tag to github
-  * If triggered on your repo's default branch (`master` if unchanged), the bump version will be a release tag.
+  * If triggered on your repo's default branch (`master` or `main` if unchanged), the bump version will be a release tag.
   * If triggered on any other branch, a prerelease will be generated, depending on the bump, starting with `*-<PRERELEASE_SUFFIX>.1`, `*-<PRERELEASE_SUFFIX>.2`, ...
 
 ### Credits
