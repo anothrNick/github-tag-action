@@ -29,7 +29,7 @@ jobs:
       uses: anothrNick/github-tag-action@1.26.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        WITH_V: true
+        PREFIX: prefix
 ```
 
 _NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all commits to look for the semver commit message._
@@ -40,7 +40,7 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all
 
 * **GITHUB_TOKEN** ***(required)*** - Required for permission to tag the repo.
 * **DEFAULT_BUMP** *(optional)* - Which type of bump to use when none explicitly provided (default: `minor`).
-* **WITH_V** *(optional)* - Tag version with `v` character.
+* **PREFIX** *(optional)* - Adds a prefix before version number.
 * **RELEASE_BRANCHES** *(optional)* - Comma separated list of branches (bash reg exp accepted) that will generate the release tags. Other branches and pull-requests generate versions postfixed with the commit hash and do not generate any tag. Examples: `master` or `.*` or `release.*,hotfix.*,master` ...
 * **CUSTOM_TAG** *(optional)* - Set a custom tag, useful when generating tag based on f.ex FROM image in a docker image. **Setting this tag will invalidate any other settings set!**
 * **SOURCE** *(optional)* - Operate on a relative path under $GITHUB_WORKSPACE.
@@ -49,12 +49,14 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all
 * **TAG_CONTEXT** *(optional)* - Set the context of the previous tag. Possible values are `repo` (default) or `branch`.
 * **PRERELEASE_SUFFIX** *(optional)* - Suffix for your prerelease versions, `beta` by default. Note this will only be used if a prerelease branch.
 * **VERBOSE** *(optional)* - Print git logs. For some projects these logs may be very large. Possible values are ```true``` (default) and ```false```. 
+* **HEAD_COMMIT** *(optional)* - Commit messages between the last tag and *HEAD_COMMIT* will be used to determine a new version number. Useful e.g. in case of running the action in a pull request. If not specified the current commit is used.
 
 #### Outputs
 
-* **new_tag** - The value of the newly created tag.
-* **tag** - The value of the latest tag after running this action.
-* **part** - The part of version which was bumped.
+* **new_tag** - The value of the newly created tag, e.g. my-prefix-1.2.3
+* **new_tag_without_prefix** - The value of the newly created tag without specified prefix, e.g 1.2.3
+* **tag** - The value of the latest tag before bumping it by running this action, e.g. 1.2.2
+* **part** - The part of version which was bumped, e.g. minor
 
 > ***Note:*** This action creates a [lightweight tag](https://developer.github.com/v3/git/refs/#create-a-reference).
 

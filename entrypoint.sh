@@ -13,6 +13,7 @@ initial_version=${INITIAL_VERSION:-0.0.0}
 tag_context=${TAG_CONTEXT:-repo}
 suffix=${PRERELEASE_SUFFIX:-beta}
 verbose=${VERBOSE:-true}
+head_commit=$HEAD_COMMIT
 
 cd ${GITHUB_WORKSPACE}/${source}
 
@@ -27,6 +28,8 @@ echo -e "\tINITIAL_VERSION: ${initial_version}"
 echo -e "\tTAG_CONTEXT: ${tag_context}"
 echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
 echo -e "\tVERBOSE: ${verbose}"
+echo -e "\tHEAD_COMMIT: ${head_commit}"
+echo -e "*********************\n"
 
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
@@ -79,10 +82,48 @@ if [ "$tag_commit" == "$commit" ]; then
     exit 0
 fi
 
-# echo log if verbose is wanted
+# calculate new tag
+
+    # Get number of occurrences of bump key words in 
+    # all commits between the "head_commit" and the last tag
+    # or in all commits of a current branch if the are no tags with
+    # a given prefix in the repository
+
+if [ -z $head_commit ]; then
+    head_commit=$commit
+fi
+
+if [ $tag = $initial_version ]; then
+    
+   if $verbose
+   then
+      echo -e "\n*****Commit messages taken into account*****"
+      git log $current_branch --pretty=format:%B
+      echo -e "********************************************\n"
+   fi
+
+    number_of_major=$(git log $current_branch --pretty=format:%B | grep -E "#major" -c)
+    number_of_minor=$(git log $current_branch --pretty=format:%B | grep -E "#minor" -c)
+    number_of_patch=$(git log $current_branch --pretty=format:%B | grep -E "#patch" -c)
+else 
+
+   if $verbose
+   then
+      echo -e "\n*****Commit messages taken into account*****"
+      git log $head_commit...$tag --pretty=format:%B
+      echo -e "********************************************\n"
+   fi
+
+    number_of_major=$(git log $head_commit...$tag --pretty=format:%B | grep -E "#major" -c)
+    number_of_minor=$(git log $head_commit...$tag --pretty=format:%B | grep -E "#minor" -c)
+    number_of_patch=$(git log $head_commit...$tag --pretty=format:%B | grep -E "#patch" -c)
+fi
+
 if $verbose
 then
-  echo $log
+  echo "number of #major tag occurrences ${number_of_major}"
+  echo "number of #minor tag  occurrences ${number_of_minor}"
+  echo "number of #patch tag occurrences ${number_of_patch}"
 fi
 
 tagWithoutPrefix=${tag#"$prefix"}
@@ -111,18 +152,18 @@ then
     fi
 fi
 
-echo $part
 
 # did we get a new tag?
 if [ ! -z "$new" ]
 then
-	# prefix with 'v'
+	# prefix with 'prefix'
 	if [ ! -z "$prefix" ]
 	then
 		new="$prefix$new"
 	fi
 fi
 
+# set a new tag to a provider CUSTOM_TAG - discard calculated tag
 if [ ! -z $custom_tag ]
 then
     new="$custom_tag"
@@ -132,22 +173,30 @@ if $pre_release
 then
     echo -e "Bumping tag ${pre_tag}. \n\tNew tag ${new}"
 else
-    echo -e "Bumping tag ${tag}. \n\tNew tag ${new}"
+    echo -e "Bumping tag ${tag}. \n\tNew tag ${new}\n"
 fi
 
 # set outputs
+new_tag_without_prefix=${new#"$prefix"}
+echo "New tag without prefix: $new_tag_without_prefix"
+echo "New tag: $new"
+echo "Prefix: $prefix"
+echo -e "Part incremented: $part\n\n"
+
 echo ::set-output name=new_tag::$new
-echo ::set-output name=new_tag_without_prefix::$tagWithoutPrefix
+echo ::set-output name=new_tag_without_prefix::$new_tag_without_prefix
 echo ::set-output name=part::$part
+
+# set the old tag value as an output
+echo ::set-output name=tag::$tag
+
 
 # use dry run to determine the next tag
 if $dryrun
 then
-    echo ::set-output name=tag::$tag
     exit 0
 fi 
 
-echo ::set-output name=tag::$new
 
 # create local git tag
 git tag $new
