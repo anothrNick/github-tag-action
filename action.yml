@@ -7,8 +7,10 @@ runs:
 outputs:
   new_tag:
     description: 'Generated tag'
+  new_tag_without_prefix:
+    description: 'Generated tag without specified prefix'
   tag:
-    description: 'The latest tag after running this action'
+    description: 'The latest tag before running this action'
   part:
     description: 'The part of version which was bumped'
 branding:
