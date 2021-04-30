@@ -61,7 +61,7 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all
 ### Bumping
 
 **Manual Bumping:** Any commit message that includes `#major`, `#minor`, `#patch`, or `#none` will trigger the respective version bump. If two or more are present, the highest-ranking one will take precedence.
-If `#none` is contained in the commit message, it will skip bumping regardless `DEFAUT_BUMP`.
+If `#none` is contained in the commit message, it will skip bumping regardless `DEFAULT_BUMP`.
 
 **Automatic Bumping:** If no `#major`, `#minor` or `#patch` tag is contained in the commit messages, it will bump whichever `DEFAULT_BUMP` is set to (which is `minor` by default). Disable this by setting `DEFAULT_BUMP` to `none`.
 
