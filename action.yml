@@ -1,4 +1,4 @@
-name: 'Github Tag Bump'
+name: 'GitHub Tag Bump'
 description: 'Bump and push git tag on merge'
 author: 'Nick Sjostrom'
 runs:
