@@ -62,7 +62,10 @@ if [ -z "$tag" ]
 then
     log=$(git log --pretty='%B')
     tag="$initial_version"
-    pre_tag="$initial_version"
+    if [ -z "$pre_tag" ] && $pre_release
+    then
+      pre_tag="$initial_version"
+    fi
 else
     log=$(git log $tag..HEAD --pretty='%B')
 fi
