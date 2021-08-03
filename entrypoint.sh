@@ -70,12 +70,12 @@ git fetch --tags
 # get latest tag that looks like a semver (with or without prefix)
 case "$tag_context" in
     *repo*) 
-        tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "^v?[0-9]+\.[0-9]+\.[0-9]+$" | head -n1)
-        pre_tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" | head -n1)
+        tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "^($prefix)?[0-9]+\.[0-9]+\.[0-9]+$" | head -n1)
+        pre_tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "^($prefix)?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" | head -n1)
         ;;
     *branch*) 
-        tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^v?[0-9]+\.[0-9]+\.[0-9]+$" | head -n1)
-        pre_tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" | head -n1)
+        tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^($prefix)?[0-9]+\.[0-9]+\.[0-9]+$" | head -n1)
+        pre_tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^($prefix)?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" | head -n1)
         ;;
     * ) echo "Unrecognised context"; exit 1;;
 esac
@@ -176,20 +176,59 @@ else
 fi
 
 tagWithoutPrefix=${tag#"$prefix"}
-case "$log" in
-    *#major* ) new=$(semver -i major $tag); part="major";;
-    *#minor* ) new=$(semver -i minor $tag); part="minor";;
-    *#patch* ) new=$(semver -i patch $tag); part="patch";;
-    *#none* ) 
-        echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0;;
-    * ) 
-        if [ "$default_semvar_bump" == "none" ]; then
-            echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0 
-        else 
-            new=$(semver -i "${default_semvar_bump}" $tagWithoutPrefix); part=$default_semvar_bump 
-        fi 
-        ;;
-esac
+
+bump_version () {
+    new=$tagWithoutPrefix
+
+    eval count_var_name=number_of_$1
+    count="${!count_var_name}"
+
+    if $use_last_commit_only; 
+    then
+        echo -e "USE_LAST_COMMIT_ONLY set to: ${use_last_commit_only}. $1 will be incremented only by 1"
+        eval number_of_$1=1
+        count=1
+    else
+        echo -e "USE_LAST_COMMIT_ONLY set to: ${use_last_commit_only}. $1 will be incremented by ${count}"
+    fi
+
+    for (( c=1; c<=$count; c++ ))
+    do
+        new=$(semver -i $1 $new); part=$1
+    done
+}
+
+if [ $number_of_major != 0 ]; then
+    bump_version "major"
+fi
+
+if [ $number_of_major = 0 ] && [ $number_of_minor != 0 ] && [ -z $new ]; then
+    bump_version "minor"
+fi
+
+if [ $number_of_major == 0 ] && [ $number_of_minor == 0 ] && [ -z $new ]; then
+    bump_version "patch"
+fi
+
+
+if [ -z $new ]; then
+    if [ "$default_semvar_bump" == "none" ]; then
+        echo "Default bump was set to none. Skipping..."; 
+    else 
+        new=$tagWithoutPrefix
+        if $use_last_commit_only; then
+            echo -e "USE_LAST_COMMIT_ONLY set to: ${use_last_commit_only}. default_semvar_bump=${default_semvar_bump} will be incremented only by 1"
+            new=$(semver -i "${default_semvar_bump}" $new); part=$default_semvar_bump 
+        else
+           echo -e "USE_LAST_COMMIT_ONLY set to: ${use_last_commit_only}. default_semvar_bump=${default_semvar_bump} will be incremented by ${number_of_commits}"
+
+           for (( c=1; c<=$number_of_commits; c++ ))
+           do  
+             new=$(semver -i "${default_semvar_bump}" $new); part=$default_semvar_bump
+           done
+        fi
+    fi 
+fi
 
 if $pre_release;
 then
