@@ -4,6 +4,7 @@ set -o pipefail
 
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
+with_v=${WITH_V}
 prefix=${PREFIX}
 release_branches=${RELEASE_BRANCHES:-master,main}
 custom_tag=${CUSTOM_TAG}
@@ -14,11 +15,13 @@ tag_context=${TAG_CONTEXT:-repo}
 suffix=${PRERELEASE_SUFFIX:-beta}
 verbose=${VERBOSE:-true}
 head_commit=$HEAD_COMMIT
+use_last_commit_only=${USE_LAST_COMMIT_ONLY:-true}
 
 cd ${GITHUB_WORKSPACE}/${source}
 
 echo "*** CONFIGURATION ***"
 echo -e "\tDEFAULT_BUMP: ${default_semvar_bump}"
+echo -e "\tWITH_V: ${with_v}"
 echo -e "\tPREFIX: ${prefix}"
 echo -e "\tRELEASE_BRANCHES: ${release_branches}"
 echo -e "\tCUSTOM_TAG: ${custom_tag}"
@@ -29,15 +32,32 @@ echo -e "\tTAG_CONTEXT: ${tag_context}"
 echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
 echo -e "\tVERBOSE: ${verbose}"
 echo -e "\tHEAD_COMMIT: ${head_commit}"
+echo -e "\tUSE_LAST_COMMIT_ONLY: ${use_last_commit_only}"
 echo -e "*********************\n"
+
+# Handle deprecated WITH_V parameter
+if [ ! -z "$with_v" ];
+then
+    echo -e "WARNING: WITH_V parameter field has been deprecated. Use PREFIX instead."
+	if [ ! -z "$prefix" ];
+	then
+		echo -e "WARNING: Both WITH_V and PREFIX parameters have been set. Value of WITH_V will be ignored"
+    else 
+        if $with_v; 
+        then
+            echo -e "WITH_V is set to true and PREFIX parameter have not been set. PREFIX will be set to 'v'"
+            prefix="v"
+        fi
+	fi
+fi
 
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
 pre_release="true"
 IFS=',' read -ra branch <<< "$release_branches"
 for b in "${branch[@]}"; do
-    echo "Is $b a match for ${current_branch}"
-    if [[ "${current_branch}" =~ $b ]]
+    echo -e "\n\nIs $b a match for ${current_branch}"
+    if [[ "${current_branch}" =~ $b ]];
     then
         pre_release="false"
     fi
@@ -47,7 +67,7 @@ echo "pre_release = $pre_release"
 # fetch tags
 git fetch --tags
 
-# get latest tag that looks like a semver (with or without v)
+# get latest tag that looks like a semver (with or without prefix)
 case "$tag_context" in
     *repo*) 
         tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "^v?[0-9]+\.[0-9]+\.[0-9]+$" | head -n1)
@@ -60,14 +80,26 @@ case "$tag_context" in
     * ) echo "Unrecognised context"; exit 1;;
 esac
 
+echo_previous_tags() {
+    if $verbose;
+    then
+        echo -e "\n******************************************"
+        echo -e $1
+        echo -e "tag: ${tag}"
+        echo -e "pre_tag: ${pre_tag}"
+        echo -e "********************************************\n"
+    fi
+}
+
 # if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
-if [ -z "$tag" ]
+if [ -z "$tag" ];
 then
     log=$(git log --pretty='%B')
     tag="$initial_version"
     pre_tag="$initial_version"
+    echo_previous_tags "No tag was found. INITIAL_VERSION will be used instead."
 else
-    log=$(git log $tag..HEAD --pretty='%B')
+    echo_previous_tags "Previous tag was found."
 fi
 
 # get current commit hash for tag
@@ -93,37 +125,54 @@ if [ -z $head_commit ]; then
     head_commit=$commit
 fi
 
-if [ $tag = $initial_version ]; then
-    
-   if $verbose
-   then
-      echo -e "\n*****Commit messages taken into account*****"
-      git log $current_branch --pretty=format:%B
-      echo -e "********************************************\n"
-   fi
-
-    number_of_major=$(git log $current_branch --pretty=format:%B | grep -E "#major" -c)
-    number_of_minor=$(git log $current_branch --pretty=format:%B | grep -E "#minor" -c)
-    number_of_patch=$(git log $current_branch --pretty=format:%B | grep -E "#patch" -c)
-else 
-
-   if $verbose
-   then
-      echo -e "\n*****Commit messages taken into account*****"
-      git log $head_commit...$tag --pretty=format:%B
-      echo -e "********************************************\n"
-   fi
-
-    number_of_major=$(git log $head_commit...$tag --pretty=format:%B | grep -E "#major" -c)
-    number_of_minor=$(git log $head_commit...$tag --pretty=format:%B | grep -E "#minor" -c)
-    number_of_patch=$(git log $head_commit...$tag --pretty=format:%B | grep -E "#patch" -c)
+if $verbose;
+then
+    echo -e "\n******************************************"
+    echo -e "current branch: ${current_branch}"
+    echo -e "commit for last found tag: ${tag_commit}"
+    echo -e "current commit: ${commit}"
+    echo -e "HEAD_COMMIT: ${head_commit}"
+    echo -e "********************************************\n"
 fi
 
-if $verbose
-then
-  echo "number of #major tag occurrences ${number_of_major}"
-  echo "number of #minor tag  occurrences ${number_of_minor}"
-  echo "number of #patch tag occurrences ${number_of_patch}"
+set_number_of_found_keywords() {
+   if $verbose;
+   then
+      echo -e "\n********************************************"
+      echo -e "Commit messages taken into account"
+      if $3;
+      then
+        echo "First commit: $2"
+        git log $2 --pretty=format:%B | awk 'NF'
+      else
+        git log $head_commit...$tag --pretty=format:%B | awk 'NF'
+      fi
+      echo -e "********************************************\n"
+   fi
+
+    number_of_major=$(git log $1...$2 --pretty=format:%B | grep -E "#major" -c)
+    number_of_minor=$(git log $1...$2 --pretty=format:%B | grep -E "#minor" -c)
+    number_of_patch=$(git log $1...$2 --pretty=format:%B | grep -E "#patch" -c)
+    number_of_commits=$(git log $1...$2 --pretty=format:%B | awk 'NF' | grep "" -c)   
+
+    if $verbose;
+    then
+        echo -e "\n********************************************"
+        echo "number of #major tag occurrences ${number_of_major}"
+        echo "number of #minor tag occurrences ${number_of_minor}"
+        echo "number of #patch tag occurrences ${number_of_patch}"
+        echo "number of commits taken into account ${number_of_commits}"
+        echo -e "********************************************\n"
+    fi
+}
+
+if [ $tag = $initial_version ]; then
+   first_commit_of_repo=$(git rev-list --max-parents=0 HEAD)
+   is_first_commit_used=true
+   set_number_of_found_keywords $head_commit $first_commit_of_repo $is_first_commit_used
+else 
+   is_first_commit_used=false
+   set_number_of_found_keywords $head_commit $tag $is_first_commit_used
 fi
 
 tagWithoutPrefix=${tag#"$prefix"}
@@ -142,7 +191,7 @@ case "$log" in
         ;;
 esac
 
-if $pre_release
+if $pre_release;
 then
     # Already a prerelease available, bump it
     if [[ "$pre_tag" == *"$new"* ]]; then
@@ -152,9 +201,8 @@ then
     fi
 fi
 
-
 # did we get a new tag?
-if [ ! -z "$new" ]
+if [ ! -z "$new" ];
 then
 	# prefix with 'prefix'
 	if [ ! -z "$prefix" ]
@@ -163,25 +211,27 @@ then
 	fi
 fi
 
-# set a new tag to a provider CUSTOM_TAG - discard calculated tag
-if [ ! -z $custom_tag ]
+# set a new tag to a provided CUSTOM_TAG - discard calculated tag
+if [ ! -z $custom_tag ];
 then
     new="$custom_tag"
 fi
 
-if $pre_release
+if $pre_release;
 then
-    echo -e "Bumping tag ${pre_tag}. \n\tNew tag ${new}"
+    echo -e "\nBumping tag\n\told tag: ${pre_tag}\n\tnew tag: ${new}"
 else
-    echo -e "Bumping tag ${tag}. \n\tNew tag ${new}\n"
+    echo -e "\nBumping tag\n\told tag: ${tag}\n\tnew tag: ${new}"
 fi
 
 # set outputs
+echo -e "\nSetting outputs"
+
 new_tag_without_prefix=${new#"$prefix"}
-echo "New tag without prefix: $new_tag_without_prefix"
-echo "New tag: $new"
-echo "Prefix: $prefix"
-echo -e "Part incremented: $part\n\n"
+echo -e "\tNew tag without prefix: $new_tag_without_prefix"
+echo -e "\tNew tag: $new"
+echo -e "\tPrefix: $prefix"
+echo -e "\tPart incremented: $part\n\n"
 
 echo ::set-output name=new_tag::$new
 echo ::set-output name=new_tag_without_prefix::$new_tag_without_prefix
@@ -192,7 +242,7 @@ echo ::set-output name=tag::$tag
 
 
 # use dry run to determine the next tag
-if $dryrun
+if $dryrun;
 then
     exit 0
 fi 

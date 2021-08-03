@@ -29,6 +29,7 @@ jobs:
       uses: anothrNick/github-tag-action@1.26.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        WITH_V: true
         PREFIX: prefix
 ```
 
@@ -40,6 +41,7 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all
 
 * **GITHUB_TOKEN** ***(required)*** - Required for permission to tag the repo.
 * **DEFAULT_BUMP** *(optional)* - Which type of bump to use when none explicitly provided (default: `minor`).
+* **WITH_V** *(optional)* - Tag version with `v` character.
 * **PREFIX** *(optional)* - Adds a prefix before version number.
 * **RELEASE_BRANCHES** *(optional)* - Comma separated list of branches (bash reg exp accepted) that will generate the release tags. Other branches and pull-requests generate versions postfixed with the commit hash and do not generate any tag. Examples: `master` or `.*` or `release.*,hotfix.*,master` ...
 * **CUSTOM_TAG** *(optional)* - Set a custom tag, useful when generating tag based on f.ex FROM image in a docker image. **Setting this tag will invalidate any other settings set!**
@@ -49,7 +51,7 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all
 * **TAG_CONTEXT** *(optional)* - Set the context of the previous tag. Possible values are `repo` (default) or `branch`.
 * **PRERELEASE_SUFFIX** *(optional)* - Suffix for your prerelease versions, `beta` by default. Note this will only be used if a prerelease branch.
 * **VERBOSE** *(optional)* - Print git logs. For some projects these logs may be very large. Possible values are ```true``` (default) and ```false```. 
-* **HEAD_COMMIT** *(optional)* - Commit messages between the last tag and *HEAD_COMMIT* will be used to determine a new version number. Specifying commit is useful when using this action for pull requests - one can set environment variable as follows: `HEAD_COMMIT: ${{ github.event.pull_request.head.sha }}` to calculate a new version basing on commits from a given PR.  If not specified the current commit is used.
+* **HEAD_COMMIT** *(optional)* - Commit messages between the last tag and *HEAD_COMMIT* will be used to determine a new version number. Specifying commit is useful when using this action for pull requests - one can set environment variable as follows: `HEAD_COMMIT: ${{ github.event.pull_request.head.sha }}` to calculate a new version basing on commits from a given PR.
 
 #### Outputs
 
