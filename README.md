@@ -52,6 +52,7 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all
 * **PRERELEASE_SUFFIX** *(optional)* - Suffix for your prerelease versions, `beta` by default. Note this will only be used if a prerelease branch.
 * **VERBOSE** *(optional)* - Print git logs. For some projects these logs may be very large. Possible values are ```true``` (default) and ```false```. 
 * **HEAD_COMMIT** *(optional)* - Commit messages between the last tag and *HEAD_COMMIT* will be used to determine a new version number. Specifying commit is useful when using this action for pull requests - one can set environment variable as follows: `HEAD_COMMIT: ${{ github.event.pull_request.head.sha }}` to calculate a new version basing on commits from a given PR.
+* **USE_LAST_COMMIT_ONLY** *(optional)* - True by default. If true only last commit is taken into account while bumping the version, otherwise all commits from the commit with the latest tag contribute to new tag calculation
 
 #### Outputs
 
