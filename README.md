@@ -48,6 +48,7 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all
 - **INITIAL_VERSION** _(optional)_ - Set initial version before bump. Default `0.0.0`.
 - **TAG_CONTEXT** _(optional)_ - Set the context of the previous tag. Possible values are `repo` (default) or `branch`.
 - **PRERELEASE_SUFFIX** _(optional)_ - Suffix for your prerelease versions, `beta` by default. Note this will only be used if a prerelease branch.
+- **BUMP_STRATEGY** _(optional)_ - Strategy to calculate bump type, `simple` by default. Supported strategies `skip` and `angular`.
 - **VERBOSE** _(optional)_ - Print git logs. For some projects these logs may be very large. Possible values are `true` (default) and `false`.
 
 #### Outputs
@@ -66,6 +67,27 @@ If `#none` is contained in the commit message, it will skip bumping regardless `
 **Automatic Bumping:** If no `#major`, `#minor` or `#patch` tag is contained in the commit messages, it will bump whichever `DEFAULT_BUMP` is set to (which is `minor` by default). Disable this by setting `DEFAULT_BUMP` to `none`.
 
 > **_Note:_** This action **will not** bump the tag if the `HEAD` commit has already been tagged.
+
+### Bumping Strategy
+
+This determines if git commit log should be checked and how it should be processed to figure out the bump type `#major`, `#minor`, `#patch` or `#none`
+
+**simple:** This is the default if `BUMP_STRATEGY` is not provided. 
+This will following the Manual/Automatic Bumping mechanism described above.
+
+**skip:** This is to bypass scanning commit logs to decide on bump type.
+When this is turned it will bump whichever `DEFAULT_BUMP` is set to. 
+
+**angular:** This strategy uses angular commit message conventions decribed [here](https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-format)
+This strategy looks for commit messages starting with words `feat:`, `fix:`, `perf`, `no-release` etc. Here is what those are mapped to.
+- Contains `BREAKING CHANGE(S)` => `major` 
+- Starts With `feat:` => `minor`
+- Starts With `fix: | perf:` => `patch`
+- Starts With `no-release:` => `none`
+
+All the other types are treated as no tags found, it will bump whichever `DEFAULT_BUMP` is set to (which is `minor` by default). 
+
+> **_Note:_** The prefix tags can have spaces around them and can have optional `(<scope>)`. It's important they end with a semicolon, and after which commit message continues.
 
 ### Workflow
 

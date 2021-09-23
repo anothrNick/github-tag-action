@@ -12,6 +12,7 @@ dryrun=${DRY_RUN:-false}
 initial_version=${INITIAL_VERSION:-0.0.0}
 tag_context=${TAG_CONTEXT:-repo}
 suffix=${PRERELEASE_SUFFIX:-beta}
+bump_strategy=${BUMP_STRATEGY:-simple}
 verbose=${VERBOSE:-true}
 
 cd ${GITHUB_WORKSPACE}/${source}
@@ -26,6 +27,7 @@ echo -e "\tDRY_RUN: ${dryrun}"
 echo -e "\tINITIAL_VERSION: ${initial_version}"
 echo -e "\tTAG_CONTEXT: ${tag_context}"
 echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
+echo -e "\tBUMP_STRATEGY: ${bump_strategy}"
 echo -e "\tVERBOSE: ${verbose}"
 
 current_branch=$(git rev-parse --abbrev-ref HEAD)
@@ -61,6 +63,7 @@ esac
 if [ -z "$tag" ]
 then
     log=$(git log --pretty='%B')
+    log_lines=$(git log --pretty=format:'%s')
     tag="$initial_version"
     if [ -z "$pre_tag" ] && $pre_release
     then
@@ -68,6 +71,7 @@ then
     fi
 else
     log=$(git log $tag..HEAD --pretty='%B')
+    log_lines=$(git log $tag..HEAD --pretty=format:'%s')
 fi
 
 # get current commit hash for tag
@@ -85,23 +89,46 @@ fi
 # echo log if verbose is wanted
 if $verbose
 then
+  echo ----------- Commits --------
   echo $log
+  echo ------------ Commit subject lines ------
+  echo $log_lines
+  echo -------------------
 fi
 
+original_log="$log"
+if [[ "$bump_strategy" == "skip" ]]; then
+    echo "Skipping checking for git commit logs to decide on bump"
+    log=""
+fi
+
+# over ride log string variable with #major, #minor, #patch, #none tags
+if [[ "$bump_strategy" == "angular" ]]; then
+    log=""
+    if [ -n "$(echo "$log_lines"|grep -E '.*BREAKING\s*CHANGES?.*'|head -n1)" ]; then log="$log #major"; fi
+    if [ -n "$(echo "$log_lines"|grep -iE '^\s*(feat)\s*(\(.*\))?\s*:'|head -n1)" ]; then log="$log #minor"; fi
+    if [ -n "$(echo "$log_lines"|grep -iE '^\s*(fix|perf)\s*(\(.*\))?\s*:'|head -n1)" ]; then log="$log #patch"; fi
+    if [ -n "$(echo "$log_lines"|grep -iE '^\s*(no-release)\s*(\(.*\))?\s*:'|head -n1)" ]; then log="$log #none"; fi
+
+    echo "Using angular bump_strategy with decisions: [$log]"
+fi
+
+# if strategy is angular log string has these decisions, otherwise it has git commit log
 case "$log" in
     *#major* ) new=$(semver -i major $tag); part="major";;
     *#minor* ) new=$(semver -i minor $tag); part="minor";;
     *#patch* ) new=$(semver -i patch $tag); part="patch";;
-    *#none* ) 
+    *#none* )
         echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0;;
-    * ) 
+    * )
         if [ "$default_semvar_bump" == "none" ]; then
-            echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0 
-        else 
-            new=$(semver -i "${default_semvar_bump}" $tag); part=$default_semvar_bump 
-        fi 
+            echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0
+        else
+            new=$(semver -i "${default_semvar_bump}" $tag); part=$default_semvar_bump
+        fi
         ;;
 esac
+log="$original_log"
 
 if $pre_release
 then
