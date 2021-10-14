@@ -26,7 +26,7 @@ jobs:
       with:
         fetch-depth: '0'
     - name: Bump version and push tag
-      uses: anothrNick/github-tag-action@1.26.0
+      uses: anothrNick/github-tag-action@1.36.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: true
@@ -58,10 +58,10 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all
 
 * **new_tag** - The value of the newly created tag, e.g. my-prefix-1.2.3
 * **new_tag_without_prefix** - The value of the newly created tag without specified prefix, e.g 1.2.3
-* **tag** - The value of the latest tag before bumping it by running this action, e.g. 1.2.2
+* **tag** - The value of the latest tag before bumping it by running this action, e.g. my-prefix-1.2.2
 * **part** - The part of version which was bumped, e.g. minor
 
-> ***Note:*** This action creates a [lightweight tag](https://developer.github.com/v3/git/refs/#create-a-reference).
+> **_Note:_** This action creates a [lightweight tag](https://developer.github.com/v3/git/refs/#create-a-reference).
 
 ### Bumping
 
@@ -70,19 +70,19 @@ If `#none` is contained in the commit message, it will skip bumping regardless `
 
 **Automatic Bumping:** If no `#major`, `#minor` or `#patch` tag is contained in the commit messages, it will bump whichever `DEFAULT_BUMP` is set to (which is `minor` by default). Disable this by setting `DEFAULT_BUMP` to `none`.
 
-> ***Note:*** This action **will not** bump the tag if the `HEAD` commit has already been tagged.
+> **_Note:_** This action **will not** bump the tag if the `HEAD` commit has already been tagged.
 
 ### Workflow
 
-* Add this action to your repo
-* Commit some changes
-* Either push to master or open a PR
-* On push (or merge), the action will:
-  * Get latest tag
-  * Bump tag with minor version unless any commit message contains `#major` or `#patch`
-  * Pushes tag to github
-  * If triggered on your repo's default branch (`master` or `main` if unchanged), the bump version will be a release tag.
-  * If triggered on any other branch, a prerelease will be generated, depending on the bump, starting with `*-<PRERELEASE_SUFFIX>.1`, `*-<PRERELEASE_SUFFIX>.2`, ...
+- Add this action to your repo
+- Commit some changes
+- Either push to master or open a PR
+- On push (or merge), the action will:
+  - Get latest tag
+  - Bump tag with minor version unless any commit message contains `#major` or `#patch`
+  - Pushes tag to github
+  - If triggered on your repo's default branch (`master` or `main` if unchanged), the bump version will be a release tag.
+  - If triggered on any other branch, a prerelease will be generated, depending on the bump, starting with `*-<PRERELEASE_SUFFIX>.1`, `*-<PRERELEASE_SUFFIX>.2`, ...
 
 ### Credits
 
@@ -92,8 +92,8 @@ If `#none` is contained in the commit message, it will skip bumping regardless `
 
 A list of projects using github-tag-action for reference.
 
-* another/github-tag-action (uses itself to create tags)
+- another/github-tag-action (uses itself to create tags)
 
-* [anothrNick/json-tree-service](https://github.com/anothrNick/json-tree-service)
+- [anothrNick/json-tree-service](https://github.com/anothrNick/json-tree-service)
 
   > Access JSON structure with HTTP path parameters as keys/indices to the JSON.

@@ -98,6 +98,7 @@ then
     tag="$initial_version"
     pre_tag="$initial_version"
     echo_previous_tags "No tag was found. INITIAL_VERSION will be used instead."
+
 else
     echo_previous_tags "Previous tag was found."
 fi
