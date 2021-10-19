@@ -1,6 +1,6 @@
 # github-tag-action
 
-A Github Action to automatically bump and tag master, on merge, with the latest SemVer formatted version.
+A GitHub Action to automatically bump and tag master, on merge, with the latest SemVer formatted version.
 
 [![Build Status](https://github.com/anothrNick/github-tag-action/workflows/Bump%20version/badge.svg)](https://github.com/anothrNick/github-tag-action/workflows/Bump%20version/badge.svg)
 [![Stable Version](https://img.shields.io/github/v/tag/anothrNick/github-tag-action)](https://img.shields.io/github/v/tag/anothrNick/github-tag-action)
@@ -75,7 +75,7 @@ If `#none` is contained in the commit message, it will skip bumping regardless `
 - On push (or merge), the action will:
   - Get latest tag
   - Bump tag with minor version unless any commit message contains `#major` or `#patch`
-  - Pushes tag to github
+  - Pushes tag to GitHub
   - If triggered on your repo's default branch (`master` or `main` if unchanged), the bump version will be a release tag.
   - If triggered on any other branch, a prerelease will be generated, depending on the bump, starting with `*-<PRERELEASE_SUFFIX>.1`, `*-<PRERELEASE_SUFFIX>.2`, ...
 
