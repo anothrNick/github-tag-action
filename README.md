@@ -53,6 +53,7 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all
 #### Outputs
 
 - **new_tag** - The value of the newly created tag.
+- **pre_tag** - The value of the previous tag.
 - **tag** - The value of the latest tag after running this action.
 - **part** - The part of version which was bumped.
 
