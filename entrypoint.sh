@@ -31,7 +31,7 @@ echo -e "\tINITIAL_VERSION: ${initial_version}"
 echo -e "\tTAG_CONTEXT: ${tag_context}"
 echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
 echo -e "\tVERBOSE: ${verbose}"
-echo -e "\tBRANCH_NAME: ${branch_latest_commit}"
+echo -e "\BRANCH_LATEST_COMMIT: ${branch_latest_commit}"
 echo -e "\tUSE_LAST_COMMIT_ONLY: ${use_last_commit_only}"
 echo -e "*********************\n"
 
