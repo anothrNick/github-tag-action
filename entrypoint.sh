@@ -258,6 +258,7 @@ fi
 
 # set a new tag to a provided CUSTOM_TAG - discard calculated tag
 if [ -n "$custom_tag" ]; then
+    echo "!!! Custom tag has been provided, so it'll be used instead of a calculated tag !!!"
     new="$custom_tag"
 fi
 
