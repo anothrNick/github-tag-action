@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# shellcheck disable=SC2153,2164
+
 set -o pipefail
 
 # config
@@ -17,7 +19,7 @@ verbose=${VERBOSE:-true}
 branch_latest_commit=$BRANCH_LATEST_COMMIT
 use_last_commit_only=${USE_LAST_COMMIT_ONLY:-true}
 
-cd ${GITHUB_WORKSPACE}/${source}
+cd "${GITHUB_WORKSPACE}"/"${source}"
 
 echo "*** CONFIGURATION ***"
 echo -e "\tDEFAULT_BUMP: ${default_semvar_bump}"
@@ -189,6 +191,7 @@ bump_version() {
     new=$tagWithoutPrefix
 
     eval count_var_name=number_of_"$1"
+    # shellcheck disable=SC2154
     count="${!count_var_name}"
 
     if $use_last_commit_only; then
@@ -199,7 +202,7 @@ bump_version() {
         echo -e "USE_LAST_COMMIT_ONLY set to: ${use_last_commit_only}. $1 will be incremented by ${count}"
     fi
 
-    for ((c = 1; c <= $count; c++)); do
+    for ((c = 1; c <= count; c++)); do
         new=$(semver -i "$1" "$new")
         part=$1
     done
@@ -229,7 +232,7 @@ if [ -z "$new" ]; then
         else
             echo -e "USE_LAST_COMMIT_ONLY set to: ${use_last_commit_only}. default_semvar_bump=${default_semvar_bump} will be incremented by ${number_of_commits}"
 
-            for ((c = 1; c <= $number_of_commits; c++)); do
+            for ((c = 1; c <= number_of_commits; c++)); do
                 new=$(semver -i "${default_semvar_bump}" "$new")
                 part=$default_semvar_bump
             done
