@@ -37,6 +37,91 @@ echo -e "\tBRANCH_LATEST_COMMIT: ${branch_latest_commit}"
 echo -e "\tUSE_LAST_COMMIT_ONLY: ${use_last_commit_only}"
 echo -e "*********************\n"
 
+push_new_tag() {
+
+    # use dry run to determine the next tag
+    if $dryrun; then
+        echo "!!!! DRY_RUN set to true, tag will not be updated !!!!"
+        exit 0
+    fi
+
+    git tag "$1"
+    # push new tag ref to github
+    dt=$(date '+%Y-%m-%dT%H:%M:%SZ')
+    full_name=$GITHUB_REPOSITORY
+    git_refs_url=$(jq .repository.git_refs_url "$GITHUB_EVENT_PATH" | tr -d '"' | sed 's/{\/sha}//g')
+
+    echo "$dt: **pushing tag $1 to repo $full_name"
+
+    git_refs_response=$(
+        curl -s -X POST "$git_refs_url" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -d @- <<EOF
+
+{
+  "ref": "refs/tags/$1",
+  "sha": "$current_commit"
+}
+EOF
+    )
+
+    git_ref_posted=$(echo "${git_refs_response}" | jq .ref | tr -d '"')
+
+    echo "::debug::${git_refs_response}"
+    if [ "${git_ref_posted}" = "refs/tags/$1" ]; then
+        exit 0
+    else
+        echo "::error::Tag was not created properly."
+        exit 1
+    fi
+}
+
+# get current commit hash
+current_commit=$(git rev-parse HEAD)
+
+# fetch tags
+git fetch --tags
+
+# get latest tag that looks like a semver (with or without prefix)
+case "$tag_context" in
+*repo*)
+    latest_tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "^($prefix)?[0-9]+\.[0-9]+\.[0-9]+$" | head -n1)
+    pre_tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "^($prefix)?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" | head -n1)
+    ;;
+*branch*)
+    latest_tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^($prefix)?[0-9]+\.[0-9]+\.[0-9]+$" | head -n1)
+    pre_tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^($prefix)?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" | head -n1)
+    ;;
+*)
+    echo "Unrecognised context"
+    exit 1
+    ;;
+esac
+
+# Set a new tag as a provided CUSTOM_TAG - do not perform any other calculations
+if [ -n "$custom_tag" ]; then
+    echo "!!! Custom tag has been provided, so it'll be used instead of a calculated tag !!!"
+
+    # set outputs
+    echo -e "\nSetting outputs"
+
+    newCustomTag="$prefix$custom_tag"
+    newCustomTagWithoutPrefix="$custom_tag"
+
+    echo -e "\tNew tag without prefix: $newCustomTagWithoutPrefix"
+    echo -e "\tNew tag: $newCustomTag"
+    echo -e "\tPrefix: $prefix"
+    echo -e "\tPart incremented: [none - custom tag was created]\n\n"
+
+    echo ::set-output name=new_tag_without_prefix::"$newCustomTagWithoutPrefix"
+    echo ::set-output name=new_tag::"$newCustomTag"
+
+    # set the old tag value as an output
+    echo ::set-output name=tag::"$latest_tag"
+
+    push_new_tag "$newCustomTag"
+fi
+
 # Handle deprecated WITH_V parameter
 if [ -n "$with_v" ]; then
     echo -e "WARNING: WITH_V parameter field has been deprecated. Use PREFIX instead."
@@ -62,25 +147,6 @@ for b in "${branch[@]}"; do
 done
 echo "pre_release = $pre_release"
 
-# fetch tags
-git fetch --tags
-
-# get latest tag that looks like a semver (with or without prefix)
-case "$tag_context" in
-*repo*)
-    latest_tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "^($prefix)?[0-9]+\.[0-9]+\.[0-9]+$" | head -n1)
-    pre_tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "^($prefix)?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" | head -n1)
-    ;;
-*branch*)
-    latest_tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^($prefix)?[0-9]+\.[0-9]+\.[0-9]+$" | head -n1)
-    pre_tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^($prefix)?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" | head -n1)
-    ;;
-*)
-    echo "Unrecognised context"
-    exit 1
-    ;;
-esac
-
 echo_previous_tags() {
     if $verbose; then
         echo -e "\n******************************************"
@@ -103,9 +169,6 @@ fi
 
 # get current commit hash for tag
 latest_tag_commit=$(git rev-list -n 1 "$latest_tag")
-
-# get current commit hash
-current_commit=$(git rev-parse HEAD)
 
 if [ "$latest_tag_commit" == "$current_commit" ]; then
     echo "No new commits since previous tag. Skipping..."
@@ -259,12 +322,6 @@ if [ -n "$new" ]; then
     fi
 fi
 
-# set a new tag to a provided CUSTOM_TAG - discard calculated tag
-if [ -n "$custom_tag" ]; then
-    echo "!!! Custom tag has been provided, so it'll be used instead of a calculated tag !!!"
-    new="$custom_tag"
-fi
-
 if $pre_release; then
     echo -e "\nBumping tag\n\told tag: ${pre_tag}\n\tnew tag: ${new}"
 else
@@ -287,39 +344,5 @@ echo ::set-output name=part::"$part"
 # set the old tag value as an output
 echo ::set-output name=tag::"$latest_tag"
 
-# use dry run to determine the next tag
-if $dryrun; then
-    exit 0
-fi
-
 # create local git tag
-git tag "$new"
-
-# push new tag ref to github
-dt=$(date '+%Y-%m-%dT%H:%M:%SZ')
-full_name=$GITHUB_REPOSITORY
-git_refs_url=$(jq .repository.git_refs_url "$GITHUB_EVENT_PATH" | tr -d '"' | sed 's/{\/sha}//g')
-
-echo "$dt: **pushing tag $new to repo $full_name"
-
-git_refs_response=$(
-    curl -s -X POST "$git_refs_url" \
-        -H "Authorization: token $GITHUB_TOKEN" \
-        -d @- <<EOF
-
-{
-  "ref": "refs/tags/$new",
-  "sha": "$current_commit"
-}
-EOF
-)
-
-git_ref_posted=$(echo "${git_refs_response}" | jq .ref | tr -d '"')
-
-echo "::debug::${git_refs_response}"
-if [ "${git_ref_posted}" = "refs/tags/${new}" ]; then
-    exit 0
-else
-    echo "::error::Tag was not created properly."
-    exit 1
-fi
+push_new_tag "$new"
