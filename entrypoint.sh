@@ -16,7 +16,7 @@ initial_version=${INITIAL_VERSION:-0.0.0}
 tag_context=${TAG_CONTEXT:-repo}
 suffix=${PRERELEASE_SUFFIX:-beta}
 verbose=${VERBOSE:-true}
-branch_latest_commit=$BRANCH_LATEST_COMMIT
+branch_latest_commit=${BRANCH_LATEST_COMMIT}
 use_last_commit_only=${USE_LAST_COMMIT_ONLY:-true}
 
 cd "${GITHUB_WORKSPACE}"/"${source}"
@@ -33,7 +33,7 @@ echo -e "\tINITIAL_VERSION: ${initial_version}"
 echo -e "\tTAG_CONTEXT: ${tag_context}"
 echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
 echo -e "\tVERBOSE: ${verbose}"
-echo -e "\BRANCH_LATEST_COMMIT: ${branch_latest_commit}"
+echo -e "\tBRANCH_LATEST_COMMIT: ${branch_latest_commit}"
 echo -e "\tUSE_LAST_COMMIT_ONLY: ${use_last_commit_only}"
 echo -e "*********************\n"
 
@@ -204,7 +204,7 @@ bump_version() {
 
     for ((c = 1; c <= count; c++)); do
         new=$(semver -i "$1" "$new")
-        part=$1
+        part=$1 # TODO: Is this line needed?
     done
 }
 
@@ -212,11 +212,11 @@ if [ "$number_of_major" != 0 ]; then
     bump_version "major"
 fi
 
-if [ "$number_of_major" = 0 ] && [ "$number_of_minor" != 0 ] && [ -z "$new" ]; then
+if [ "$number_of_major" == 0 ] && [ "$number_of_minor" != 0 ] && [ -z "$new" ]; then
     bump_version "minor"
 fi
 
-if [ "$number_of_major" == 0 ] && [ "$number_of_minor" == 0 ] && [ -z "$new" ]; then
+if [ "$number_of_major" == 0 ] && [ "$number_of_minor" == 0 ] && [ "$number_of_patch" != 0 ] && [ -z "$new" ]; then
     bump_version "patch"
 fi
 
