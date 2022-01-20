@@ -43,6 +43,7 @@ echo "pre_release = $pre_release"
 
 # fetch tags
 git fetch --tags
+
 tagFmt="^[0-9]+\.[0-9]+\.[0-9]+$" 
 preTagFmt="^[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" 
 
