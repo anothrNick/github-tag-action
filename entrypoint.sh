@@ -43,16 +43,24 @@ echo "pre_release = $pre_release"
 
 # fetch tags
 git fetch --tags
+tagFmt="^[0-9]+\.[0-9]+\.[0-9]+$" 
+preTagFmt="^[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" 
 
+if [ with_v ]
+then 
+    tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$"
+    preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$"
+fi
+    
 # get latest tag that looks like a semver (with or without v)
 case "$tag_context" in
     *repo*) 
-        tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "^v?[0-9]+\.[0-9]+\.[0-9]+$" | head -n1)
-        pre_tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" | head -n1)
+        tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt" | head -n1)
+        pre_tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt" | head -n1)
         ;;
     *branch*) 
-        tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^v?[0-9]+\.[0-9]+\.[0-9]+$" | head -n1)
-        pre_tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" | head -n1)
+        tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt" | head -n1)
+        pre_tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt" | head -n1)
         ;;
     * ) echo "Unrecognised context"; exit 1;;
 esac
