@@ -47,7 +47,7 @@ git fetch --tags
 tagFmt="^[0-9]+\.[0-9]+\.[0-9]+$" 
 preTagFmt="^[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" 
 
-if [ with_v ]
+if $with_v
 then 
     tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$"
     preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$"
