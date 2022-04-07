@@ -79,6 +79,8 @@ If `#none` is contained in the commit message, it will skip bumping regardless `
   - If triggered on your repo's default branch (`master` or `main` if unchanged), the bump version will be a release tag.
   - If triggered on any other branch, a prerelease will be generated, depending on the bump, starting with `*-<PRERELEASE_SUFFIX>.1`, `*-<PRERELEASE_SUFFIX>.2`, ...
 
+Readme Bump
+
 ### Credits
 
 [fsaintjacques/semver-tool](https://github.com/fsaintjacques/semver-tool)
