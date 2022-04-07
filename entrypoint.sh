@@ -27,6 +27,10 @@ echo -e "\tINITIAL_VERSION: ${initial_version}"
 echo -e "\tTAG_CONTEXT: ${tag_context}"
 echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
 echo -e "\tVERBOSE: ${verbose}"
+if $verbose
+then
+    set -x
+fi
 
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
