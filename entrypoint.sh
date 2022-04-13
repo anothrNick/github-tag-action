@@ -13,6 +13,9 @@ initial_version=${INITIAL_VERSION:-0.0.0}
 tag_context=${TAG_CONTEXT:-repo}
 suffix=${PRERELEASE_SUFFIX:-beta}
 verbose=${VERBOSE:-true}
+verbose=${VERBOSE:-true}
+# since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses 
+GIT_CEILING_DIRECTORIES='/github/workspace'
 
 cd ${GITHUB_WORKSPACE}/${source}
 
@@ -27,6 +30,7 @@ echo -e "\tINITIAL_VERSION: ${initial_version}"
 echo -e "\tTAG_CONTEXT: ${tag_context}"
 echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
 echo -e "\tVERBOSE: ${verbose}"
+echo -e "\tGIT_CEILING_DIRECTORIES: ${GIT_CEILING_DIRECTORIES}"
 
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
