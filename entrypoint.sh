@@ -14,8 +14,8 @@ tag_context=${TAG_CONTEXT:-repo}
 suffix=${PRERELEASE_SUFFIX:-beta}
 verbose=${VERBOSE:-true}
 verbose=${VERBOSE:-true}
-# since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses 
-GIT_CEILING_DIRECTORIES='/github/workspace'
+# since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses?
+GIT_CEILING_DIRECTORIES='/'
 
 cd ${GITHUB_WORKSPACE}/${source}
 
