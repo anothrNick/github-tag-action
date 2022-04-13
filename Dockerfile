@@ -1,4 +1,4 @@
-FROM alpine:3.14
+FROM alpine:3.14.5
 LABEL "repository"="https://github.com/anothrNick/github-tag-action"
 LABEL "homepage"="https://github.com/anothrNick/github-tag-action"
 LABEL "maintainer"="Nick Sjostrom"
