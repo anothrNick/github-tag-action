@@ -19,7 +19,7 @@ verbose=${VERBOSE:-true}
 branch_latest_commit=${BRANCH_LATEST_COMMIT}
 use_last_commit_only=${USE_LAST_COMMIT_ONLY:-true}
 
-cd "${GITHUB_WORKSPACE}"/"${source}"
+cd "${GITHUB_WORKSPACE}/${source}"
 
 echo "*** CONFIGURATION ***"
 echo -e "\tDEFAULT_BUMP: ${default_semvar_bump}"
