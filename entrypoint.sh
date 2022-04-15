@@ -18,6 +18,8 @@ suffix=${PRERELEASE_SUFFIX:-beta}
 verbose=${VERBOSE:-true}
 branch_latest_commit=${BRANCH_LATEST_COMMIT}
 use_last_commit_only=${USE_LAST_COMMIT_ONLY:-true}
+# since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses?
+git config --global --add safe.directory /github/workspace
 
 cd "${GITHUB_WORKSPACE}/${source}"
 
@@ -81,16 +83,24 @@ current_commit=$(git rev-parse HEAD)
 
 # fetch tags
 git fetch --tags
+    
+tagFmt="^($prefix)?[0-9]+\.[0-9]+\.[0-9]+$" 
+preTagFmt="^($prefix)?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" 
 
 # get latest tag that looks like a semver (with or without prefix)
 case "$tag_context" in
 *repo*)
-    latest_tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "^($prefix)?[0-9]+\.[0-9]+\.[0-9]+$" | head -n1)
-    pre_tag=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "^($prefix)?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" | head -n1)
+    taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt")"
+    latest_tag="$(semver "$taglist" | tail -n 1)"
+    pre_taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt")"
+    pre_tag="$(semver "$pre_taglist" | tail -n 1)"
     ;;
 *branch*)
-    latest_tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^($prefix)?[0-9]+\.[0-9]+\.[0-9]+$" | head -n1)
-    pre_tag=$(git tag --list --merged HEAD --sort=-v:refname | grep -E "^($prefix)?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" | head -n1)
+    taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt")"
+    latest_tag="$(semver "$taglist" | tail -n 1)"
+
+    pre_taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt")"
+    pre_tag=$(semver "$pre_taglist" | tail -n 1)
     ;;
 *)
     echo "Unrecognised context"
@@ -156,6 +166,7 @@ echo_previous_tags() {
         echo -e "********************************************\n"
     fi
 }
+
 
 # if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
 if [ -z "$latest_tag" ]; then
