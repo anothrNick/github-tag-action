@@ -37,6 +37,12 @@ echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
 echo -e "\tVERBOSE: ${verbose}"
 echo -e "\tGITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
 
+prefix=""
+if ${with_v}
+then
+    prefix="v"
+fi
+
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
 pre_release="true"
@@ -53,26 +59,29 @@ echo "pre_release = ${pre_release}"
 # fetch tags
 git fetch --tags
 
-tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$"
-preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$"
+tagFmt="^${prefix}[0-9]+\.[0-9]+\.[0-9]+$"
+preTagFmt="^${prefix}[0-9]+\.[0-9]+\.[0-9]+(-${suffix}\.[0-9]+)?$"
 
 # get latest tag that looks like a semver (with or without v)
-case "$tag_context" in
+case "${tag_context}" in
     *repo*)
-        taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt")"
-        tag="$(semver $taglist | tail -n 1)"
+        mapfile -t taglist < <(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "${tagFmt}")
+        tag="${prefix}$(semver "${taglist[@]}" | tail -n 1)"
 
-        pre_taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt")"
-        pre_tag="$(semver "$pre_taglist" | tail -n 1)"
+        mapfile -t pre_taglist < <(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "${preTagFmt}")
+        pre_tag="${prefix}$(semver "${pre_taglist[@]}" | tail -n 1)"
         ;;
     *branch*)
-        taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt")"
-        tag="$(semver $taglist | tail -n 1)"
+        mapfile -t taglist < <(git tag --list --merged HEAD --sort=-v:refname | grep -E "${tagFmt}")
+        tag="${prefix}$(semver "${taglist[@]}" | tail -n 1)"
 
-        pre_taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt")"
-        pre_tag=$(semver "$pre_taglist" | tail -n 1)
+        mapfile -t taglist < <(git tag --list --merged HEAD --sort=-v:refname | grep -E "${preTagFmt}")
+        pre_tag="${prefix}$(semver "${pre_taglist[@]}" | tail -n 1)"
         ;;
-    * ) echo "Unrecognised context"; exit 1;;
+    * )
+        echo "Unrecognised context";
+        exit 1
+        ;;
 esac
 
 
@@ -147,7 +156,7 @@ echo "${part}"
 # prefix with 'v'
 if ${with_v}
 then
-	new="v$new"
+	new="v${new}"
 fi
 
 if [[ -n "${custom_tag}" ]]
