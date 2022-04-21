@@ -10,7 +10,7 @@ A Github Action to automatically bump and tag master, on merge, with the latest 
 
 [<img src="https://miro.medium.com/max/1200/1*_4Ex1uUhL93a3bHyC-TgPg.png" width="400">](https://itnext.io/creating-a-github-action-to-tag-commits-2722f1560dec)
 
-### Usage
+## Usage
 
 ```Dockerfile
 name: Bump version
@@ -34,9 +34,9 @@ jobs:
 
 _NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all commits to look for the semver commit message._
 
-#### Options
+### Options
 
-**Environment Variables**
+#### Environment Variables
 
 - **GITHUB_TOKEN** **_(required)_** - Required for permission to tag the repo.
 - **DEFAULT_BUMP** _(optional)_ - Which type of bump to use when none explicitly provided (default: `minor`).
