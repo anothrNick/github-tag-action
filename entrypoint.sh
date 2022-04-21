@@ -13,8 +13,14 @@ initial_version=${INITIAL_VERSION:-0.0.0}
 tag_context=${TAG_CONTEXT:-repo}
 suffix=${PRERELEASE_SUFFIX:-beta}
 verbose=${VERBOSE:-true}
+
 # since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses?
-git config --global --add safe.directory /github/workspace
+if [[ "${source}" =~ ^\.$ ]]
+then
+    git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+else
+    git config --global --add safe.directory "${GITHUB_WORKSPACE}/${source}"
+fi
 
 cd "${GITHUB_WORKSPACE}/${source}" || exit
 
@@ -29,6 +35,7 @@ echo -e "\tINITIAL_VERSION: ${initial_version}"
 echo -e "\tTAG_CONTEXT: ${tag_context}"
 echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
 echo -e "\tVERBOSE: ${verbose}"
+echo -e "\tGITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
 
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
@@ -45,20 +52,20 @@ echo "pre_release = ${pre_release}"
 
 # fetch tags
 git fetch --tags
-    
-tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$" 
-preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" 
+
+tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$"
+preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$"
 
 # get latest tag that looks like a semver (with or without v)
 case "$tag_context" in
-    *repo*) 
+    *repo*)
         taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt")"
         tag="$(semver $taglist | tail -n 1)"
 
         pre_taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt")"
         pre_tag="$(semver "$pre_taglist" | tail -n 1)"
         ;;
-    *branch*) 
+    *branch*)
         taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt")"
         tag="$(semver $taglist | tail -n 1)"
 
