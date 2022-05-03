@@ -2,6 +2,15 @@
 
 set -o pipefail
 
+function generate_pre_tag {
+  local suffix=$1
+  preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" 
+  pre_taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt")"
+  semver $pre_taglist | tail -n 1
+}
+
+export $generate_pre_tag
+
 git config --global --add safe.directory /github/workspace
 
 # config
@@ -47,7 +56,6 @@ echo "pre_release = $pre_release"
 git fetch --tags
     
 tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$" 
-preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" 
 
 # get latest tag that looks like a semver (with or without v)
 case "$tag_context" in
@@ -56,18 +64,24 @@ case "$tag_context" in
         tag="$(semver $taglist | tail -n 1)"
 
         pre_taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt")"
-        pre_tag="$(semver "$pre_taglist" | tail -n 1)"
+        pre_tag=$(generate_pre_tag $suffix)
         ;;
     *branch*) 
         taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt")"
         tag="$(semver $taglist | tail -n 1)"
 
         pre_taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt")"
-        pre_tag=$(semver "$pre_taglist" | tail -n 1)
+        pre_tag=$(generate_pre_tag $suffix)
         ;;
     * ) echo "Unrecognised context"; exit 1;;
 esac
 
+if $with_v
+then
+	vtag="v$tag"
+else
+    vtag=$tag
+fi
 
 # if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
 if [ -z "$tag" ]
@@ -79,11 +93,11 @@ then
       pre_tag="$initial_version"
     fi
 else
-    log=$(git log $tag..HEAD --pretty='%B')
+    log=$(git log $vtag..HEAD --pretty='%B')
 fi
 
 # get current commit hash for tag
-tag_commit=$(git rev-list -n 1 $tag)
+tag_commit=$(git rev-list -n 1 $vtag)
 
 # get current commit hash
 commit=$(git rev-parse HEAD)
