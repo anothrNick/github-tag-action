@@ -46,25 +46,25 @@ echo "pre_release = $pre_release"
 
 # fetch tags
 git fetch --tags
-    
-tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$" 
-preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" 
+
+tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$"
+preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$"
 
 # get latest tag that looks like a semver (with or without v)
 case "$tag_context" in
-    *repo*) 
-        taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt")"
-        tag="$(semver $taglist | tail -n 1)"
+    *repo*)
+        read -ra taglist <<< "$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt")"
+        tag="$(semver "${taglist[@]}" | tail -n 1)"
 
-        pre_taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt")"
-        pre_tag="$(semver "$pre_taglist" | tail -n 1)"
+        read -ra pre_taglist <<< "$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt")"
+        pre_tag="$(semver "${pre_taglist[@]}" | tail -n 1)"
         ;;
-    *branch*) 
-        taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt")"
-        tag="$(semver $taglist | tail -n 1)"
+    *branch*)
+        read -ra taglist <<< "$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt")"
+        tag="$(semver "${taglist[@]}" | tail -n 1)"
 
-        pre_taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt")"
-        pre_tag=$(semver "$pre_taglist" | tail -n 1)
+        read -ra pre_taglist <<< "$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt")"
+        pre_tag=$(semver "${pre_taglist[@]}" | tail -n 1)
         ;;
     * ) echo "Unrecognised context"; exit 1;;
 esac
@@ -105,14 +105,14 @@ case "$log" in
     *#major* ) new=$(semver -i major $tag); part="major";;
     *#minor* ) new=$(semver -i minor $tag); part="minor";;
     *#patch* ) new=$(semver -i patch $tag); part="patch";;
-    *#none* ) 
+    *#none* )
         echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0;;
-    * ) 
+    * )
         if [ "$default_semvar_bump" == "none" ]; then
-            echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0 
-        else 
-            new=$(semver -i "${default_semvar_bump}" $tag); part=$default_semvar_bump 
-        fi 
+            echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0
+        else
+            new=$(semver -i "${default_semvar_bump}" $tag); part=$default_semvar_bump
+        fi
         ;;
 esac
 
@@ -155,7 +155,7 @@ if $dryrun
 then
     echo ::set-output name=tag::$tag
     exit 0
-fi 
+fi
 
 echo ::set-output name=tag::$new
 
