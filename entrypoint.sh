@@ -52,23 +52,23 @@ preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$"
 # get latest tag that looks like a semver (with or without v)
 case "$tag_context" in
     *repo*)
-        read -ra taglist <<< "$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt")"
+        mapfile -t taglist < <(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "${tagFmt}")
         if [ -n "${taglist[*]}" ]; then
             tag="$(semver "${taglist[@]}" | tail -n 1)"
         fi
 
-        read -ra pre_taglist <<< "$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt")"
+        mapfile -t pre_taglist < <(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "${preTagFmt}")
         if [ -n "${pre_taglist[*]}" ]; then
             pre_tag="$(semver "${pre_taglist[@]}" | tail -n 1)"
         fi
         ;;
     *branch*)
-        read -ra taglist <<< "$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt")"
+        mapfile -t taglist < <(git tag --list --merged HEAD --sort=-v:refname | grep -E "${tagFmt}")
         if [ -n "${taglist[*]}" ]; then
             tag="$(semver "${taglist[@]}" | tail -n 1)"
         fi
 
-        read -ra pre_taglist <<< "$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt")"
+        mapfile -t taglist < <(git tag --list --merged HEAD --sort=-v:refname | grep -E "${preTagFmt}")
         if [ -n "${pre_taglist[*]}" ]; then
             pre_tag=$(semver "${pre_taglist[@]}" | tail -n 1)
         fi
