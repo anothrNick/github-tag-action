@@ -33,7 +33,7 @@ echo -e "\tVERBOSE: ${verbose}"
 
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
-pre_release="true"
+pre_release="false" # never use pre_release since we want this to run on all branches
 IFS=',' read -ra branch <<< "$release_branches"
 for b in "${branch[@]}"; do
     echo "Is $b a match for ${current_branch}"
