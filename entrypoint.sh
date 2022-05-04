@@ -53,19 +53,27 @@ preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$"
 case "$tag_context" in
     *repo*)
         read -ra taglist <<< "$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt")"
-        tag="$(semver "${taglist[@]}" | tail -n 1)"
+        if [ -n "${taglist[*]}" ]; then
+            tag="$(semver "${taglist[@]}" | tail -n 1)"
+        fi
 
         read -ra pre_taglist <<< "$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt")"
-        pre_tag="$(semver "${pre_taglist[@]}" | tail -n 1)"
+        if [ -n "${pre_taglist[*]}" ]; then
+            pre_tag="$(semver "${pre_taglist[@]}" | tail -n 1)"
+        fi
         ;;
     *branch*)
         read -ra taglist <<< "$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt")"
-        tag="$(semver "${taglist[@]}" | tail -n 1)"
+        if [ -n "${taglist[*]}" ]; then
+            tag="$(semver "${taglist[@]}" | tail -n 1)"
+        fi
 
         read -ra pre_taglist <<< "$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt")"
-        pre_tag=$(semver "${pre_taglist[@]}" | tail -n 1)
+        if [ -n "${pre_taglist[*]}" ]; then
+            pre_tag=$(semver "${pre_taglist[@]}" | tail -n 1)
+        fi
         ;;
-    * ) echo "Unrecognised context"; exit 1;;
+    * ) echo "Unrecognized context"; exit 1;;
 esac
 
 
