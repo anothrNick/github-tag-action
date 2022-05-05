@@ -8,6 +8,9 @@ custom_tag=${CUSTOM_TAG}
 source=${SOURCE:-.}
 dryrun=${DRY_RUN:-false}
 
+# see https://github.blog/2022-04-12-git-security-vulnerability-announced/
+git config --global --add safe.directory /github/workspace
+
 cd ${GITHUB_WORKSPACE}/${source}
 
 pre_release="true"
