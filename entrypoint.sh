@@ -36,8 +36,8 @@ current_branch=$(git rev-parse --abbrev-ref HEAD)
 pre_release="true"
 IFS=',' read -ra branch <<< "$release_branches"
 for b in "${branch[@]}"; do
-    echo "Is $b a match for ${current_branch}"
-    if [[ "${current_branch}" =~ $b ]]
+    # check if ${current_branch} is in ${release_branches}
+    if [[ "$current_branch" == "$b" ]]
     then
         pre_release="false"
     fi
@@ -73,14 +73,14 @@ esac
 # if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
 if [ -z "$tag" ]
 then
-    log=$(git log --pretty='%B')
+    log=$(git log --pretty='%B' --)
     tag="$initial_version"
     if [ -z "$pre_tag" ] && $pre_release
     then
       pre_tag="$initial_version"
     fi
 else
-    log=$(git log $tag..HEAD --pretty='%B')
+    log=$(git log ${tag}..HEAD --pretty='%B' --)
 fi
 
 # get current commit hash for tag
