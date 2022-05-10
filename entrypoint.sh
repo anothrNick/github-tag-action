@@ -13,6 +13,9 @@ initial_version=${INITIAL_VERSION:-0.0.0}
 tag_context=${TAG_CONTEXT:-repo}
 suffix=${PRERELEASE_SUFFIX:-beta}
 verbose=${VERBOSE:-true}
+verbose=${VERBOSE:-true}
+# since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses?
+git config --global --add safe.directory /github/workspace
 
 cd ${GITHUB_WORKSPACE}/${source}
 
