@@ -136,7 +136,7 @@ esac
 if $pre_release
 then
     # Already a prerelease available, bump it
-    if [ "$pre_tag" =~ "$new" ]] && [ "$pre_tag" =~ "$suffix" ]]
+    if [[ "$pre_tag" =~ "$new" ]] && [[ "$pre_tag" =~ "$suffix" ]]
     then
         if $with_v
         then
