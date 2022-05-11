@@ -6,7 +6,6 @@ set -o pipefail
 default_semvar_bump=${DEFAULT_BUMP:-minor}
 with_v=${WITH_V:-false}
 release_branches=${RELEASE_BRANCHES:-master,main}
-custom_tag=${CUSTOM_TAG}
 source=${SOURCE:-.}
 dryrun=${DRY_RUN:-false}
 initial_version=${INITIAL_VERSION:-0.0.0}
@@ -23,7 +22,6 @@ echo "*** CONFIGURATION ***"
 echo -e "\tDEFAULT_BUMP: ${default_semvar_bump}"
 echo -e "\tWITH_V: ${with_v}"
 echo -e "\tRELEASE_BRANCHES: ${release_branches}"
-echo -e "\tCUSTOM_TAG: ${custom_tag}"
 echo -e "\tSOURCE: ${source}"
 echo -e "\tDRY_RUN: ${dryrun}"
 echo -e "\tINITIAL_VERSION: ${initial_version}"
@@ -47,8 +45,8 @@ echo "pre_release = $pre_release"
 # fetch tags
 git fetch --tags
     
-tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$" 
-preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" 
+tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$"
+preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$"
 
 # get latest tag that looks like a semver (with or without v)
 case "$tag_context" in
@@ -74,13 +72,28 @@ esac
 if [ -z "$tag" ]
 then
     log=$(git log --pretty='%B' --)
-    tag="$initial_version"
+    if $with_v
+    then
+        tag="v$initial_version"
+    else
+        tag="$initial_version"
+    fi
     if [ -z "$pre_tag" ] && $pre_release
     then
-      pre_tag="$initial_version"
+        if $with_v
+        then
+            pre_tag="v$initial_version"
+        else
+            pre_tag="$initial_version"
+        fi
     fi
 else
-    log=$(git log ${tag}..HEAD --pretty='%B' --)
+    if $with_v
+    then
+        log=$(git log v${tag}..HEAD --pretty='%B' --)
+    else
+        log=$(git log ${tag}..HEAD --pretty='%B' --)
+    fi
 fi
 
 # get current commit hash for tag
@@ -106,12 +119,20 @@ case "$log" in
     *#minor* ) new=$(semver -i minor $tag); part="minor";;
     *#patch* ) new=$(semver -i patch $tag); part="patch";;
     *#none* ) 
-        echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0;;
+        echo "Default bump was set to none. Skipping..."
+        echo ::set-output name=new_tag::$tag
+        echo ::set-output name=tag::$tag
+        exit 0;;
     * ) 
-        if [ "$default_semvar_bump" == "none" ]; then
-            echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0 
+        if [ "$default_semvar_bump" == "none" ]
+        then
+            echo "Default bump was set to none. Skipping..."
+            echo ::set-output name=new_tag::$tag
+            echo ::set-output name=tag::$tag
+            exit 0 
         else 
-            new=$(semver -i "${default_semvar_bump}" $tag); part=$default_semvar_bump 
+            new=$(semver -i "${default_semvar_bump}" $tag)
+            part=$default_semvar_bump 
         fi 
         ;;
 esac
@@ -119,32 +140,29 @@ esac
 if $pre_release
 then
     # Already a prerelease available, bump it
-    if [[ "$pre_tag" == *"$new"* ]]; then
-        new=$(semver -i prerelease $pre_tag --preid $suffix); part="pre-$part"
+    if [[ "$pre_tag" == *"$new"* ]]
+    then
+        if $with_v
+        then
+            new="v$(semver -i prerelease ${pre_tag} --preid ${suffix})"
+        else
+            new=$(semver -i prerelease ${pre_tag} --preid ${suffix})
+        fi
+        part="pre-$part"
     else
-        new="$new-$suffix.1"; part="pre-$part"
+        if $with_v
+        then
+            new="v$new-$suffix.0"
+        else
+            new="$new-$suffix.0"
+        fi
+        part="pre-$part"
     fi
-fi
-
-echo $part
-
-# prefix with 'v'
-if $with_v
-then
-	new="v$new"
-fi
-
-if [ ! -z $custom_tag ]
-then
-    new="$custom_tag"
-fi
-
-if $pre_release
-then
     echo -e "Bumping tag ${pre_tag}. \n\tNew tag ${new}"
 else
     echo -e "Bumping tag ${tag}. \n\tNew tag ${new}"
 fi
+
 
 # set outputs
 echo ::set-output name=new_tag::$new
@@ -160,7 +178,7 @@ fi
 echo ::set-output name=tag::$new
 
 # create local git tag
-git tag $new
+git tag "$new"
 
 # push new tag ref to github
 dt=$(date '+%Y-%m-%dT%H:%M:%SZ')
@@ -184,7 +202,8 @@ EOF
 git_ref_posted=$( echo "${git_refs_response}" | jq .ref | tr -d '"' )
 
 echo "::debug::${git_refs_response}"
-if [ "${git_ref_posted}" = "refs/tags/${new}" ]; then
+if [ "${git_ref_posted}" = "refs/tags/${new}" ]
+then
   exit 0
 else
   echo "::error::Tag was not created properly."
