@@ -136,7 +136,7 @@ esac
 if $pre_release
 then
     # Already a prerelease available, bump it
-    if [ "$pre_tag" = "$new" ]
+    if [ "$pre_tag" =~ "$new" ]] && [ "$pre_tag" =~ "$suffix" ]]
     then
         if $with_v
         then
@@ -144,7 +144,7 @@ then
         else
             new=$(semver -i prerelease ${pre_tag} --preid ${suffix})
         fi
-        part="pre-$part"
+        echo -e "Bumping ${suffix} pre-tag ${pre_tag}. \n\tNew pre-tag ${new}"
     else
         if $with_v
         then
@@ -152,9 +152,9 @@ then
         else
             new="$new-$suffix.0"
         fi
-        part="pre-$part"
+        echo -e "Setting ${suffix} pre-tag  ${pre_tag}. \n\With pre-tag ${new}"
     fi
-    echo -e "Bumping tag ${pre_tag}. \n\tNew tag ${new}"
+    part="pre-$part"
 else
     echo -e "Bumping tag ${tag}. \n\tNew tag ${new}"
 fi
