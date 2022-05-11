@@ -157,6 +157,10 @@ then
     part="pre-$part"
 else
     echo -e "Bumping tag ${tag}. New tag ${new}"
+    if $with_v
+    then
+        new="v$new"
+    fi
 fi
 
 
