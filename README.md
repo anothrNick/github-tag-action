@@ -51,8 +51,8 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all
 - **TAG_CONTEXT** *(optional)* - Set the context of the previous tag. Possible values are `repo` (default) or `branch`.
 - **PRERELEASE_SUFFIX** *(optional)* - Suffix for your prerelease versions, `beta` by default. Note this will only be used if a prerelease branch.
 - **VERBOSE** *(optional)* - Print git logs. For some projects these logs may be very large. Possible values are ```true``` (default) and ```false```. 
-- **BRANCH_LATEST_COMMIT** *(optional)* - Commit messages for commits of a given branch will be taken into account while calculating a new tag. Specifying bramch is useful when using this action for pull requests - one can set environment variable as follows: `BRANCH_LATEST_COMMIT: ${{ github.event.pull_request.head.sha }}` to calculate a new version basing on commits from a given PR.  If not specified the current commit is used.
-- **USE_LAST_COMMIT_ONLY** *(optional)* - True by default. If true only last commit is taken into account while bumping the version, otherwise all commits from the commit with the latest tag contribute to new tag calculation
+- **BRANCH_LATEST_COMMIT** *(optional)* - Commit messages for commits of a given branch will be taken into account while calculating a new tag. Specifying branch is useful when using this action for pull requests - one can set environment variable as follows: `BRANCH_LATEST_COMMIT: ${{ github.event.pull_request.head.sha }}` to calculate a new version basing on commits from a given PR.  If not specified the current commit is used.
+- **USE_LAST_COMMIT_ONLY** *(optional)* - True by default. If true only last commit is taken into account while bumping the version, otherwise all commits from the branch with the latest tag contribute to new tag calculation
 
 #### Outputs
 
