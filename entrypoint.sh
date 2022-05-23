@@ -136,7 +136,7 @@ then
         then
             new="v$(semver -i prerelease ${pre_tag} --preid ${suffix})"
         else
-            new=$(semver -i prerelease ${pre_tag} --preid ${suffix})
+            new="$(semver -i prerelease ${pre_tag} --preid ${suffix})"
         fi
         echo -e "Bumping ${suffix} pre-tag ${pre_tag}. New pre-tag ${new}"
     else
