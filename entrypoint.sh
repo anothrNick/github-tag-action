@@ -101,54 +101,54 @@ then
   echo $log
 fi
 
-case "$log" in
-    *#major* ) new=$(semver -i major $tag); part="major";;
-    *#minor* ) new=$(semver -i minor $tag); part="minor";;
-    *#patch* ) new=$(semver -i patch $tag); part="patch";;
-    *#none* ) 
-        echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0;;
-    * ) 
-        if [ "$default_semvar_bump" == "none" ]; then
-            echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0 
-        else 
-            new=$(semver -i "${default_semvar_bump}" $tag); part=$default_semvar_bump 
-        fi 
-        ;;
-esac
-
-if $pre_release
-then
-    # Already a prerelease available, bump it
-    if [[ "$pre_tag" == *"$new"* ]]; then
-        new=$(semver -i prerelease $pre_tag --preid $suffix); part="pre-$part"
-    else
-        new="$new-$suffix.1"; part="pre-$part"
-    fi
-fi
-
-echo $part
-
-# prefix with 'v'
-if $with_v
-then
-	new="v$new"
-fi
-
-if [ ! -z $custom_tag ]
-then
+if [ ! -z $custom_tag ]; then
+    echo "Custom tag is set, ignoring all other settings and using tag \"$custom_tag\"."
     new="$custom_tag"
-fi
-
-if $pre_release
-then
-    echo -e "Bumping tag ${pre_tag}. \n\tNew tag ${new}"
 else
-    echo -e "Bumping tag ${tag}. \n\tNew tag ${new}"
-fi
+    case "$log" in
+        *#major* ) new=$(semver -i major $tag); part="major";;
+        *#minor* ) new=$(semver -i minor $tag); part="minor";;
+        *#patch* ) new=$(semver -i patch $tag); part="patch";;
+        *#none* ) 
+            echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0;;
+        * ) 
+            if [ "$default_semvar_bump" == "none" ]; then
+                echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0 
+            else
+                new=$(semver -i "${default_semvar_bump}" $tag); part=$default_semvar_bump 
+            fi 
+            ;;
+    esac
 
-# set outputs
-echo ::set-output name=new_tag::$new
-echo ::set-output name=part::$part
+    if $pre_release
+    then
+        # Already a prerelease available, bump it
+        if [[ "$pre_tag" == *"$new"* ]]; then
+            new=$(semver -i prerelease $pre_tag --preid $suffix); part="pre-$part"
+        else
+            new="$new-$suffix.1"; part="pre-$part"
+        fi
+    fi
+
+    echo $part
+
+    # prefix with 'v'
+    if $with_v
+    then
+        new="v$new"
+    fi
+
+    if $pre_release
+    then
+        echo -e "Bumping tag ${pre_tag}. \n\tNew tag ${new}"
+    else
+        echo -e "Bumping tag ${tag}. \n\tNew tag ${new}"
+    fi
+
+    # set outputs
+    echo ::set-output name=new_tag::$new
+    echo ::set-output name=part::$part
+fi
 
 # use dry run to determine the next tag
 if $dryrun
