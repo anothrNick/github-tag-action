@@ -144,7 +144,12 @@ echo $part
 # prefix with 'v'
 if $with_v
 then
-	new="v$new"
+    if [ -z "$new" ]
+    then
+        new="v$initial_version"
+    else
+        new="v$new"
+    fi
 fi
 
 if [ ! -z $custom_tag ]
