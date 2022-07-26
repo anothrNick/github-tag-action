@@ -135,7 +135,7 @@ then
     echo ::set-output name=pre_tag::${pre_tag}
     echo -e "Bumping tag ${pre_tag}. \n\tNew tag ${new}"
 else
-    echo ::set-output name=pre_tag::${tag}
+    echo ::set-output name=tag::${tag}
     echo -e "Bumping tag ${tag}. \n\tNew tag ${new}"
 fi
 
