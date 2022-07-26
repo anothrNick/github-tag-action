@@ -146,7 +146,7 @@ then
         else
             new="$new-$suffix.0"
         fi
-        echo -e "Setting ${suffix} pre-tag  ${pre_tag}. With pre-tag ${new}"
+        echo -e "Setting ${suffix} pre-tag ${pre_tag}. With pre-tag ${new}"
     fi
     part="pre-$part"
 else
