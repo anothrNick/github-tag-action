@@ -6,6 +6,7 @@ set -o pipefail
 default_semvar_bump=${DEFAULT_BUMP:-minor}
 with_v=${WITH_V:-false}
 release_branches=${RELEASE_BRANCHES:-master,main}
+custom_tag=${CUSTOM_TAG}
 source=${SOURCE:-.}
 dryrun=${DRY_RUN:-false}
 initial_version=${INITIAL_VERSION:-0.0.0}
@@ -22,6 +23,7 @@ echo "*** CONFIGURATION ***"
 echo -e "\tDEFAULT_BUMP: ${default_semvar_bump}"
 echo -e "\tWITH_V: ${with_v}"
 echo -e "\tRELEASE_BRANCHES: ${release_branches}"
+echo -e "\tCUSTOM_TAG: ${custom_tag}"
 echo -e "\tSOURCE: ${source}"
 echo -e "\tDRY_RUN: ${dryrun}"
 echo -e "\tINITIAL_VERSION: ${initial_version}"
@@ -157,6 +159,11 @@ else
     fi
 fi
 
+# as defined in readme if CUSTOM_TAG is used any semver calculations are irrelevant.
+if ! [ -z "$custom_tag" ]
+then
+    new="$custom_tag"
+fi
 
 # set outputs
 echo ::set-output name=new_tag::$new
