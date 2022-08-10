@@ -50,18 +50,26 @@ git fetch --tags
 tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$" 
 preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" 
 
+tag=""
+
 # get latest tag that looks like a semver (with or without v)
 case "$tag_context" in
     *repo*) 
         taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt")"
-        tag="$(semver $taglist | tail -n 1)"
+        if [ ! -z "$taglist" ]
+        then
+            tag="$(semver $taglist | tail -n 1)"
+        fi
 
         pre_taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt")"
         pre_tag="$(semver "$pre_taglist" | tail -n 1)"
         ;;
     *branch*) 
         taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt")"
-        tag="$(semver $taglist | tail -n 1)"
+        if [ ! -z "$taglist" ]
+        then
+            tag="$(semver $taglist | tail -n 1)"
+        fi
 
         pre_taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt")"
         pre_tag=$(semver "$pre_taglist" | tail -n 1)
