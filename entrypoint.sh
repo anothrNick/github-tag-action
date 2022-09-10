@@ -55,33 +55,12 @@ tag=""
 # get latest tag that looks like a semver (with or without v)
 case "$tag_context" in
     *repo*) 
-<<<<<<< HEAD
-        taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt")"
-        if [ ! -z "$taglist" ]
-        then
-            tag="$(semver $taglist | tail -n 1)"
-        fi
-
-        pre_taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt")"
-        pre_tag="$(semver "$pre_taglist" | tail -n 1)"
-        ;;
-    *branch*) 
-        taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt")"
-        if [ ! -z "$taglist" ]
-        then
-            tag="$(semver $taglist | tail -n 1)"
-        fi
-
-        pre_taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt")"
-        pre_tag=$(semver "$pre_taglist" | tail -n 1)
-=======
         tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt" | head -n 1)"
         pre_tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt" | head -n 1)"
         ;;
     *branch*) 
         tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt" | head -n 1)"
         pre_tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt" | head -n 1)"
->>>>>>> 38e273cbdda80759cc0232a36f559999f4e47d29
         ;;
     * ) echo "Unrecognised context"
         exit 1;;
