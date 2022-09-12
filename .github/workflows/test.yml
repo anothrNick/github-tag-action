@@ -41,29 +41,21 @@ jobs:
           OUTPUT_NEWTAG=${{ steps.test.outputs.new_tag }}
           OUTPUT_PART=${{ steps.test.outputs.part }}
 
-          echo "Outputs from running the action:"
-          echo "Tag: $OUTPUT_TAG"
-          echo "New tag: $OUTPUT_NEWTAG"
-          echo "Part: $OUTPUT_PART"
+          echo "Outputs from running the action:" >> $GITHUB_SUMMARY
+          echo "Tag: $OUTPUT_TAG" >> $GITHUB_SUMMARY
+          echo "New tag: $OUTPUT_NEWTAG" >> $GITHUB_SUMMARY
+          echo "Part: $OUTPUT_PART" >> $GITHUB_SUMMARY
 
           # Work out what the new tag should be
           a=( ${OUTPUT_TAG//./ } )
           ((a[1]++))
           a[2]=0
-          CORRECT_TAG="${a[0]}.${a[1]}.${a[2]}-test.0"
+          CORRECT_TAG="v${a[0]}.${a[1]}.${a[2]}-test.0"
 
           if [[ $OUTPUT_NEWTAG == $CORRECT_TAG ]]; then
-            echo "The tag was created correctly"
+            echo "The tag was created correctly" >> $GITHUB_SUMMARY
           else
-            echo "The tag was not created correctly, expected $CORRECT_TAG got $OUTPUT_NEWTAG"
-            exit 1
-          fi
-
-          if $OUTPUT_NEWTAG ; then
-            echo "The tag was created as expected"
-            exit 0
-          else
-            echo "The action did not create a new tag"
+            echo "The tag was not created correctly, expected $CORRECT_TAG got $OUTPUT_NEWTAG" >> $GITHUB_SUMMARY
             exit 1
           fi
 
