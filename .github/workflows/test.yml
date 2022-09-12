@@ -35,10 +35,11 @@ jobs:
 
       # Check if the action created the expected output
       - name: Check if the tag would have been created
+        shell: bash
         run: |
-          OUTPUT_TAG = ${{ steps.test.outputs.tag }}
-          OUTPUT_NEWTAG = ${{ steps.test.outputs.new_tag }}
-          OUTPUT_PART = ${{ steps.test.outputs.part }}
+          OUTPUT_TAG=${{ steps.test.outputs.tag }}
+          OUTPUT_NEWTAG=${{ steps.test.outputs.new_tag }}
+          OUTPUT_PART=${{ steps.test.outputs.part }}
 
           echo "Outputs from running the action:"
           echo "Tag: $OUTPUT_TAG"
