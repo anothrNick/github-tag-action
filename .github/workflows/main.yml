@@ -19,7 +19,7 @@ jobs:
           commit_message: Bump version
 
       - name: version-tag
-        uses: anothrNick/github-tag-action@1.40.0 # another pr require to move this to v1
+        uses: anothrNick/github-tag-action@1.42.0 # another pr require to move this to v1
         if: steps.git_auto_commit.outputs.changes_detected == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
