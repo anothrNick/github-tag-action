@@ -47,7 +47,7 @@ jobs:
           echo "Part: $OUTPUT_PART"
 
           # Work out what the new tag should be
-          INCREMENT=$(echo $TAG | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{if(length($NF+1)>length($NF))$(NF-1)++; $NF=sprintf("%0*d", length($NF), ($NF+1)%(10^length($NF))); print}')
+          INCREMENT=$(echo $OUTPUT_TAG | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{if(length($NF+1)>length($NF))$(NF-1)++; $NF=sprintf("%0*d", length($NF), ($NF+1)%(10^length($NF))); print}')
           CORRECT_TAG="$INCREMENT-test.0"
 
           # Bash if statement that checks that the OUTPUT_NEWTAG value is the same as the
