@@ -8,9 +8,6 @@ on:
       - edited
       - reopened
       - synchronize
-  push:
-    branches:
-      - master
   workflow_dispatch:
 
 jobs:
