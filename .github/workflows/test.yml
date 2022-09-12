@@ -41,10 +41,10 @@ jobs:
           OUTPUT_NEWTAG=${{ steps.test.outputs.new_tag }}
           OUTPUT_PART=${{ steps.test.outputs.part }}
 
-          echo "Outputs from running the action:" >> $GITHUB_SUMMARY
-          echo "Tag: $OUTPUT_TAG" >> $GITHUB_SUMMARY
-          echo "New tag: $OUTPUT_NEWTAG" >> $GITHUB_SUMMARY
-          echo "Part: $OUTPUT_PART" >> $GITHUB_SUMMARY
+          echo "Outputs from running the action:" >> $GITHUB_STEP_SUMMARY
+          echo "Tag: $OUTPUT_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "New tag: $OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
+          echo "Part: $OUTPUT_PART" >> $GITHUB_STEP_SUMMARY
 
           # Work out what the new tag should be
           a=( ${OUTPUT_TAG//./ } )
@@ -53,9 +53,9 @@ jobs:
           CORRECT_TAG="v${a[0]}.${a[1]}.${a[2]}-test.0"
 
           if [[ $OUTPUT_NEWTAG == $CORRECT_TAG ]]; then
-            echo "The tag was created correctly" >> $GITHUB_SUMMARY
+            echo "The tag was created correctly" >> $GITHUB_STEP_SUMMARY
           else
-            echo "The tag was not created correctly, expected $CORRECT_TAG got $OUTPUT_NEWTAG" >> $GITHUB_SUMMARY
+            echo "The tag was not created correctly, expected $CORRECT_TAG got $OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
 
