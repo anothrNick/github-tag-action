@@ -1,16 +1,39 @@
 name: Bump version
+
 on:
   push:
     branches:
       - master
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: '0'
-    - name: Bump version and push tag
-      uses: anothrNick/github-tag-action@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: '0'
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        id: git_auto_commit
+        with:
+          commit_message: Bump version
+
+      - name: version-tag
+        uses: anothrNick/github-tag-action@1.42.0 # another pr require to move this to v1
+        if: steps.git_auto_commit.outputs.changes_detected == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: version-tag-major
+        if: steps.git_auto_commit.outputs.changes_detected == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git fetch --tags
+          tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$"
+          tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt" | head -n 1)"
+          [[ "$tag" =~ ^(v[0-9]+) ]]
+          major=${BASH_REMATCH[1]}
+          # update major tag
+          git tag -f "$major"
+          git push -f origin "$major"
