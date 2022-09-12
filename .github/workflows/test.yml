@@ -1,0 +1,51 @@
+name: Test
+# This workflow tests the tag action and can be used on PRs to detect (some) breaking changes.
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  test-action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: '0'
+
+      # Use the action to generate a tag for itself
+      - name: Test action
+        id: test
+        uses: ./
+        env:
+          DRY_RUN: true
+          WITH_V: true
+          INITIAL_VERSION: 'v100.0.0' # For testing purposes only
+          VERBOSE: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Check if the action created the expected output
+      - name: Check if the tag would have been created
+        run: |
+          echo "Outputs from running the action:"
+          echo "TAG = ${{ steps.test.outputs.tag }}"
+          echo "NEW TAG = ${{ steps.test.outputs.new_tag }}"
+          echo "PART = ${{ steps.test.outputs.part }}"
+
+          if ${{ steps.test.outputs.new_tag == 'v100.0.1' }}; then
+            echo "The tag was created as expected"
+            exit 0
+          else
+            echo "The action did not create a new tag"
+            exit 1
+          fi
+
