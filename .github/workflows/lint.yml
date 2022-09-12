@@ -40,7 +40,7 @@ jobs:
           fail_on_error: true
           hadolint_ignore: DL3016 DL3018 # Ignore pinning apk and npm packages to specific version with @
 
-  actionlint:
+  lint-actions:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
