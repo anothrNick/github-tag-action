@@ -13,19 +13,12 @@ jobs:
         with:
           fetch-depth: '0'
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        id: git_auto_commit
-        with:
-          commit_message: Bump version
-
       - name: version-tag
-        uses: anothrNick/github-tag-action@1.42.0 # another pr require to move this to v1
-        if: steps.git_auto_commit.outputs.changes_detected == 'true'
+        uses: anothrNick/github-tag-action@1.42.0 # another pr require to move this to 1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: version-tag-major
-        if: steps.git_auto_commit.outputs.changes_detected == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
