@@ -17,7 +17,7 @@ jobs:
 
       - name: version-tag
         id: tag
-        uses: anothrNick/github-tag-action@1.42.0 # another pr require to move this to 1
+        uses: anothrNick/github-tag-action@1 # another pr require to move this to 1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
