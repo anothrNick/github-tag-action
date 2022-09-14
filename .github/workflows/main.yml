@@ -14,9 +14,18 @@ jobs:
           fetch-depth: '0'
 
       - name: version-tag
+        id: tag
         uses: anothrNick/github-tag-action@1.42.0 # another pr require to move this to 1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: automatic-draft-release
+        uses: marvinpinto/action-automatic-releases@v1.2.1
+        with:
+          draft: true
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          title: "${{ steps.tag.outputs.tag }}: [title-edit-me] by:${{ github.actor }}"
+          automatic_release_tag: ${{ steps.tag.outputs.tag }}
 
       - name: version-tag-major
         env:
