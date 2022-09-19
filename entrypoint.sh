@@ -158,11 +158,11 @@ then
     fi
     part="pre-$part"
 else
-    echo -e "Bumping tag $tag. New tag ${new}"
     if $with_v
     then
         new="v$new"
     fi
+    echo -e "Bumping tag ${tag}. New tag ${new}"
 fi
 
 # as defined in readme if CUSTOM_TAG is used any semver calculations are irrelevant.
