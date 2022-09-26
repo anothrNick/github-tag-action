@@ -11,6 +11,8 @@ on:
 
 permissions:
   pull-requests: write
+  checks: write
+  contents: read
 
 jobs:
   lint-bash:
