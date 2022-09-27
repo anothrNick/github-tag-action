@@ -37,7 +37,7 @@ pre_release="true"
 IFS=',' read -ra branch <<< "$release_branches"
 for b in "${branch[@]}"; do
     # check if ${current_branch} is in ${release_branches} | exact branch match
-    if [[ "$current_branch" == "$b" ]] || [[ "$current_branch" =~ $b ]]
+    if [[ "$current_branch" == "$b" ]]
     then
         pre_release="false"
     fi
