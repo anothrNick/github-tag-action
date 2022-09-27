@@ -10,6 +10,11 @@ on:
       - synchronize
   workflow_dispatch:
 
+permissions:
+  pull-requests: write
+  checks: write
+  contents: read
+
 jobs:
   test-action:
     runs-on: ubuntu-latest

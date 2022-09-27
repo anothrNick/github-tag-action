@@ -6,7 +6,7 @@ set -o pipefail
 default_semvar_bump=${DEFAULT_BUMP:-minor}
 with_v=${WITH_V:-false}
 release_branches=${RELEASE_BRANCHES:-master,main}
-custom_tag=${CUSTOM_TAG}
+custom_tag=${CUSTOM_TAG:-}
 source=${SOURCE:-.}
 dryrun=${DRY_RUN:-false}
 initial_version=${INITIAL_VERSION:-0.0.0}
@@ -17,7 +17,7 @@ verbose=${VERBOSE:-true}
 # since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses?
 git config --global --add safe.directory /github/workspace
 
-cd ${GITHUB_WORKSPACE}/${source}
+cd "${GITHUB_WORKSPACE}/${source}" || exit 1
 
 echo "*** CONFIGURATION ***"
 echo -e "\tDEFAULT_BUMP: ${default_semvar_bump}"
@@ -84,11 +84,11 @@ then
         fi
     fi
 else
-    log=$(git log ${tag}..HEAD --pretty='%B' --)
+    log=$(git log "$tag"..HEAD --pretty='%B' --)
 fi
 
 # get current commit hash for tag
-tag_commit=$(git rev-list -n 1 ${tag})
+tag_commit=$(git rev-list -n 1 "$tag")
 
 # get current commit hash
 commit=$(git rev-parse HEAD)
@@ -96,34 +96,34 @@ commit=$(git rev-parse HEAD)
 if [ "$tag_commit" == "$commit" ]
 then
     echo "No new commits since previous tag. Skipping..."
-    echo ::set-output name=tag::$tag
+    echo "::set-output name=tag::$tag"
     exit 0
 fi
 
 # echo log if verbose is wanted
 if $verbose
 then
-  echo $log
+  echo "$log"
 fi
 
 case "$log" in
-    *#major* ) new=$(semver -i major ${tag}); part="major";;
-    *#minor* ) new=$(semver -i minor ${tag}); part="minor";;
-    *#patch* ) new=$(semver -i patch ${tag}); part="patch";;
+    *#major* ) new=$(semver -i major "$tag"); part="major";;
+    *#minor* ) new=$(semver -i minor "$tag"); part="minor";;
+    *#patch* ) new=$(semver -i patch "$tag"); part="patch";;
     *#none* ) 
         echo "Default bump was set to none. Skipping..."
-        echo ::set-output name=new_tag::$tag
-        echo ::set-output name=tag::$tag
+        echo "::set-output name=new_tag::$tag"
+        echo "::set-output name=tag::$tag"
         exit 0;;
     * ) 
         if [ "$default_semvar_bump" == "none" ]
         then
             echo "Default bump was set to none. Skipping..."
-            echo ::set-output name=new_tag::$tag
-            echo ::set-output name=tag::$tag
+            echo "::set-output name=new_tag::$tag"
+            echo "::set-output name=tag::$tag"
             exit 0 
         else 
-            new=$(semver -i "${default_semvar_bump}" ${tag})
+            new=$(semver -i "${default_semvar_bump}" "$tag")
             part=$default_semvar_bump 
         fi 
         ;;
@@ -132,13 +132,13 @@ esac
 if $pre_release
 then
     # Already a prerelease available, bump it
-    if [[ "$pre_tag" =~ "$new" ]] && [[ "$pre_tag" =~ "$suffix" ]]
+    if [[ "$pre_tag" =~ $new ]] && [[ "$pre_tag" =~ $suffix ]]
     then
         if $with_v
         then
-            new="v$(semver -i prerelease ${pre_tag} --preid ${suffix})"
+            new=v$(semver -i prerelease "${pre_tag}" --preid "${suffix}")
         else
-            new="$(semver -i prerelease ${pre_tag} --preid ${suffix})"
+            new=$(semver -i prerelease "${pre_tag}" --preid "${suffix}")
         fi
         echo -e "Bumping ${suffix} pre-tag ${pre_tag}. New pre-tag ${new}"
     else
@@ -152,7 +152,7 @@ then
     fi
     part="pre-$part"
 else
-    echo -e "Bumping tag ${tag}. New tag ${new}"
+    echo -e "Bumping tag $tag. New tag ${new}"
     if $with_v
     then
         new="v$new"
@@ -160,23 +160,23 @@ else
 fi
 
 # as defined in readme if CUSTOM_TAG is used any semver calculations are irrelevant.
-if ! [ -z "$custom_tag" ]
+if [ -n "$custom_tag" ]
 then
     new="$custom_tag"
 fi
 
 # set outputs
-echo ::set-output name=new_tag::$new
-echo ::set-output name=part::$part
+echo "::set-output name=new_tag::$new"
+echo "::set-output name=part::$part"
 
 # use dry run to determine the next tag
 if $dryrun
 then
-    echo ::set-output name=tag::$tag
+    echo "::set-output name=tag::$tag"
     exit 0
 fi 
 
-echo ::set-output name=tag::$new
+echo "::set-output name=tag::$new"
 
 # create local git tag
 git tag "$new"
@@ -184,12 +184,12 @@ git tag "$new"
 # push new tag ref to github
 dt=$(date '+%Y-%m-%dT%H:%M:%SZ')
 full_name=$GITHUB_REPOSITORY
-git_refs_url=$(jq .repository.git_refs_url $GITHUB_EVENT_PATH | tr -d '"' | sed 's/{\/sha}//g')
+git_refs_url=$(jq .repository.git_refs_url "$GITHUB_EVENT_PATH" | tr -d '"' | sed 's/{\/sha}//g')
 
 echo "$dt: **pushing tag $new to repo $full_name"
 
 git_refs_response=$(
-curl -s -X POST $git_refs_url \
+curl -s -X POST "$git_refs_url" \
 -H "Authorization: token $GITHUB_TOKEN" \
 -d @- << EOF
 
