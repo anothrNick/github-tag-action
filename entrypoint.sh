@@ -6,7 +6,7 @@ set -o pipefail
 default_semvar_bump=${DEFAULT_BUMP:-minor}
 with_v=${WITH_V:-false}
 release_branches=${RELEASE_BRANCHES:-master,main}
-custom_tag=${CUSTOM_TAG}
+# custom_tag=${CUSTOM_TAG} # commented out as default NULL is not a good solution
 source=${SOURCE:-.}
 dryrun=${DRY_RUN:-false}
 initial_version=${INITIAL_VERSION:-0.0.0}
@@ -23,7 +23,7 @@ echo "*** CONFIGURATION ***"
 echo -e "\tDEFAULT_BUMP: ${default_semvar_bump}"
 echo -e "\tWITH_V: ${with_v}"
 echo -e "\tRELEASE_BRANCHES: ${release_branches}"
-echo -e "\tCUSTOM_TAG: ${custom_tag}"
+echo -e "\tCUSTOM_TAG: ${CUSTOM_TAG}"
 echo -e "\tSOURCE: ${source}"
 echo -e "\tDRY_RUN: ${dryrun}"
 echo -e "\tINITIAL_VERSION: ${initial_version}"
