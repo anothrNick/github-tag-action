@@ -41,3 +41,6 @@ jobs:
           # update major tag
           git tag -f "$major"
           git push -f origin "$major"
+          # add vX as 1 is linked to short sha bug https://github.com/anothrNick/github-tag-action/actions/runs/3139501775/jobs/5099976842#step:1:35
+          git tag -f "v$major"
+          git push -f origin "v$major"
