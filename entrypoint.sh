@@ -50,10 +50,10 @@ echo -e "\tNONE_STRING_TOKEN: ${none_string_token}"
 echo -e "*********************\n"
 
 # verbose, show everything
-if $verbose
-then
-    set -x
-fi
+# if $verbose TODO: restore
+# then
+#     set -x
+# fi
 
 push_new_tag_if_not_dry_run() {
 
@@ -107,7 +107,7 @@ echo_previous_tags() {
 set_number_of_found_keywords() {
     if $verbose; then
         echo -e "\n********************************************"
-        echo -e "Commit messages taken into account"
+        echo -e "Commit messages taken into account:"
         if $3; then
             echo "First commit: $2"
             git log "$2" --pretty=format:%B | awk 'NF'
@@ -140,11 +140,11 @@ bump_version() {
     count="${!count_var_name}"
 
     if $use_last_commit_only; then
-        echo -e "USE_LAST_COMMIT_ONLY set to: ${use_last_commit_only}. $1 will be incremented only by 1"
+        echo -e "USE_LAST_COMMIT_ONLY set to: '${use_last_commit_only}'. $1 will be incremented only by 1"
         eval number_of_"$1"=1
         count=1
     else
-        echo -e "USE_LAST_COMMIT_ONLY set to: ${use_last_commit_only}. $1 will be incremented by ${count}"
+        echo -e "USE_LAST_COMMIT_ONLY set to: '${use_last_commit_only}'. $1 will be incremented by ${count}"
     fi
 
     for ((c = 1; c <= count; c++)); do
@@ -240,8 +240,12 @@ then
     else
         tag="$initial_version"
     fi
+    echo "tag to be created: $tag"
+    echo "tag to be created, pre_release: $pre_release"
+    echo "tag to be created, pre_tag: $pre_tag"
     if [ -z "$pre_tag" ] && $pre_release
     then
+        echo "XXXXXXXX"
         if [ -n "${prefix}" ]
         then
             pre_tag="$initial_version"
@@ -251,12 +255,18 @@ then
     fi
 else
     echo_previous_tags "Previous tag was found."
-
     log=$(git log "$tag"..HEAD --pretty='%B' --)
 fi
 
 # get current commit hash for tag
-tag_commit=$(git rev-list -n 1 "$tag")
+
+if [ "$tag" = "$initial_version" ]
+then
+    first_commit_of_repo=$(git rev-list --max-parents=0 HEAD)
+    tag_commit=first_commit_of_repo
+else 
+    tag_commit=$(git rev-list -n 1 "$tag")
+fi
 
 # get current commit hash
 commit=$(git rev-parse HEAD)
@@ -269,9 +279,11 @@ then
     exit 0
 fi
 
-# get the merge commit message looking for #bumps
-log=$(git show -s --format=%s)
-echo "Last commit message: $log"
+# echo log if verbose is wanted
+if $verbose; then
+    echo "git log for commits between current tag and HEAD:"
+    echo "$log"
+fi
 
 # calculate new tag
 
@@ -297,16 +309,14 @@ else
 
     is_first_commit_used=false
     if [ -z "$branch_latest_commit" ]; then
-        next_commit_after_current_tag=$(git log --pretty=format:"%H" --reverse --ancestry-path "$tag"^.."$commit" | sed -n 2p)
+        next_commit_after_current_tag=$(git log --pretty=format:"%H" --reverse --ancestry-path "$tag".."$commit" | sed -n 1p)
         if $verbose; then
-            echo -e "\n********************************************"
-            echo "next commit after current tag commit ${number_of_commits}"
-            echo -e "********************************************\n"
+            echo "next commit after current tag commit ${next_commit_after_current_tag}"
         fi
         set_number_of_found_keywords "$commit" "$next_commit_after_current_tag" "$is_first_commit_used"
     else
         base_branch_commit_on_parent_branch=$(diff -u <(git rev-list --first-parent "$branch_latest_commit") <(git rev-list --first-parent "$commit") | sed -ne 's/^ //p' | head -1)
-        first_separate_commit_on_branch=$(git log --pretty=format:"%H" --reverse --ancestry-path "$base_branch_commit_on_parent_branch"^.."$branch_latest_commit" | sed -n 2p)
+        first_separate_commit_on_branch=$(git log --pretty=format:"%H" --reverse --ancestry-path "$base_branch_commit_on_parent_branch".."$branch_latest_commit" | sed -n 1p)
         if $verbose; then
             echo -e "\n********************************************"
             echo "base branch commit on parent branch ${base_branch_commit_on_parent_branch}"
@@ -331,18 +341,17 @@ if [ "$number_of_major" == 0 ] && [ "$number_of_minor" == 0 ] && [ "$number_of_p
     bump_version "patch"
 fi
 
-
 if [ -z "$new" ]; then
     if [ "$default_semvar_bump" == "${none_string_token}" ]; then
         echo "Default bump was set to none. Skipping..."
     else
         new=$tagWithoutPrefix
         if $use_last_commit_only; then
-            echo -e "USE_LAST_COMMIT_ONLY set to: ${use_last_commit_only}. default_semvar_bump=${default_semvar_bump} will be incremented only by 1"
+            echo -e "USE_LAST_COMMIT_ONLY set to: '${use_last_commit_only}'. default_semvar_bump=${default_semvar_bump} will be incremented only by 1"
             new=$(semver -i "${default_semvar_bump}" "$new")
             part=$default_semvar_bump
         else
-            echo -e "USE_LAST_COMMIT_ONLY set to: ${use_last_commit_only}. default_semvar_bump=${default_semvar_bump} will be incremented by ${number_of_commits}"
+            echo -e "USE_LAST_COMMIT_ONLY set to: '${use_last_commit_only}'. default_semvar_bump=${default_semvar_bump} will be incremented by ${number_of_commits}"
 
             for ((c = 1; c <= number_of_commits; c++)); do
                 new=$(semver -i "${default_semvar_bump}" "$new")
@@ -382,7 +391,6 @@ else
     fi
     echo -e "Bumping tag ${tag} - New tag ${new}"
 fi
-
 
 # set outputs
 echo -e "\nSetting outputs"

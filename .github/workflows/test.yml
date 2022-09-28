@@ -8,6 +8,7 @@ on:
       - edited
       - reopened
       - synchronize
+  workflow_dispatch:
 
 permissions:
   pull-requests: write
@@ -15,75 +16,199 @@ permissions:
   contents: read
 
 jobs:
-  test-action:
+  default-bump-undefined:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: '0'
-
-      # Use the action to generate a tag for itself
-      - name: Test action main
-        id: test_main
+          fetch-depth: "0"
+      - name: Create test repo
+        shell: bash
+        run: |
+          .github/workflows/tests/default-bump.sh
+      - name: Create a tag
+        id: create-tag
         uses: ./
         env:
           DRY_RUN: true
-          WITH_V: true
           VERBOSE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Use the action to generate a tag for itself
-      - name: Test action pre-release
-        id: test_pre
-        uses: ./
-        env:
-          DRY_RUN: true
-          WITH_V: true
-          PRERELEASE: true
-          PRERELEASE_SUFFIX: test
-          VERBOSE: true
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Check if the action created the expected output
+          SOURCE: test-repo
       - name: Check if the tag would have been created
         shell: bash
         run: |
-          set -x
-          MAIN_OUTPUT_TAG=${{ steps.test_main.outputs.old_tag }}
-          MAIN_OUTPUT_NEWTAG=${{ steps.test_main.outputs.new_tag }}
-          MAIN_OUTPUT_PART=${{ steps.test_main.outputs.part }}
-          PRE_OUTPUT_TAG=${{ steps.test_pre.outputs.old_tag }}
-          PRE_OUTPUT_NEWTAG=${{ steps.test_pre.outputs.new_tag }}
-          PRE_OUTPUT_PART=${{ steps.test_pre.outputs.part }}
-
-          echo "Outputs from running the action:" >> $GITHUB_STEP_SUMMARY
-          echo "MAIN Tag: $MAIN_OUTPUT_TAG" >> $GITHUB_STEP_SUMMARY
-          echo "MAIN New tag: $MAIN_OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
-          echo "MAIN Part: $MAIN_OUTPUT_PART" >> $GITHUB_STEP_SUMMARY
-          echo "PRE Tag: $PRE_OUTPUT_TAG" >> $GITHUB_STEP_SUMMARY
-          echo "PRE New tag: $PRE_OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
-          echo "PRE Part: $PRE_OUTPUT_PART" >> $GITHUB_STEP_SUMMARY
-
-          # check that the original tag got bumped either major, minor, patch
-          verlte() {
-            [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]
-          }
-          verlt() {
-            [ "$1" = "$2" ] && return 1 || verlte $1 $2
-          }
-
-          main="$(verlt $MAIN_OUTPUT_TAG $MAIN_OUTPUT_NEWTAG && true || false)"
-          pre="$(verlt $PRE_OUTPUT_TAG $PRE_OUTPUT_NEWTAG && true || false)"
-
-          if $main && $pre
-          then
-            echo "The tags were created correctly" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "Tags not created correctly" >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
-
-          # todo add test for #none bump
-
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "1.2.0"
+  default-bump-set-to-patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: "0"
+      - name: Create test repo
+        shell: bash
+        run: |
+          .github/workflows/tests/default-bump.sh
+      - name: Create a tag
+        id: create-tag
+        uses: ./
+        env:
+          DRY_RUN: true
+          VERBOSE: true
+          DEFAULT_BUMP: patch
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+      - name: Check if the tag would have been created
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "1.1.2"
+  default-bump-set-to-major:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: "0"
+      - name: Create test repo
+        shell: bash
+        run: |
+          .github/workflows/tests/default-bump.sh
+      - name: Create a tag
+        id: create-tag
+        uses: ./
+        env:
+          DRY_RUN: true
+          VERBOSE: true
+          DEFAULT_BUMP: major
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+      - name: Check if the tag would have been created
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "2.0.0"
+  several-commits-default-bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: "0"
+      - name: Create test repo
+        shell: bash
+        run: |
+          .github/workflows/tests/several_commits_default_bump.sh
+      - name: Create a tag
+        id: create-tag
+        uses: ./
+        env:
+          DRY_RUN: true
+          VERBOSE: true
+          DEFAULT_BUMP: major
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+          USE_LAST_COMMIT_ONLY: false
+      - name: Check if the tag would have been created
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "6.0.0"
+  several-commits-mix-tagged-and-not-tagged-commits:
+    name: "Several commits: if tagged and not tagged commits present then only tagged are taken into account"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: "0"
+      - name: Create test repo
+        shell: bash
+        run: |
+          .github/workflows/tests/several_mixed_tagged_and_not_tagged_commits.sh
+      - name: Create a tag
+        id: create-tag
+        uses: ./
+        env:
+          DRY_RUN: true
+          VERBOSE: true
+          DEFAULT_BUMP: major
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+          USE_LAST_COMMIT_ONLY: false
+      - name: Check if the tag would have been created
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "1.3.0"
+  several-commits-major-takes-precedence-over-path:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: "0"
+      - name: Create test repo
+        shell: bash
+        run: |
+          .github/workflows/tests/several_commits_major_takes_precedence_over_path.sh
+      - name: Create a tag
+        id: create-tag
+        uses: ./
+        env:
+          DRY_RUN: true
+          VERBOSE: true
+          DEFAULT_BUMP: major
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+          USE_LAST_COMMIT_ONLY: false
+      - name: Check if the tag would have been created
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "1.4.0"
+  custom-tag-with-prefix-is-bumped-if-tag-with-given-prefix-already-exists:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: "0"
+      - name: Create test repo
+        shell: bash
+        run: |
+          .github/workflows/tests/custom_tag_with_prefix_is_bumped_if_tag_with_given_prefix_already_exists.sh
+      - name: Create a tag
+        id: create-tag
+        uses: ./
+        env:
+          DRY_RUN: true
+          VERBOSE: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+          PREFIX: prefix-
+      - name: Check if the tag would have been created
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "prefix-1.1.2"
+  custom-tag-of-initial-value-with-prefix-is-created-if-tag-with-given-prefix-does-not-exist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: "0"
+      - name: Create test repo
+        shell: bash
+        run: |
+          .github/workflows/tests/custom_tag_of_initial_value_with_prefix_is_created_if_tag_with_given_prefix_does_not_exist.sh
+      - name: Create a tag
+        id: create-tag
+        uses: ./
+        env:
+          DRY_RUN: true
+          VERBOSE: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+          # PREFIX: prefix-
+          # INITIAL_VERSION: 5.6.7
+      - name: Check if the tag would have been created
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "prefix-1.1.0"

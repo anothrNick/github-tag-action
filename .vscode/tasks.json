@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "act - run tests",
+      "label": "act - test default-bump-undefined",
       "command": "act",
       "options": {
         "cwd": "${workspaceFolder}"
@@ -10,11 +10,116 @@
       "args": [
         "--rebuild",
         "--job",
-        "test-action",
+        "default-bump-undefined",
         "--env-file",
         ".act/.env",
       ],
       "type": "shell",
-    }
+    },
+    {
+      "label": "act - test default-bump-set-to-patch",
+      "command": "act",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "args": [
+        "--rebuild",
+        "--job",
+        "default-bump-set-to-patch",
+        "--env-file",
+        ".act/.env",
+      ],
+      "type": "shell",
+    },
+    {
+      "label": "act - test default-bump-set-to-major",
+      "command": "act",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "args": [
+        "--rebuild",
+        "--job",
+        "default-bump-set-to-major",
+        "--env-file",
+        ".act/.env",
+      ],
+      "type": "shell",
+    },
+    {
+      "label": "act - test several-commits-default-bump",
+      "command": "act",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "args": [
+        "--rebuild",
+        "--job",
+        "several-commits-default-bump",
+        "--env-file",
+        ".act/.env",
+      ],
+      "type": "shell",
+    },
+    {
+      "label": "act - test several-commits-mix-tagged-and-not-tagged-commits",
+      "command": "act",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "args": [
+        "--rebuild",
+        "--job",
+        "several-commits-mix-tagged-and-not-tagged-commits",
+        "--env-file",
+        ".act/.env",
+      ],
+      "type": "shell",
+    },
+    {
+      "label": "act - test several-commits-major-takes-precedence-over-path",
+      "command": "act",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "args": [
+        "--rebuild",
+        "--job",
+        "several-commits-major-takes-precedence-over-path",
+        "--env-file",
+        ".act/.env",
+      ],
+      "type": "shell",
+    },
+    {
+      "label": "act - test custom-tag-with-prefix-is-bumped-if-tag-with-given-prefix-already-exists",
+      "command": "act",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "args": [
+        "--rebuild",
+        "--job",
+        "custom-tag-with-prefix-is-bumped-if-tag-with-given-prefix-already-exists",
+        "--env-file",
+        ".act/.env",
+      ],
+      "type": "shell",
+    },
+    {
+      "label": "act - test custom-tag-of-initial-value-with-prefix-is-created-if-tag-with-given-prefix-does-not-exist",
+      "command": "act",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "args": [
+        "--rebuild",
+        "--job",
+        "custom-tag-of-initial-value-with-prefix-is-created-if-tag-with-given-prefix-does-not-exist",
+        "--env-file",
+        ".act/.env",
+      ],
+      "type": "shell",
+    },
   ]
 }
