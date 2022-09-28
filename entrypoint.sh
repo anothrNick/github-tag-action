@@ -36,8 +36,13 @@ current_branch=$(git rev-parse --abbrev-ref HEAD)
 pre_release="true"
 IFS=',' read -ra branch <<< "$release_branches"
 for b in "${branch[@]}"; do
-    # check if ${current_branch} is in ${release_branches}
+    # check if ${current_branch} is in ${release_branches} | exact branch match
     if [[ "$current_branch" == "$b" ]]
+    then
+        pre_release="false"
+    fi
+    # verify non specific branch names like  .* release/* if wildcard filter then =~
+    if [ "$b" != "${b//[\[\]|.? +*]/}" ] && [[ "$current_branch" =~ $b ]]
     then
         pre_release="false"
     fi
