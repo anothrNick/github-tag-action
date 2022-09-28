@@ -1,0 +1,63 @@
+name: Test
+# This workflow tests the tag action and can be used on PRs to detect (some) breaking changes.
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+  checks: write
+  contents: read
+
+jobs:
+  test-action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: '0'
+
+      # Use the action to generate a tag for itself
+      - name: Test action
+        id: test
+        uses: ./
+        env:
+          DRY_RUN: true
+          WITH_V: true
+          PRERELEASE_SUFFIX: test
+          VERBOSE: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Check if the action created the expected output
+      - name: Check if the tag would have been created
+        shell: bash
+        run: |
+          OUTPUT_TAG=${{ steps.test.outputs.tag }}
+          OUTPUT_NEWTAG=${{ steps.test.outputs.new_tag }}
+          OUTPUT_PART=${{ steps.test.outputs.part }}
+
+          echo "Outputs from running the action:" >> $GITHUB_STEP_SUMMARY
+          echo "Tag: $OUTPUT_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "New tag: $OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
+          echo "Part: $OUTPUT_PART" >> $GITHUB_STEP_SUMMARY
+
+          # Work out what the new tag should be
+          a=( ${OUTPUT_TAG//./ } )
+          ((a[1]++))
+          a[2]=0
+          CORRECT_TAG="v${a[0]}.${a[1]}.${a[2]}-test.0"
+
+          if [[ $OUTPUT_NEWTAG == $CORRECT_TAG ]]; then
+            echo "The tag was created correctly" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "The tag was not created correctly, expected $CORRECT_TAG got $OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+

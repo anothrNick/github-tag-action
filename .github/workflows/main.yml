@@ -1,16 +1,46 @@
 name: Bump version
+
 on:
   push:
     branches:
       - master
+    paths-ignore:
+      - '.github/**'
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@master
-      with:
-        fetch-depth: '0'
-    - name: Bump version and push tag
-      uses: anothrNick/github-tag-action@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: '0'
+
+      - name: version-tag
+        id: tag
+        uses: anothrNick/github-tag-action@1.47.0 # if we use 1 there is a too-be-fixed bug https://github.com/anothrNick/github-tag-action/actions/runs/3139501775/jobs/5099976842#step:1:35
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: automatic-draft-release
+        uses: marvinpinto/action-automatic-releases@v1.2.1
+        with:
+          draft: true
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          title: "${{ steps.tag.outputs.tag }}: [title-edit-me] by:${{ github.actor }}"
+          automatic_release_tag: ${{ steps.tag.outputs.tag }}
+
+      - name: version-tag-major
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git fetch --tags
+          tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$"
+          tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt" | head -n 1)"
+          [[ "$tag" =~ ^([0-9]+) ]] # use ^(v[0-9]+) for vX
+          major=${BASH_REMATCH[1]}
+          # update major tag
+          git tag -f "$major"
+          git push -f origin "$major"
+          # add vX as 1 is linked to short sha bug https://github.com/anothrNick/github-tag-action/actions/runs/3139501775/jobs/5099976842#step:1:35
+          git tag -f "v$major"
+          git push -f origin "v$major"

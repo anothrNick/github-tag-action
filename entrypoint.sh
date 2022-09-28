@@ -7,9 +7,9 @@ set -o pipefail
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
 with_v=${WITH_V}
-prefix=${PREFIX}
+prefix=${PREFIX:-}
 release_branches=${RELEASE_BRANCHES:-master,main}
-custom_tag=${CUSTOM_TAG}
+custom_tag=${CUSTOM_TAG:-}
 source=${SOURCE:-.}
 dryrun=${DRY_RUN:-false}
 initial_version=${INITIAL_VERSION:-0.0.0}
@@ -21,7 +21,7 @@ use_last_commit_only=${USE_LAST_COMMIT_ONLY:-true}
 # since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses?
 git config --global --add safe.directory /github/workspace
 
-cd "${GITHUB_WORKSPACE}/${source}"
+cd "${GITHUB_WORKSPACE}/${source}" || exit 1
 
 echo "*** CONFIGURATION ***"
 echo -e "\tDEFAULT_BUMP: ${default_semvar_bump}"
@@ -39,7 +39,7 @@ echo -e "\tBRANCH_LATEST_COMMIT: ${branch_latest_commit}"
 echo -e "\tUSE_LAST_COMMIT_ONLY: ${use_last_commit_only}"
 echo -e "*********************\n"
 
-push_new_tag() {
+push_new_tag_if_not_dry_run() {
 
     # use dry run to determine the next tag
     if $dryrun; then
@@ -62,7 +62,7 @@ push_new_tag() {
 
 {
   "ref": "refs/tags/$1",
-  "sha": "$current_commit"
+  "sha": "$commit"
 }
 EOF
     )
@@ -78,130 +78,15 @@ EOF
     fi
 }
 
-# get current commit hash
-current_commit=$(git rev-parse HEAD)
-
-# fetch tags
-git fetch --tags
-    
-tagFmt="^($prefix)?[0-9]+\.[0-9]+\.[0-9]+$" 
-preTagFmt="^($prefix)?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)?$" 
-
-# get latest tag that looks like a semver (with or without prefix)
-case "$tag_context" in
-*repo*)
-    taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt")"
-    latest_tag="$(semver "$taglist" | tail -n 1)"
-    pre_taglist="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt")"
-    pre_tag="$(semver "$pre_taglist" | tail -n 1)"
-    ;;
-*branch*)
-    taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt")"
-    latest_tag="$(semver "$taglist" | tail -n 1)"
-
-    pre_taglist="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt")"
-    pre_tag=$(semver "$pre_taglist" | tail -n 1)
-    ;;
-*)
-    echo "Unrecognised context"
-    exit 1
-    ;;
-esac
-
-# Set a new tag as a provided CUSTOM_TAG - do not perform any other calculations
-if [ -n "$custom_tag" ]; then
-    echo "!!! Custom tag has been provided, so it'll be used instead of a calculated tag !!!"
-
-    # set outputs
-    echo -e "\nSetting outputs"
-
-    newCustomTag="$prefix$custom_tag"
-    newCustomTagWithoutPrefix="$custom_tag"
-
-    echo -e "\tNew tag without prefix: $newCustomTagWithoutPrefix"
-    echo -e "\tNew tag: $newCustomTag"
-    echo -e "\tPrefix: $prefix"
-    echo -e "\tPart incremented: [none - custom tag was created]\n\n"
-
-    echo ::set-output name=new_tag_without_prefix::"$newCustomTagWithoutPrefix"
-    echo ::set-output name=new_tag::"$newCustomTag"
-
-    # set the old tag value as an output
-    echo ::set-output name=tag::"$latest_tag"
-
-    push_new_tag "$newCustomTag"
-fi
-
-# Handle deprecated WITH_V parameter
-if [ -n "$with_v" ]; then
-    echo -e "WARNING: WITH_V parameter field has been deprecated. Use PREFIX instead."
-    if [ -n "$prefix" ]; then
-        echo -e "WARNING: Both WITH_V and PREFIX parameters have been set. Value of WITH_V will be ignored"
-    else
-        if $with_v; then
-            echo -e "WITH_V is set to true and PREFIX parameter have not been set. PREFIX will be set to 'v'"
-            prefix="v"
-        fi
-    fi
-fi
-
-current_branch=$(git rev-parse --abbrev-ref HEAD)
-
-pre_release="true"
-IFS=',' read -ra branch <<<"$release_branches"
-for b in "${branch[@]}"; do
-    echo -e "\n\nIs $b a match for ${current_branch}"
-    if [[ "${current_branch}" =~ $b ]]; then
-        pre_release="false"
-    fi
-done
-echo "pre_release = $pre_release"
-
 echo_previous_tags() {
     if $verbose; then
         echo -e "\n******************************************"
         echo -e "$1"
-        echo -e "latest_tag: ${latest_tag}"
+        echo -e "latest_tag: ${tag}"
         echo -e "pre_tag: ${pre_tag}"
         echo -e "********************************************\n"
     fi
 }
-
-
-# if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
-if [ -z "$latest_tag" ]; then
-    latest_tag="$initial_version"
-    pre_tag="$initial_version"
-    echo_previous_tags "No tag was found. INITIAL_VERSION will be used instead."
-
-else
-    echo_previous_tags "Previous tag was found."
-fi
-
-# get current commit hash for tag
-latest_tag_commit=$(git rev-list -n 1 "$latest_tag")
-
-if [ "$latest_tag_commit" == "$current_commit" ]; then
-    echo "No new commits since previous tag. Skipping..."
-    echo ::set-output name=tag::"$latest_tag"
-    exit 0
-fi
-
-# calculate new tag
-
-# Get number of occurrences of bump key words in
-# all commits between the "branch_latest_commit" and the last tag
-# or in all commits of a current branch if the are no tags with
-# a given prefix in the repository
-
-if $verbose; then
-    echo -e "\n******************************************"
-    echo -e "current branch: ${current_branch}"
-    echo -e "commit for last found tag: ${latest_tag_commit}"
-    echo -e "current commit: ${current_commit}"
-    echo -e "branch_latest_commit: ${branch_latest_commit}"
-    echo -e "********************************************\n"
-fi
 
 set_number_of_found_keywords() {
     if $verbose; then
@@ -231,36 +116,6 @@ set_number_of_found_keywords() {
     fi
 }
 
-if [ "$latest_tag" = "$initial_version" ]; then
-    first_commit_of_repo=$(git rev-list --max-parents=0 HEAD)
-    is_first_commit_used=true
-    set_number_of_found_keywords "$branch_latest_commit" "$first_commit_of_repo" "$is_first_commit_used"
-else
-
-    is_first_commit_used=false
-    if [ -z "$branch_latest_commit" ]; then
-        next_commit_after_current_tag=$(git log --pretty=format:"%H" --reverse --ancestry-path "$latest_tag"^.."$current_commit" | sed -n 2p)
-        if $verbose; then
-            echo -e "\n********************************************"
-            echo "next commit after current tag commit ${number_of_commits}"
-            echo -e "********************************************\n"
-        fi
-        set_number_of_found_keywords "$current_commit" "$next_commit_after_current_tag" "$is_first_commit_used"
-    else
-        base_branch_commit_on_parent_branch=$(diff -u <(git rev-list --first-parent "$branch_latest_commit") <(git rev-list --first-parent "$current_commit") | sed -ne 's/^ //p' | head -1)
-        first_separate_commit_on_branch=$(git log --pretty=format:"%H" --reverse --ancestry-path "$base_branch_commit_on_parent_branch"^.."$branch_latest_commit" | sed -n 2p)
-        if $verbose; then
-            echo -e "\n********************************************"
-            echo "base branch commit on parent branch ${base_branch_commit_on_parent_branch}"
-            echo "first separate commit on branch ${first_separate_commit_on_branch}"
-            echo -e "********************************************\n"
-        fi
-        set_number_of_found_keywords "$branch_latest_commit" "$first_separate_commit_on_branch" "$is_first_commit_used"
-    fi
-fi
-
-tagWithoutPrefix=${latest_tag#"$prefix"}
-
 bump_version() {
     new=$tagWithoutPrefix
 
@@ -282,6 +137,175 @@ bump_version() {
     done
 }
 
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+pre_release="true"
+IFS=',' read -ra branch <<< "$release_branches"
+for b in "${branch[@]}"; do
+    # check if ${current_branch} is in ${release_branches} | exact branch match
+    if [[ "$current_branch" == "$b" ]]
+    then
+        pre_release="false"
+    fi
+    # verify non specific branch names like  .* release/* if wildcard filter then =~
+    if [ "$b" != "${b//[\[\]|.? +*]/}" ] && [[ "$current_branch" =~ $b ]]
+    then
+        pre_release="false"
+    fi
+done
+echo "pre_release = $pre_release"
+
+
+# fetch tags
+git fetch --tags
+
+tagFmt="^$prefix?[0-9]+\.[0-9]+\.[0-9]+$"
+preTagFmt="^$prefix?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)$"
+
+# get latest tag that looks like a semver (with or without prefix)
+case "$tag_context" in
+    *repo*)
+        tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt" | head -n 1)"
+        pre_tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt" | head -n 1)"
+        ;;
+    *branch*)
+        tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt" | head -n 1)"
+        pre_tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt" | head -n 1)"
+        ;;
+    * ) echo "Unrecognised context"
+        exit 1;;
+esac
+
+# as defined in readme if CUSTOM_TAG is used any semver calculations are irrelevant.
+if [ -n "$custom_tag" ]; then
+    echo "!!! Custom tag has been provided, so it'll be used instead of a calculated tag !!!"
+
+    # set outputs
+    echo -e "\nSetting outputs"
+
+    newCustomTag="$prefix$custom_tag"
+    newCustomTagWithoutPrefix="$custom_tag"
+
+    echo -e "\tNew tag without prefix: $newCustomTagWithoutPrefix"
+    echo -e "\tNew tag: $newCustomTag"
+    echo -e "\tPrefix: $prefix"
+    echo -e "\tPart incremented: [none - custom tag was created]\n\n"
+
+    echo ::set-output name=new_tag_without_prefix::"$newCustomTagWithoutPrefix"
+    echo ::set-output name=new_tag::"$newCustomTag"
+
+    # set the old tag value as an output
+    echo ::set-output name=tag::"$tag"
+
+    push_new_tag_if_not_dry_run "$newCustomTag"
+fi
+
+# Handle deprecated WITH_V parameter
+if [ -n "$with_v" ]; then
+    echo -e "WARNING: WITH_V parameter field has been deprecated. Use PREFIX instead."
+    if [ -n "$prefix" ]; then
+        echo -e "WARNING: Both WITH_V and PREFIX parameters have been set. Value of WITH_V will be ignored"
+    else
+        if $with_v; then
+            echo -e "WITH_V is set to true and PREFIX parameter have not been set. PREFIX will be set to 'v'"
+            prefix="v"
+        fi
+    fi
+fi
+
+# if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
+if [ -z "$tag" ]
+then
+    echo_previous_tags "No tag was found. INITIAL_VERSION will be used instead."
+
+    log=$(git log --pretty='%B' --)
+    if [ -n "${prefix}" ]
+    then
+        tag="${prefix}${initial_version}"
+    else
+        tag="$initial_version"
+    fi
+    if [ -z "$pre_tag" ] && $pre_release
+    then
+        if [ -n "${prefix}" ]
+        then
+            pre_tag="$initial_version"
+        else
+            pre_tag="${prefix}$initial_version"
+        fi
+    fi
+else
+    echo_previous_tags "Previous tag was found."
+
+    log=$(git log "$tag"..HEAD --pretty='%B' --)
+fi
+
+# get current commit hash for tag
+tag_commit=$(git rev-list -n 1 "$tag")
+
+# get current commit hash
+commit=$(git rev-parse HEAD)
+
+if [ "$tag_commit" == "$commit" ]
+then
+    echo "No new commits since previous tag. Skipping..."
+    echo "::set-output name=new_tag::$tag"
+    echo "::set-output name=tag::$tag"
+    exit 0
+fi
+
+# echo log if verbose is wanted
+if $verbose
+then
+  echo "$log"
+fi
+
+# calculate new tag
+
+# Get number of occurrences of bump key words in
+# all commits between the "branch_latest_commit" and the last tag
+# or in all commits of a current branch if the are no tags with
+# a given prefix in the repository
+
+if $verbose; then
+    echo -e "\n******************************************"
+    echo -e "current branch: ${current_branch}"
+    echo -e "commit for last found tag: ${tag_commit}"
+    echo -e "current commit: ${commit}"
+    echo -e "branch_latest_commit: ${branch_latest_commit}"
+    echo -e "********************************************\n"
+fi
+
+if [ "$tag" = "$initial_version" ]; then
+    first_commit_of_repo=$(git rev-list --max-parents=0 HEAD)
+    is_first_commit_used=true
+    set_number_of_found_keywords "$branch_latest_commit" "$first_commit_of_repo" "$is_first_commit_used"
+else
+
+    is_first_commit_used=false
+    if [ -z "$branch_latest_commit" ]; then
+        next_commit_after_current_tag=$(git log --pretty=format:"%H" --reverse --ancestry-path "$tag"^.."$commit" | sed -n 2p)
+        if $verbose; then
+            echo -e "\n********************************************"
+            echo "next commit after current tag commit ${number_of_commits}"
+            echo -e "********************************************\n"
+        fi
+        set_number_of_found_keywords "$commit" "$next_commit_after_current_tag" "$is_first_commit_used"
+    else
+        base_branch_commit_on_parent_branch=$(diff -u <(git rev-list --first-parent "$branch_latest_commit") <(git rev-list --first-parent "$commit") | sed -ne 's/^ //p' | head -1)
+        first_separate_commit_on_branch=$(git log --pretty=format:"%H" --reverse --ancestry-path "$base_branch_commit_on_parent_branch"^.."$branch_latest_commit" | sed -n 2p)
+        if $verbose; then
+            echo -e "\n********************************************"
+            echo "base branch commit on parent branch ${base_branch_commit_on_parent_branch}"
+            echo "first separate commit on branch ${first_separate_commit_on_branch}"
+            echo -e "********************************************\n"
+        fi
+        set_number_of_found_keywords "$branch_latest_commit" "$first_separate_commit_on_branch" "$is_first_commit_used"
+    fi
+fi
+
+tagWithoutPrefix=${tag#"$prefix"}
+
 if [ "$number_of_major" != 0 ]; then
     bump_version "major"
 fi
@@ -293,6 +317,7 @@ fi
 if [ "$number_of_major" == 0 ] && [ "$number_of_minor" == 0 ] && [ "$number_of_patch" != 0 ] && [ -z "$new" ]; then
     bump_version "patch"
 fi
+
 
 if [ -z "$new" ]; then
     if [ "$default_semvar_bump" == "none" ]; then
@@ -314,30 +339,37 @@ if [ -z "$new" ]; then
     fi
 fi
 
-if $pre_release; then
+
+if $pre_release
+then
     # Already a prerelease available, bump it
-    if [[ "$pre_tag" == *"$new"* ]]; then
-        new=$(semver -i prerelease "$pre_tag" --preid "$suffix")
-        part="pre-$part"
+    if [[ "$pre_tag" =~ $new ]] && [[ "$pre_tag" =~ $suffix ]]
+    then
+        if [ -n "${prefix}" ]
+        then
+            new=${prefix}$(semver -i prerelease "${pre_tag}" --preid "${suffix}")
+        else
+            new=$(semver -i prerelease "${pre_tag}" --preid "${suffix}")
+        fi
+        echo -e "Bumping ${suffix} pre-tag ${pre_tag}. New pre-tag ${new}"
     else
-        new="$new-$suffix.1"
-        part="pre-$part"
+        if [ -n "${prefix}" ]
+        then
+            new="${prefix}$new-$suffix.0"
+        else
+            new="$new-$suffix.0"
+        fi
+        echo -e "Setting ${suffix} pre-tag ${pre_tag}. With pre-tag ${new}"
     fi
-fi
-
-# did we get a new tag?
-if [ -n "$new" ]; then
-    # prefix with 'prefix'
-    if [ -n "$prefix" ]; then
-        new="$prefix$new"
-    fi
-fi
-
-if $pre_release; then
-    echo -e "\nBumping tag\n\told tag: ${pre_tag}\n\tnew tag: ${new}"
+    part="pre-$part"
 else
-    echo -e "\nBumping tag\n\told tag: ${latest_tag}\n\tnew tag: ${new}"
+    echo -e "Bumping tag $tag. New tag ${new}"
+    if [ -n "${prefix}" ]
+    then
+        new="${prefix}$new"
+    fi
 fi
+
 
 # set outputs
 echo -e "\nSetting outputs"
@@ -348,12 +380,11 @@ echo -e "\tNew tag: $new"
 echo -e "\tPrefix: $prefix"
 echo -e "\tPart incremented: $part\n\n"
 
-echo ::set-output name=new_tag::"$new"
-echo ::set-output name=new_tag_without_prefix::"$new_tag_without_prefix"
-echo ::set-output name=part::"$part"
+echo "::set-output name=new_tag::$new"
+echo "::set-output name=new_tag_without_prefix::$new_tag_without_prefix"
+echo "::set-output name=part::$part"
 
 # set the old tag value as an output
-echo ::set-output name=tag::"$latest_tag"
+echo "::set-output name=tag::$tag"
 
-# create local git tag
-push_new_tag "$new"
+push_new_tag_if_not_dry_run "$new"

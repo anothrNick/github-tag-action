@@ -22,18 +22,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: '0'
     - name: Bump version and push tag
-      uses: anothrNick/github-tag-action@1.36.0
+      uses: anothrNick/github-tag-action@1.40.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: true
         PREFIX: prefix
 ```
 
-_NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all commits to look for the semver commit message._
+_NOTE: set the fetch-depth for `actions/checkout@v2` or newer to be sure you retrieve all commits to look for the semver commit message._
 
 #### Options
 

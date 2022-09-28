@@ -1,0 +1,55 @@
+name: Lint
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+  checks: write
+  contents: read
+
+jobs:
+  lint-bash:
+    name: Lint Bash scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: reviewdog/action-shellcheck@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          level: warning
+          path: .
+          pattern: '*.sh'
+          fail_on_error: true
+
+  lint-dockerfile:
+    name: Lint Dockerfiles
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: hadolint
+        uses: reviewdog/action-hadolint@v1
+        with:
+          reporter: github-pr-review
+          level: warning
+          fail_on_error: true
+          hadolint_ignore: DL3016 DL3018 # Ignore pinning apk and npm packages to specific version with @
+
+  lint-actions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Lint Github Actions
+        uses: reviewdog/action-actionlint@v1
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          reporter: github-pr-review
