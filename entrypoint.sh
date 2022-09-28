@@ -155,7 +155,6 @@ for b in "${branch[@]}"; do
 done
 echo "pre_release = $pre_release"
 
-
 # fetch tags
 git fetch --tags
 
@@ -363,11 +362,11 @@ then
     fi
     part="pre-$part"
 else
-    echo -e "Bumping tag $tag. New tag ${new}"
     if [ -n "${prefix}" ]
     then
-        new="${prefix}$new"
+        new="${prefix}${new}"
     fi
+    echo -e "Bumping tag ${tag}. New tag ${new}"
 fi
 
 
