@@ -121,9 +121,9 @@ then
 fi
 
 case "$log" in
-    *$major_string_token* ) new=$(semver -i major $tag); part="major";;
-    *$minor_string_token* ) new=$(semver -i minor $tag); part="minor";;
-    *$patch_string_token* ) new=$(semver -i patch $tag); part="patch";;
+    *$major_string_token* ) new=$(semver -i major "$tag"); part="major";;
+    *$minor_string_token* ) new=$(semver -i minor "$tag"); part="minor";;
+    *$patch_string_token* ) new=$(semver -i patch "$tag"); part="patch";;
     *$none_string_token* ) 
         echo "Default bump was set to none. Skipping..."
         echo "::set-output name=new_tag::$tag"
