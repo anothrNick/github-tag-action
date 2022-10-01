@@ -14,6 +14,10 @@ tag_context=${TAG_CONTEXT:-repo}
 suffix=${PRERELEASE_SUFFIX:-beta}
 verbose=${VERBOSE:-true}
 verbose=${VERBOSE:-true}
+major_string_token=${MAJOR_STRING_TOKEN:-#major}
+minor_string_token=${MINOR_STRING_TOKEN:-#minor}
+patch_string_token=${PATCH_STRING_TOKEN:-#patch}
+none_string_token=${NONE_STRING_TOKEN:-#none}
 # since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses?
 git config --global --add safe.directory /github/workspace
 
@@ -30,6 +34,10 @@ echo -e "\tINITIAL_VERSION: ${initial_version}"
 echo -e "\tTAG_CONTEXT: ${tag_context}"
 echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
 echo -e "\tVERBOSE: ${verbose}"
+echo -e "\tMAJOR_STRING_TOKEN: ${major_string_token}"
+echo -e "\tMINOR_STRING_TOKEN: ${minor_string_token}"
+echo -e "\tPATCH_STRING_TOKEN: ${patch_string_token}"
+echo -e "\tNONE_STRING_TOKEN: ${none_string_token}"
 
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
@@ -113,10 +121,10 @@ then
 fi
 
 case "$log" in
-    *#major* ) new=$(semver -i major "$tag"); part="major";;
-    *#minor* ) new=$(semver -i minor "$tag"); part="minor";;
-    *#patch* ) new=$(semver -i patch "$tag"); part="patch";;
-    *#none* ) 
+    *$major_string_token* ) new=$(semver -i major "$tag"); part="major";;
+    *$minor_string_token* ) new=$(semver -i minor "$tag"); part="minor";;
+    *$patch_string_token* ) new=$(semver -i patch "$tag"); part="patch";;
+    *$none_string_token* ) 
         echo "Default bump was set to none. Skipping..."
         echo "::set-output name=new_tag::$tag"
         echo "::set-output name=tag::$tag"

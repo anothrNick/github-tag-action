@@ -49,6 +49,10 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` or newer to be sure you ret
 - **TAG_CONTEXT** _(optional)_ - Set the context of the previous tag. Possible values are `repo` (default) or `branch`.
 - **PRERELEASE_SUFFIX** _(optional)_ - Suffix for your prerelease versions, `beta` by default. Note this will only be used if a prerelease branch.
 - **VERBOSE** _(optional)_ - Print git logs. For some projects these logs may be very large. Possible values are `true` (default) and `false`.
+- **MAJOR_STRING_TOKEN** _(optional)_ - Change the default `#major` commit message string tag.
+- **MINOR_STRING_TOKEN** _(optional)_ - Change the default `#minor` commit message string tag.
+- **PATCH_STRING_TOKEN** _(optional)_ - Change the default `#patch` commit message string tag.
+- **NONE_STRING_TOKEN** _(optional)_ - Change the default `#none` commit message string tag.
 
 #### Outputs
 
