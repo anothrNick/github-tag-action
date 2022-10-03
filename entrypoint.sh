@@ -13,7 +13,6 @@ initial_version=${INITIAL_VERSION:-0.0.0}
 tag_context=${TAG_CONTEXT:-repo}
 suffix=${PRERELEASE_SUFFIX:-beta}
 verbose=${VERBOSE:-true}
-verbose=${VERBOSE:-true}
 major_string_token=${MAJOR_STRING_TOKEN:-#major}
 minor_string_token=${MINOR_STRING_TOKEN:-#minor}
 patch_string_token=${PATCH_STRING_TOKEN:-#patch}
@@ -38,6 +37,12 @@ echo -e "\tMAJOR_STRING_TOKEN: ${major_string_token}"
 echo -e "\tMINOR_STRING_TOKEN: ${minor_string_token}"
 echo -e "\tPATCH_STRING_TOKEN: ${patch_string_token}"
 echo -e "\tNONE_STRING_TOKEN: ${none_string_token}"
+
+# verbose, show everything
+if $verbose
+then
+    set -x
+fi
 
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
@@ -77,10 +82,9 @@ case "$tag_context" in
         exit 1;;
 esac
 
-# if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
+# if there are none, start tags at INITIAL_VERSION
 if [ -z "$tag" ]
 then
-    log=$(git log --pretty='%B' --)
     if $with_v
     then
         tag="v$initial_version"
@@ -96,8 +100,6 @@ then
             pre_tag="$initial_version"
         fi
     fi
-else
-    log=$(git log "$tag"..HEAD --pretty='%B' --)
 fi
 
 # get current commit hash for tag
@@ -114,11 +116,8 @@ then
     exit 0
 fi
 
-# echo log if verbose is wanted
-if $verbose
-then
-  echo "$log"
-fi
+# get the merge commit message looking for #bumps
+log=$(git log -1 --pretty='%B' --)
 
 case "$log" in
     *$major_string_token* ) new=$(semver -i major "$tag"); part="major";;
@@ -219,8 +218,8 @@ git_ref_posted=$( echo "${git_refs_response}" | jq .ref | tr -d '"' )
 echo "::debug::${git_refs_response}"
 if [ "${git_ref_posted}" = "refs/tags/${new}" ]
 then
-  exit 0
+    exit 0
 else
-  echo "::error::Tag was not created properly."
-  exit 1
+    echo "::error::Tag was not created properly."
+    exit 1
 fi

@@ -20,13 +20,13 @@ on:
       - master
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: '0'
     - name: Bump version and push tag
-      uses: anothrNick/github-tag-action@1.40.0
+      uses: anothrNick/github-tag-action@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: true
@@ -65,9 +65,9 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` or newer to be sure you ret
 ### Bumping
 
 **Manual Bumping:** Any commit message that includes `#major`, `#minor`, `#patch`, or `#none` will trigger the respective version bump. If two or more are present, the highest-ranking one will take precedence.
-If `#none` is contained in the commit message, it will skip bumping regardless `DEFAULT_BUMP`.
+If `#none` is contained in the merge commit message, it will skip bumping regardless `DEFAULT_BUMP`.
 
-**Automatic Bumping:** If no `#major`, `#minor` or `#patch` tag is contained in the commit messages, it will bump whichever `DEFAULT_BUMP` is set to (which is `minor` by default). Disable this by setting `DEFAULT_BUMP` to `none`.
+**Automatic Bumping:** If no `#major`, `#minor` or `#patch` tag is contained in the merge commit message, it will bump whichever `DEFAULT_BUMP` is set to (which is `minor` by default). Disable this by setting `DEFAULT_BUMP` to `none`.
 
 > **_Note:_** This action **will not** bump the tag if the `HEAD` commit has already been tagged.
 
@@ -78,7 +78,7 @@ If `#none` is contained in the commit message, it will skip bumping regardless `
 - Either push to master or open a PR
 - On push (or merge), the action will:
   - Get latest tag
-  - Bump tag with minor version unless any commit message contains `#major` or `#patch`
+  - Bump tag with minor version unless the merge commit message contains `#major` or `#patch`
   - Pushes tag to github
   - If triggered on your repo's default branch (`master` or `main` if unchanged), the bump version will be a release tag.
   - If triggered on any other branch, a prerelease will be generated, depending on the bump, starting with `*-<PRERELEASE_SUFFIX>.1`, `*-<PRERELEASE_SUFFIX>.2`, ...
