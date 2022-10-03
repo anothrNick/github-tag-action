@@ -50,6 +50,7 @@ jobs:
       - name: Check if the tag would have been created
         shell: bash
         run: |
+          set -x
           MAIN_OUTPUT_TAG=${{ steps.test_main.outputs.tag }}
           MAIN_OUTPUT_NEWTAG=${{ steps.test_main.outputs.new_tag }}
           MAIN_OUTPUT_PART=${{ steps.test_main.outputs.part }}
