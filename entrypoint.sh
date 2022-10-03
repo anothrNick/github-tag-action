@@ -182,9 +182,9 @@ fi
 # set outputs
 echo "::set-output name=new_tag::$new"
 echo "::set-output name=part::$part"
-echo "::set-output name=tag::$new"
+echo "::set-output name=tag::$tag"
 
-# use dry run to determine the next tag
+# dry run exit without real changes
 if $dryrun
 then
     exit 0

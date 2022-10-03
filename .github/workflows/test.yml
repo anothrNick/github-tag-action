@@ -25,7 +25,17 @@ jobs:
           fetch-depth: '0'
 
       # Use the action to generate a tag for itself
-      - name: Test action
+      - name: Test action main
+        id: test
+        uses: ./
+        env:
+          DRY_RUN: true
+          WITH_V: true
+          VERBOSE: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Use the action to generate a tag for itself
+      - name: Test action pre-release
         id: test
         uses: ./
         env:
