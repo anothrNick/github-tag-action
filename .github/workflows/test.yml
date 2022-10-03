@@ -66,21 +66,25 @@ jobs:
           echo "PRE New tag: $PRE_OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
           echo "PRE Part: $PRE_OUTPUT_PART" >> $GITHUB_STEP_SUMMARY
 
-          # Work out what the new tag should be
-          a=( ${MAIN_OUTPUT_TAG//./ } )
-          ((a[1]++))
-          a[2]=0
-          MAIN_CORRECT_TAG="v${a[0]}.${a[1]}.${a[2]}"
 
-          b=( ${PRE_OUTPUT_TAG//./ } )
-          ((b[1]++))
-          b[2]=0
-          PRE_CORRECT_TAG="v${b[0]}.${b[1]}.${b[2]}-test.0"
 
-          if [[ $MAIN_OUTPUT_NEWTAG == $MAIN_CORRECT_TAG ]] && [[ $PRE_OUTPUT_NEWTAG == $PRE_CORRECT_TAG ]]; then
-            echo "The tag was created correctly" >> $GITHUB_STEP_SUMMARY
+          # check that the original tag got bumped either major, minor, patch
+          verlte() {
+            [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]
+          }
+          verlt() {
+            [ "$1" = "$2" ] && return 1 || verlte $1 $2
+          }
+
+          main=$(verlt $MAIN_OUTPUT_TAG $MAIN_OUTPUT_NEWTAG && true || false)
+          pre=$(verlt $PRE_OUTPUT_TAG $PRE_OUTPUT_NEWTAG && true || false)
+
+          if $main && $pre
+            echo "The tags were created correctly" >> $GITHUB_STEP_SUMMARY
           else
-            echo "The tag was not created correctly" >> $GITHUB_STEP_SUMMARY
+            echo "Tags not created correctly" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
+
+          # todo add test for #none bump
 
