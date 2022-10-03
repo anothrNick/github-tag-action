@@ -12,7 +12,8 @@ A Github Action to automatically bump and tag master, on merge, with the latest 
 
 ### Usage
 
-```Dockerfile
+```yaml
+# example 1: on push to master
 name: Bump version
 on:
   push:
@@ -25,12 +26,40 @@ jobs:
     - uses: actions/checkout@v3
       with:
         fetch-depth: '0'
+
     - name: Bump version and push tag
       uses: anothrNick/github-tag-action@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: true
 ```
+
+```yaml
+# example 2: on merge to master
+name: Bump version
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        fetch-depth: '0'
+
+    - name: Bump version and push tag
+      uses: anothrNick/github-tag-action@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        WITH_V: true
+```
+
+**Depending if you choose example 1 or example 2 is how crafter bumps operate when reading the commit log. Is recommended to use on `pull_request` instead of on commit to master/main.**
 
 _NOTE: set the fetch-depth for `actions/checkout@v2` or newer to be sure you retrieve all commits to look for the semver commit message._
 
