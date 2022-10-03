@@ -118,6 +118,7 @@ fi
 
 # get the merge commit message looking for #bumps
 log=$(git log -1 --pretty='%B' --)
+echo "Last commit message: $log"
 
 case "$log" in
     *$major_string_token* ) new=$(semver -i major "$tag"); part="major";;
