@@ -8,7 +8,6 @@ on:
       - edited
       - reopened
       - synchronize
-  workflow_dispatch:
 
 permissions:
   pull-requests: write
@@ -22,6 +21,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: '0'
 
       # Use the action to generate a tag for itself
