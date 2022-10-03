@@ -59,7 +59,7 @@ jobs:
         WITH_V: true
 ```
 
-**Depending if you choose example 1 or example 2 is how crafter bumps operate when reading the commit log. Is recommended to use on `pull_request` instead of on commit to master/main.**
+**Depending if you choose example 1 or example 2 is how crafted bumps operate when reading the commit log. Is recommended to use on `pull_request` instead of on commit to master/main.**
 
 _NOTE: set the fetch-depth for `actions/checkout@v2` or newer to be sure you retrieve all commits to look for the semver commit message._
 
