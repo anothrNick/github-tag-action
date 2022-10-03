@@ -66,8 +66,6 @@ jobs:
           echo "PRE New tag: $PRE_OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
           echo "PRE Part: $PRE_OUTPUT_PART" >> $GITHUB_STEP_SUMMARY
 
-
-
           # check that the original tag got bumped either major, minor, patch
           verlte() {
             [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]
@@ -76,8 +74,8 @@ jobs:
             [ "$1" = "$2" ] && return 1 || verlte $1 $2
           }
 
-          main=$(verlt $MAIN_OUTPUT_TAG $MAIN_OUTPUT_NEWTAG && true || false)
-          pre=$(verlt $PRE_OUTPUT_TAG $PRE_OUTPUT_NEWTAG && true || false)
+          main="$(verlt $MAIN_OUTPUT_TAG $MAIN_OUTPUT_NEWTAG && true || false)"
+          pre="$(verlt $PRE_OUTPUT_TAG $PRE_OUTPUT_NEWTAG && true || false)"
 
           if $main && $pre
             echo "The tags were created correctly" >> $GITHUB_STEP_SUMMARY
