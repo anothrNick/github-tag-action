@@ -162,7 +162,7 @@ then
         else
             new="$new-$suffix.0"
         fi
-        echo -e "Setting ${suffix} pre-tag ${pre_tag}. With pre-tag ${new}"
+        echo -e "Setting ${suffix} pre-tag ${pre_tag} - With pre-tag ${new}"
     fi
     part="pre-$part"
 else
@@ -170,7 +170,7 @@ else
     then
         new="v$new"
     fi
-    echo -e "Bumping tag ${tag}. New tag ${new}"
+    echo -e "Bumping tag ${tag} - New tag ${new}"
 fi
 
 # as defined in readme if CUSTOM_TAG is used any semver calculations are irrelevant.
@@ -182,15 +182,13 @@ fi
 # set outputs
 echo "::set-output name=new_tag::$new"
 echo "::set-output name=part::$part"
+echo "::set-output name=tag::$new"
 
 # use dry run to determine the next tag
 if $dryrun
 then
-    echo "::set-output name=tag::$tag"
     exit 0
-fi 
-
-echo "::set-output name=tag::$new"
+fi
 
 # create local git tag
 git tag "$new"
