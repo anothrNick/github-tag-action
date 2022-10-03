@@ -26,7 +26,7 @@ jobs:
 
       # Use the action to generate a tag for itself
       - name: Test action main
-        id: test
+        id: test_main
         uses: ./
         env:
           DRY_RUN: true
@@ -36,7 +36,7 @@ jobs:
 
       # Use the action to generate a tag for itself
       - name: Test action pre-release
-        id: test
+        id: test_pre
         uses: ./
         env:
           DRY_RUN: true
@@ -49,25 +49,36 @@ jobs:
       - name: Check if the tag would have been created
         shell: bash
         run: |
-          OUTPUT_TAG=${{ steps.test.outputs.tag }}
-          OUTPUT_NEWTAG=${{ steps.test.outputs.new_tag }}
-          OUTPUT_PART=${{ steps.test.outputs.part }}
+          MAIN_OUTPUT_TAG=${{ steps.test_main.outputs.tag }}
+          MAIN_OUTPUT_NEWTAG=${{ steps.test_main.outputs.new_tag }}
+          MAIN_OUTPUT_PART=${{ steps.test_main.outputs.part }}
+          PRE_OUTPUT_TAG=${{ steps.test_pre.outputs.tag }}
+          PRE_OUTPUT_NEWTAG=${{ steps.test_pre.outputs.new_tag }}
+          PRE_OUTPUT_PART=${{ steps.test_pre.outputs.part }}
 
           echo "Outputs from running the action:" >> $GITHUB_STEP_SUMMARY
-          echo "Tag: $OUTPUT_TAG" >> $GITHUB_STEP_SUMMARY
-          echo "New tag: $OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
-          echo "Part: $OUTPUT_PART" >> $GITHUB_STEP_SUMMARY
+          echo "MAIN Tag: $MAIN_OUTPUT_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "MAIN New tag: $MAIN_OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
+          echo "MAIN Part: $MAIN_OUTPUT_PART" >> $GITHUB_STEP_SUMMARY
+          echo "PRE Tag: $PRE_OUTPUT_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "PRE New tag: $PRE_OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
+          echo "PRE Part: $PRE_OUTPUT_PART" >> $GITHUB_STEP_SUMMARY
 
           # Work out what the new tag should be
-          a=( ${OUTPUT_TAG//./ } )
+          a=( ${MAIN_OUTPUT_TAG//./ } )
           ((a[1]++))
           a[2]=0
-          CORRECT_TAG="v${a[0]}.${a[1]}.${a[2]}-test.0"
+          MAIN_CORRECT_TAG="v${a[0]}.${a[1]}.${a[2]}"
 
-          if [[ $OUTPUT_NEWTAG == $CORRECT_TAG ]]; then
+          b=( ${PRE_OUTPUT_TAG//./ } )
+          ((b[1]++))
+          b[2]=0
+          PRE_CORRECT_TAG="v${b[0]}.${b[1]}.${b[2]}-test.0"
+
+          if [[ $MAIN_OUTPUT_NEWTAG == $MAIN_CORRECT_TAG ]] || [[ $PRE_OUTPUT_NEWTAG == $PRE_CORRECT_TAG ]]; then
             echo "The tag was created correctly" >> $GITHUB_STEP_SUMMARY
           else
-            echo "The tag was not created correctly, expected $CORRECT_TAG got $OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
+            echo "The tag was not created correctly" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
 
