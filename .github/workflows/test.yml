@@ -78,6 +78,7 @@ jobs:
           pre="$(verlt $PRE_OUTPUT_TAG $PRE_OUTPUT_NEWTAG && true || false)"
 
           if $main && $pre
+          then
             echo "The tags were created correctly" >> $GITHUB_STEP_SUMMARY
           else
             echo "Tags not created correctly" >> $GITHUB_STEP_SUMMARY
