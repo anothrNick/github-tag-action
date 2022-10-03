@@ -41,6 +41,7 @@ jobs:
         env:
           DRY_RUN: true
           WITH_V: true
+          PRERELEASE: true
           PRERELEASE_SUFFIX: test
           VERBOSE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -75,7 +76,7 @@ jobs:
           b[2]=0
           PRE_CORRECT_TAG="v${b[0]}.${b[1]}.${b[2]}-test.0"
 
-          if [[ $MAIN_OUTPUT_NEWTAG == $MAIN_CORRECT_TAG ]] || [[ $PRE_OUTPUT_NEWTAG == $PRE_CORRECT_TAG ]]; then
+          if [[ $MAIN_OUTPUT_NEWTAG == $MAIN_CORRECT_TAG ]] && [[ $PRE_OUTPUT_NEWTAG == $PRE_CORRECT_TAG ]]; then
             echo "The tag was created correctly" >> $GITHUB_STEP_SUMMARY
           else
             echo "The tag was not created correctly" >> $GITHUB_STEP_SUMMARY

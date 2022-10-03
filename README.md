@@ -76,6 +76,7 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` or newer to be sure you ret
 - **DRY_RUN** _(optional)_ - Determine the next version without tagging the branch. The workflow can use the outputs `new_tag` and `tag` in subsequent steps. Possible values are `true` and `false` (default).
 - **INITIAL_VERSION** _(optional)_ - Set initial version before bump. Default `0.0.0`.
 - **TAG_CONTEXT** _(optional)_ - Set the context of the previous tag. Possible values are `repo` (default) or `branch`.
+- **PRERELEASE** _(optional)_ - Define if workflow runs on prerelease flag or not, `false` by default. Note this will be overwritten if using complex suffix release branches.
 - **PRERELEASE_SUFFIX** _(optional)_ - Suffix for your prerelease versions, `beta` by default. Note this will only be used if a prerelease branch.
 - **VERBOSE** _(optional)_ - Print git logs. For some projects these logs may be very large. Possible values are `true` (default) and `false`.
 - **MAJOR_STRING_TOKEN** _(optional)_ - Change the default `#major` commit message string tag.
