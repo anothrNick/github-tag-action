@@ -87,6 +87,84 @@ jobs:
         shell: bash
         run: |
           .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "2.0.0"
+  custom-string-token-major:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: "0"
+      - name: Create test repo
+        shell: bash
+        run: |
+          .github/workflows/tests/custom_string_token.sh
+      - name: Create a tag
+        id: create-tag
+        uses: ./
+        env:
+          DRY_RUN: true
+          VERBOSE: true
+          DEFAULT_BUMP: major
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+          USE_LAST_COMMIT_ONLY: false
+          MAJOR_STRING_TOKEN: ma
+      - name: Check if the tag would have been created
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "3.0.0"
+  custom-string-token-minor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: "0"
+      - name: Create test repo
+        shell: bash
+        run: |
+          .github/workflows/tests/custom_string_token.sh
+      - name: Create a tag
+        id: create-tag
+        uses: ./
+        env:
+          DRY_RUN: true
+          VERBOSE: true
+          DEFAULT_BUMP: major
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+          USE_LAST_COMMIT_ONLY: false
+          MINOR_STRING_TOKEN: mi
+      - name: Check if the tag would have been created
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "1.4.0"
+  custom-string-token-patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: "0"
+      - name: Create test repo
+        shell: bash
+        run: |
+          .github/workflows/tests/custom_string_token.sh
+      - name: Create a tag
+        id: create-tag
+        uses: ./
+        env:
+          DRY_RUN: true
+          VERBOSE: true
+          DEFAULT_BUMP: major
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+          USE_LAST_COMMIT_ONLY: false
+          PATCH_STRING_TOKEN: pa
+      - name: Check if the tag would have been created
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "1.1.2"
   several-commits-default-bump:
     runs-on: ubuntu-latest
     steps:

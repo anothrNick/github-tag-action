@@ -121,5 +121,50 @@
       ],
       "type": "shell",
     },
+    {
+      "label": "act - test custom-string-token-major",
+      "command": "act",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "args": [
+        "--rebuild",
+        "--job",
+        "custom-string-token-major",
+        "--env-file",
+        ".act/.env",
+      ],
+      "type": "shell",
+    },
+    {
+      "label": "act - test custom-string-token-minor",
+      "command": "act",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "args": [
+        "--rebuild",
+        "--job",
+        "custom-string-token-minor",
+        "--env-file",
+        ".act/.env",
+      ],
+      "type": "shell",
+    },
+    {
+      "label": "act - test custom-string-token-patch",
+      "command": "act",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "args": [
+        "--rebuild",
+        "--job",
+        "custom-string-token-patch",
+        "--env-file",
+        ".act/.env",
+      ],
+      "type": "shell",
+    },
   ]
 }
