@@ -12,7 +12,8 @@ A Github Action to automatically bump and tag master, on merge, with the latest 
 
 ### Usage
 
-```Dockerfile
+```yaml
+# example 1: on push to master
 name: Bump version
 on:
   push:
@@ -20,18 +21,71 @@ on:
       - master
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: '0'
+
     - name: Bump version and push tag
-      uses: anothrNick/github-tag-action@1.40.0
+      uses: anothrNick/github-tag-action@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        WITH_V: true
+```
+
+```yaml
+# example 2: on merge to master
+name: Bump version
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        fetch-depth: '0'
+
+    - name: Bump version and push tag
+      uses: anothrNick/github-tag-action@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: true
         PREFIX: prefix
 ```
+
+```yaml
+# example 2: on merge to master
+name: Bump version
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        fetch-depth: '0'
+
+    - name: Bump version and push tag
+      uses: anothrNick/github-tag-action@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        WITH_V: true
+```
+
+**Depending if you choose example 1 or example 2 is how crafted version bumps operate when reading the commit log. Is recommended to use on `pull_request` instead of on commit to master/main.**
 
 _NOTE: set the fetch-depth for `actions/checkout@v2` or newer to be sure you retrieve all commits to look for the semver commit message._
 
@@ -49,10 +103,15 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` or newer to be sure you ret
 - **DRY_RUN** *(optional)* - Determine the next version without tagging the branch. The workflow can use the outputs `new_tag` and `tag` in subsequent steps. Possible values are ```true``` and ```false``` (default).
 - **INITIAL_VERSION** *(optional)* - Set initial version before bump. Default `0.0.0`.
 - **TAG_CONTEXT** *(optional)* - Set the context of the previous tag. Possible values are `repo` (default) or `branch`.
+- **PRERELEASE** _(optional)_ - Define if workflow runs in prerelease mode, `false` by default. Note this will be overwritten if using complex suffix release branches.
 - **PRERELEASE_SUFFIX** *(optional)* - Suffix for your prerelease versions, `beta` by default. Note this will only be used if a prerelease branch.
 - **VERBOSE** *(optional)* - Print git logs. For some projects these logs may be very large. Possible values are ```true``` (default) and ```false```. 
 - **BRANCH_LATEST_COMMIT** *(optional)* - Commit messages for commits of a given branch will be taken into account while calculating a new tag. Specifying branch is useful when using this action for pull requests - one can set environment variable as follows: `BRANCH_LATEST_COMMIT: ${{ github.event.pull_request.head.sha }}` to calculate a new version basing on commits from a given PR.  If not specified the current commit is used.
 - **USE_LAST_COMMIT_ONLY** *(optional)* - True by default. If true only last commit is taken into account while bumping the version, otherwise all commits from the branch with the latest tag contribute to new tag calculation
+- **MAJOR_STRING_TOKEN** _(optional)_ - Change the default `#major` commit message string tag.
+- **MINOR_STRING_TOKEN** _(optional)_ - Change the default `#minor` commit message string tag.
+- **PATCH_STRING_TOKEN** _(optional)_ - Change the default `#patch` commit message string tag.
+- **NONE_STRING_TOKEN** _(optional)_ - Change the default `#none` commit message string tag.
 
 #### Outputs
 
@@ -66,9 +125,9 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` or newer to be sure you ret
 ### Bumping
 
 **Manual Bumping:** Any commit message that includes `#major`, `#minor`, `#patch`, or `#none` will trigger the respective version bump. If two or more are present, the highest-ranking one will take precedence.
-If `#none` is contained in the commit message, it will skip bumping regardless `DEFAULT_BUMP`.
+If `#none` is contained in the merge commit message, it will skip bumping regardless `DEFAULT_BUMP`.
 
-**Automatic Bumping:** If no `#major`, `#minor` or `#patch` tag is contained in the commit messages, it will bump whichever `DEFAULT_BUMP` is set to (which is `minor` by default). Disable this by setting `DEFAULT_BUMP` to `none`.
+**Automatic Bumping:** If no `#major`, `#minor` or `#patch` tag is contained in the merge commit message, it will bump whichever `DEFAULT_BUMP` is set to (which is `minor` by default). Disable this by setting `DEFAULT_BUMP` to `none`.
 
 > **_Note:_** This action **will not** bump the tag if the `HEAD` commit has already been tagged.
 
@@ -79,7 +138,7 @@ If `#none` is contained in the commit message, it will skip bumping regardless `
 - Either push to master or open a PR
 - On push (or merge), the action will:
   - Get latest tag
-  - Bump tag with minor version unless any commit message contains `#major` or `#patch`
+  - Bump tag with minor version unless the merge commit message contains `#major` or `#patch`
   - Pushes tag to github
   - If triggered on your repo's default branch (`master` or `main` if unchanged), the bump version will be a release tag.
   - If triggered on any other branch, a prerelease will be generated, depending on the bump, starting with `*-<PRERELEASE_SUFFIX>.1`, `*-<PRERELEASE_SUFFIX>.2`, ...

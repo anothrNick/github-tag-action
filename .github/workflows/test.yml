@@ -8,7 +8,6 @@ on:
       - edited
       - reopened
       - synchronize
-  workflow_dispatch:
 
 permissions:
   pull-requests: write
@@ -22,15 +21,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: '0'
 
       # Use the action to generate a tag for itself
-      - name: Test action
-        id: test
+      - name: Test action main
+        id: test_main
         uses: ./
         env:
           DRY_RUN: true
           WITH_V: true
+          VERBOSE: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Use the action to generate a tag for itself
+      - name: Test action pre-release
+        id: test_pre
+        uses: ./
+        env:
+          DRY_RUN: true
+          WITH_V: true
+          PRERELEASE: true
           PRERELEASE_SUFFIX: test
           VERBOSE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -39,25 +50,40 @@ jobs:
       - name: Check if the tag would have been created
         shell: bash
         run: |
-          OUTPUT_TAG=${{ steps.test.outputs.tag }}
-          OUTPUT_NEWTAG=${{ steps.test.outputs.new_tag }}
-          OUTPUT_PART=${{ steps.test.outputs.part }}
+          set -x
+          MAIN_OUTPUT_TAG=${{ steps.test_main.outputs.old_tag }}
+          MAIN_OUTPUT_NEWTAG=${{ steps.test_main.outputs.new_tag }}
+          MAIN_OUTPUT_PART=${{ steps.test_main.outputs.part }}
+          PRE_OUTPUT_TAG=${{ steps.test_pre.outputs.old_tag }}
+          PRE_OUTPUT_NEWTAG=${{ steps.test_pre.outputs.new_tag }}
+          PRE_OUTPUT_PART=${{ steps.test_pre.outputs.part }}
 
           echo "Outputs from running the action:" >> $GITHUB_STEP_SUMMARY
-          echo "Tag: $OUTPUT_TAG" >> $GITHUB_STEP_SUMMARY
-          echo "New tag: $OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
-          echo "Part: $OUTPUT_PART" >> $GITHUB_STEP_SUMMARY
+          echo "MAIN Tag: $MAIN_OUTPUT_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "MAIN New tag: $MAIN_OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
+          echo "MAIN Part: $MAIN_OUTPUT_PART" >> $GITHUB_STEP_SUMMARY
+          echo "PRE Tag: $PRE_OUTPUT_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "PRE New tag: $PRE_OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
+          echo "PRE Part: $PRE_OUTPUT_PART" >> $GITHUB_STEP_SUMMARY
 
-          # Work out what the new tag should be
-          a=( ${OUTPUT_TAG//./ } )
-          ((a[1]++))
-          a[2]=0
-          CORRECT_TAG="v${a[0]}.${a[1]}.${a[2]}-test.0"
+          # check that the original tag got bumped either major, minor, patch
+          verlte() {
+            [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]
+          }
+          verlt() {
+            [ "$1" = "$2" ] && return 1 || verlte $1 $2
+          }
 
-          if [[ $OUTPUT_NEWTAG == $CORRECT_TAG ]]; then
-            echo "The tag was created correctly" >> $GITHUB_STEP_SUMMARY
+          main="$(verlt $MAIN_OUTPUT_TAG $MAIN_OUTPUT_NEWTAG && true || false)"
+          pre="$(verlt $PRE_OUTPUT_TAG $PRE_OUTPUT_NEWTAG && true || false)"
+
+          if $main && $pre
+          then
+            echo "The tags were created correctly" >> $GITHUB_STEP_SUMMARY
           else
-            echo "The tag was not created correctly, expected $CORRECT_TAG got $OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
+            echo "Tags not created correctly" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
+
+          # todo add test for #none bump
 
