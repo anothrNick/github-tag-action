@@ -18,7 +18,7 @@ jobs:
 
       - name: version-tag
         id: tag
-        uses: anothrNick/github-tag-action@1.51.0 # if we use 1 there is a too-be-fixed bug https://github.com/anothrNick/github-tag-action/actions/runs/3139501775/jobs/5099976842#step:1:35
+        uses: anothrNick/github-tag-action@master # if we use 1 there is a too-be-fixed bug https://github.com/anothrNick/github-tag-action/actions/runs/3139501775/jobs/5099976842#step:1:35 alternatvelly we can use v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
