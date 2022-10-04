@@ -1,11 +1,11 @@
 name: Bump version
 
 on:
-  push:
+  pull_request:
+    types:
+      - closed
     branches:
       - master
-    paths-ignore:
-      - '.github/**'
 
 jobs:
   build:
@@ -13,11 +13,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: '0'
 
       - name: version-tag
         id: tag
-        uses: anothrNick/github-tag-action@1.47.0 # if we use 1 there is a too-be-fixed bug https://github.com/anothrNick/github-tag-action/actions/runs/3139501775/jobs/5099976842#step:1:35
+        uses: anothrNick/github-tag-action@1.51.0 # if we use 1 there is a too-be-fixed bug https://github.com/anothrNick/github-tag-action/actions/runs/3139501775/jobs/5099976842#step:1:35
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

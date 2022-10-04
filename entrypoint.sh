@@ -11,8 +11,8 @@ source=${SOURCE:-.}
 dryrun=${DRY_RUN:-false}
 initial_version=${INITIAL_VERSION:-0.0.0}
 tag_context=${TAG_CONTEXT:-repo}
+prerelease=${PRERELEASE:-false}
 suffix=${PRERELEASE_SUFFIX:-beta}
-verbose=${VERBOSE:-true}
 verbose=${VERBOSE:-true}
 major_string_token=${MAJOR_STRING_TOKEN:-#major}
 minor_string_token=${MINOR_STRING_TOKEN:-#minor}
@@ -32,6 +32,7 @@ echo -e "\tSOURCE: ${source}"
 echo -e "\tDRY_RUN: ${dryrun}"
 echo -e "\tINITIAL_VERSION: ${initial_version}"
 echo -e "\tTAG_CONTEXT: ${tag_context}"
+echo -e "\tPRERELEASE: ${prerelease}"
 echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
 echo -e "\tVERBOSE: ${verbose}"
 echo -e "\tMAJOR_STRING_TOKEN: ${major_string_token}"
@@ -39,9 +40,15 @@ echo -e "\tMINOR_STRING_TOKEN: ${minor_string_token}"
 echo -e "\tPATCH_STRING_TOKEN: ${patch_string_token}"
 echo -e "\tNONE_STRING_TOKEN: ${none_string_token}"
 
+# verbose, show everything
+if $verbose
+then
+    set -x
+fi
+
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
-pre_release="true"
+pre_release="$prerelease"
 IFS=',' read -ra branch <<< "$release_branches"
 for b in "${branch[@]}"; do
     # check if ${current_branch} is in ${release_branches} | exact branch match
@@ -77,10 +84,9 @@ case "$tag_context" in
         exit 1;;
 esac
 
-# if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
+# if there are none, start tags at INITIAL_VERSION
 if [ -z "$tag" ]
 then
-    log=$(git log --pretty='%B' --)
     if $with_v
     then
         tag="v$initial_version"
@@ -96,8 +102,6 @@ then
             pre_tag="$initial_version"
         fi
     fi
-else
-    log=$(git log "$tag"..HEAD --pretty='%B' --)
 fi
 
 # get current commit hash for tag
@@ -114,11 +118,9 @@ then
     exit 0
 fi
 
-# echo log if verbose is wanted
-if $verbose
-then
-  echo "$log"
-fi
+# get the merge commit message looking for #bumps
+log=$(git show -s --format=%s)
+echo "Last commit message: $log"
 
 case "$log" in
     *$major_string_token* ) new=$(semver -i major "$tag"); part="major";;
@@ -145,7 +147,7 @@ esac
 
 if $pre_release
 then
-    # Already a prerelease available, bump it
+    # already a pre-release available, bump it
     if [[ "$pre_tag" =~ $new ]] && [[ "$pre_tag" =~ $suffix ]]
     then
         if $with_v
@@ -162,7 +164,7 @@ then
         else
             new="$new-$suffix.0"
         fi
-        echo -e "Setting ${suffix} pre-tag ${pre_tag}. With pre-tag ${new}"
+        echo -e "Setting ${suffix} pre-tag ${pre_tag} - With pre-tag ${new}"
     fi
     part="pre-$part"
 else
@@ -170,7 +172,7 @@ else
     then
         new="v$new"
     fi
-    echo -e "Bumping tag ${tag}. New tag ${new}"
+    echo -e "Bumping tag ${tag} - New tag ${new}"
 fi
 
 # as defined in readme if CUSTOM_TAG is used any semver calculations are irrelevant.
@@ -182,15 +184,13 @@ fi
 # set outputs
 echo "::set-output name=new_tag::$new"
 echo "::set-output name=part::$part"
+echo "::set-output name=tag::$tag"
 
-# use dry run to determine the next tag
+# dry run exit without real changes
 if $dryrun
 then
-    echo "::set-output name=tag::$tag"
     exit 0
-fi 
-
-echo "::set-output name=tag::$new"
+fi
 
 # create local git tag
 git tag "$new"
@@ -219,8 +219,8 @@ git_ref_posted=$( echo "${git_refs_response}" | jq .ref | tr -d '"' )
 echo "::debug::${git_refs_response}"
 if [ "${git_ref_posted}" = "refs/tags/${new}" ]
 then
-  exit 0
+    exit 0
 else
-  echo "::error::Tag was not created properly."
-  exit 1
+    echo "::error::Tag was not created properly."
+    exit 1
 fi
