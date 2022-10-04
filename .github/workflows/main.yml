@@ -13,13 +13,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: master
           fetch-depth: '0'
 
       - name: version-tag
         id: tag
         uses: anothrNick/github-tag-action@master # if we use 1 there is a too-be-fixed bug https://github.com/anothrNick/github-tag-action/actions/runs/3139501775/jobs/5099976842#step:1:35 alternatvelly we can use v1
         env:
+          VERBOSE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: automatic-draft-release
