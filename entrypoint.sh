@@ -184,7 +184,8 @@ fi
 # set outputs
 echo "::set-output name=new_tag::$new"
 echo "::set-output name=part::$part"
-echo "::set-output name=tag::$tag"
+echo "::set-output name=tag::$new" # this needs to go in v2 is breaking change
+echo "::set-output name=old_tag::$tag"
 
 # dry run exit without real changes
 if $dryrun

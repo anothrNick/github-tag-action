@@ -51,10 +51,10 @@ jobs:
         shell: bash
         run: |
           set -x
-          MAIN_OUTPUT_TAG=${{ steps.test_main.outputs.tag }}
+          MAIN_OUTPUT_TAG=${{ steps.test_main.outputs.old_tag }}
           MAIN_OUTPUT_NEWTAG=${{ steps.test_main.outputs.new_tag }}
           MAIN_OUTPUT_PART=${{ steps.test_main.outputs.part }}
-          PRE_OUTPUT_TAG=${{ steps.test_pre.outputs.tag }}
+          PRE_OUTPUT_TAG=${{ steps.test_pre.outputs.old_tag }}
           PRE_OUTPUT_NEWTAG=${{ steps.test_pre.outputs.new_tag }}
           PRE_OUTPUT_PART=${{ steps.test_pre.outputs.part }}
 
