@@ -9,12 +9,13 @@ on:
 
 jobs:
   build:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: master
           fetch-depth: '0'
+          ref: ${{ github.ref_name }}
 
       - name: version-tag
         id: tag
@@ -23,13 +24,14 @@ jobs:
           VERBOSE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # auto releases is not working atm and is deleting releases due branch tags
       - name: automatic-draft-release
         uses: marvinpinto/action-automatic-releases@v1.2.1
         with:
           draft: true
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           title: "${{ steps.tag.outputs.tag }}: [title-edit-me] by:${{ github.actor }}"
-          automatic_release_tag: ${{ steps.tag.outputs.tag }}
+          automatic_release_tag: ${{ steps.tag.outputs.new_tag }}
 
       - name: version-tag-major
         env:
