@@ -2,6 +2,7 @@ name: Test
 # This workflow tests the tag action and can be used on PRs to detect (some) breaking changes.
 
 on:
+  workflow_dispatch:
   pull_request:
     types:
       - opened
@@ -16,13 +17,13 @@ permissions:
 
 jobs:
   test-action:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: '0'
+          fetch-depth: "0"
 
       # Use the action to generate a tag for itself
       - name: Test action main
@@ -86,4 +87,3 @@ jobs:
           fi
 
           # todo add test for #none bump
-

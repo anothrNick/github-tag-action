@@ -1,0 +1,10 @@
+#Ignore logs
+logs/
+*.log
+
+#Ignore the git and cache folders
+.git
+.cache
+
+#Ignore Temp files
+*.tmp
