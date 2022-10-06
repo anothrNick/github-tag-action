@@ -252,6 +252,31 @@ jobs:
           DEFAULT_BUMP: major
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
+          USE_LAST_COMMIT_ONLY: true
+      - name: Check if the tag would have been created
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "0.0.0"
+  initial-tag-creation-do-not-use-last-commit-only:
+    name: initial tag creation sets initial value regardless of bump tokens - USE_LAST_COMMIT_ONLY is false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: "0"
+      - name: Create test repo
+        shell: bash
+        run: |
+          .github/workflows/tests/initial_tag_creation.sh
+      - name: Create a tag
+        id: create-tag
+        uses: ./
+        env:
+          DRY_RUN: true
+          DEFAULT_BUMP: major
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
           USE_LAST_COMMIT_ONLY: false
       - name: Check if the tag would have been created
         shell: bash
@@ -277,7 +302,6 @@ jobs:
           DEFAULT_BUMP: major
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
-          USE_LAST_COMMIT_ONLY: false
           INITIAL_VERSION: 6.7.8
       - name: Check if the tag would have been created
         shell: bash
@@ -304,7 +328,6 @@ jobs:
           DEFAULT_BUMP: major
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
-          USE_LAST_COMMIT_ONLY: false
           PREFIX: prefix-
       - name: Check if the tag would have been created
         shell: bash
@@ -353,6 +376,7 @@ jobs:
           VERBOSE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
+          USE_LAST_COMMIT_ONLY: false
           # PREFIX: prefix-
           # INITIAL_VERSION: 5.6.7
       - name: Check if the tag would have been created

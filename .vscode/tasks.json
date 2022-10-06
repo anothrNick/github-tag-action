@@ -182,6 +182,21 @@
       "type": "shell",
     },
     {
+      "label": "act - test initial-tag-creation-do-not-use-last-commit-only",
+      "command": "act",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "args": [
+        "--rebuild",
+        "--job",
+        "initial-tag-creation-do-not-use-last-commit-only",
+        "--env-file",
+        ".act/.env",
+      ],
+      "type": "shell",
+    },
+    {
       "label": "act - test initial-tag-creation-custom-with-initial-version",
       "command": "act",
       "options": {

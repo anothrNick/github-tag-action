@@ -245,7 +245,6 @@ then
     echo "tag to be created, pre_tag: $pre_tag"
     if [ -z "$pre_tag" ] && $pre_release
     then
-        echo "XXXXXXXX"
         if [ -n "${prefix}" ]
         then
             pre_tag="$initial_version"
@@ -260,7 +259,7 @@ fi
 
 # get current commit hash for tag
 
-if [ "$tag" = "$initial_version" ]
+if [ "$tag" = "$initial_version" ] || [ "$tag" = "${prefix}${initial_version}" ]
 then
     first_commit_of_repo=$(git rev-list --max-parents=0 HEAD)
     tag_commit=first_commit_of_repo
@@ -353,7 +352,10 @@ if [ -z "$new" ]; then
         echo "Default bump was set to none. Skipping..."
     else
         new=$tagWithoutPrefix
-        if $use_last_commit_only; then
+        if [ "$tag" = "$initial_version" ] || [ "$tag" = "${prefix}${initial_version}" ]; then
+            echo "Initial version will be used"
+            new=$tag
+        elif $use_last_commit_only; then
             echo -e "USE_LAST_COMMIT_ONLY set to: '${use_last_commit_only}'. default_semvar_bump=${default_semvar_bump} will be incremented only by 1"
             new=$(semver -i "${default_semvar_bump}" "$new")
             part=$default_semvar_bump
