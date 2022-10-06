@@ -301,10 +301,17 @@ if $verbose; then
     echo -e "********************************************\n"
 fi
 
-if [ "$tag" = "$initial_version" ]; then
+if [ "$tag" = "$initial_version" ] || [ "$tag" = "${prefix}${initial_version}" ]; then
     first_commit_of_repo=$(git rev-list --max-parents=0 HEAD)
     is_first_commit_used=true
-    set_number_of_found_keywords "$branch_latest_commit" "$first_commit_of_repo" "$is_first_commit_used"
+
+    if [ -z "$branch_latest_commit" ]; then
+        echo "*set_number_of_found_keywords: first_commit_of_repo commit is_first_commit_used"
+        set_number_of_found_keywords "$first_commit_of_repo" "$commit" "$is_first_commit_used"
+    else
+        echo "*set_number_of_found_keywords: branch_latest_commit first_commit_of_repo is_first_commit_used"
+        set_number_of_found_keywords "$branch_latest_commit" "$first_commit_of_repo" "$is_first_commit_used"
+    fi
 else
 
     is_first_commit_used=false
