@@ -1,0 +1,26 @@
+# EditorConfig https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+
+# Ensure we're standardising on 2 space soft-tabs for most files
+[*.md, *.markdown, *.yml, *.yaml, *.json, *.js, *.ts, *.tsx, *.sh]
+indent_style = space
+indent_size = 2
+
+# Makefile specific
+[Makefile]
+indent_style = tab
+indent_size = 4
+
+# Python specific
+[*.py, *.pyi]
+indent_style = space
+indent_size = 4

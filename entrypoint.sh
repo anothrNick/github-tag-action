@@ -41,26 +41,23 @@ echo -e "\tPATCH_STRING_TOKEN: ${patch_string_token}"
 echo -e "\tNONE_STRING_TOKEN: ${none_string_token}"
 
 # verbose, show everything
-if $verbose
-then
-    set -x
+if $verbose; then
+  set -x
 fi
 
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
 pre_release="$prerelease"
-IFS=',' read -ra branch <<< "$release_branches"
+IFS=',' read -ra branch <<<"$release_branches"
 for b in "${branch[@]}"; do
-    # check if ${current_branch} is in ${release_branches} | exact branch match
-    if [[ "$current_branch" == "$b" ]]
-    then
-        pre_release="false"
-    fi
-    # verify non specific branch names like  .* release/* if wildcard filter then =~
-    if [ "$b" != "${b//[\[\]|.? +*]/}" ] && [[ "$current_branch" =~ $b ]]
-    then
-        pre_release="false"
-    fi
+  # check if ${current_branch} is in ${release_branches} | exact branch match
+  if [[ "$current_branch" == "$b" ]]; then
+    pre_release="false"
+  fi
+  # verify non specific branch names like  .* release/* if wildcard filter then =~
+  if [ "$b" != "${b//[\[\]|.? +*]/}" ] && [[ "$current_branch" =~ $b ]]; then
+    pre_release="false"
+  fi
 done
 echo "pre_release = $pre_release"
 
@@ -72,36 +69,34 @@ preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)$"
 
 # get latest tag that looks like a semver (with or without v)
 case "$tag_context" in
-    *repo*) 
-        tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt" | head -n 1)"
-        pre_tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt" | head -n 1)"
-        ;;
-    *branch*) 
-        tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt" | head -n 1)"
-        pre_tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt" | head -n 1)"
-        ;;
-    * ) echo "Unrecognised context"
-        exit 1;;
+*repo*)
+  tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt" | head -n 1)"
+  pre_tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt" | head -n 1)"
+  ;;
+*branch*)
+  tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt" | head -n 1)"
+  pre_tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt" | head -n 1)"
+  ;;
+*)
+  echo "Unrecognised context"
+  exit 1
+  ;;
 esac
 
 # if there are none, start tags at INITIAL_VERSION
-if [ -z "$tag" ]
-then
-    if $with_v
-    then
-        tag="v$initial_version"
+if [ -z "$tag" ]; then
+  if $with_v; then
+    tag="v$initial_version"
+  else
+    tag="$initial_version"
+  fi
+  if [ -z "$pre_tag" ] && $pre_release; then
+    if $with_v; then
+      pre_tag="v$initial_version"
     else
-        tag="$initial_version"
+      pre_tag="$initial_version"
     fi
-    if [ -z "$pre_tag" ] && $pre_release
-    then
-        if $with_v
-        then
-            pre_tag="v$initial_version"
-        else
-            pre_tag="$initial_version"
-        fi
-    fi
+  fi
 fi
 
 # get current commit hash for tag
@@ -110,12 +105,11 @@ tag_commit=$(git rev-list -n 1 "$tag")
 # get current commit hash
 commit=$(git rev-parse HEAD)
 
-if [ "$tag_commit" == "$commit" ]
-then
-    echo "No new commits since previous tag. Skipping..."
-    echo "::set-output name=new_tag::$tag"
-    echo "::set-output name=tag::$tag"
-    exit 0
+if [ "$tag_commit" == "$commit" ]; then
+  echo "No new commits since previous tag. Skipping..."
+  echo "::set-output name=new_tag::$tag"
+  echo "::set-output name=tag::$tag"
+  exit 0
 fi
 
 # get the merge commit message looking for #bumps
@@ -123,62 +117,65 @@ log=$(git show -s --format=%s)
 echo "Last commit message: $log"
 
 case "$log" in
-    *$major_string_token* ) new=$(semver -i major "$tag"); part="major";;
-    *$minor_string_token* ) new=$(semver -i minor "$tag"); part="minor";;
-    *$patch_string_token* ) new=$(semver -i patch "$tag"); part="patch";;
-    *$none_string_token* ) 
-        echo "Default bump was set to none. Skipping..."
-        echo "::set-output name=new_tag::$tag"
-        echo "::set-output name=tag::$tag"
-        exit 0;;
-    * ) 
-        if [ "$default_semvar_bump" == "none" ]
-        then
-            echo "Default bump was set to none. Skipping..."
-            echo "::set-output name=new_tag::$tag"
-            echo "::set-output name=tag::$tag"
-            exit 0 
-        else 
-            new=$(semver -i "${default_semvar_bump}" "$tag")
-            part=$default_semvar_bump 
-        fi 
-        ;;
+*$major_string_token*)
+  new=$(semver -i major "$tag")
+  part="major"
+  ;;
+*$minor_string_token*)
+  new=$(semver -i minor "$tag")
+  part="minor"
+  ;;
+*$patch_string_token*)
+  new=$(semver -i patch "$tag")
+  part="patch"
+  ;;
+*$none_string_token*)
+  echo "Default bump was set to none. Skipping..."
+  echo "::set-output name=new_tag::$tag"
+  echo "::set-output name=tag::$tag"
+  exit 0
+  ;;
+*)
+  if [ "$default_semvar_bump" == "none" ]; then
+    echo "Default bump was set to none. Skipping..."
+    echo "::set-output name=new_tag::$tag"
+    echo "::set-output name=tag::$tag"
+    exit 0
+  else
+    new=$(semver -i "${default_semvar_bump}" "$tag")
+    part=$default_semvar_bump
+  fi
+  ;;
 esac
 
-if $pre_release
-then
-    # already a pre-release available, bump it
-    if [[ "$pre_tag" =~ $new ]] && [[ "$pre_tag" =~ $suffix ]]
-    then
-        if $with_v
-        then
-            new=v$(semver -i prerelease "${pre_tag}" --preid "${suffix}")
-        else
-            new=$(semver -i prerelease "${pre_tag}" --preid "${suffix}")
-        fi
-        echo -e "Bumping ${suffix} pre-tag ${pre_tag}. New pre-tag ${new}"
+if $pre_release; then
+  # already a pre-release available, bump it
+  if [[ "$pre_tag" =~ $new ]] && [[ "$pre_tag" =~ $suffix ]]; then
+    if $with_v; then
+      new=v$(semver -i prerelease "${pre_tag}" --preid "${suffix}")
     else
-        if $with_v
-        then
-            new="v$new-$suffix.0"
-        else
-            new="$new-$suffix.0"
-        fi
-        echo -e "Setting ${suffix} pre-tag ${pre_tag} - With pre-tag ${new}"
+      new=$(semver -i prerelease "${pre_tag}" --preid "${suffix}")
     fi
-    part="pre-$part"
+    echo -e "Bumping ${suffix} pre-tag ${pre_tag}. New pre-tag ${new}"
+  else
+    if $with_v; then
+      new="v$new-$suffix.0"
+    else
+      new="$new-$suffix.0"
+    fi
+    echo -e "Setting ${suffix} pre-tag ${pre_tag} - With pre-tag ${new}"
+  fi
+  part="pre-$part"
 else
-    if $with_v
-    then
-        new="v$new"
-    fi
-    echo -e "Bumping tag ${tag} - New tag ${new}"
+  if $with_v; then
+    new="v$new"
+  fi
+  echo -e "Bumping tag ${tag} - New tag ${new}"
 fi
 
 # as defined in readme if CUSTOM_TAG is used any semver calculations are irrelevant.
-if [ -n "$custom_tag" ]
-then
-    new="$custom_tag"
+if [ -n "$custom_tag" ]; then
+  new="$custom_tag"
 fi
 
 # set outputs
@@ -188,9 +185,8 @@ echo "::set-output name=tag::$new" # this needs to go in v2 is breaking change
 echo "::set-output name=old_tag::$tag"
 
 # dry run exit without real changes
-if $dryrun
-then
-    exit 0
+if $dryrun; then
+  exit 0
 fi
 
 # create local git tag
@@ -204,9 +200,9 @@ git_refs_url=$(jq .repository.git_refs_url "$GITHUB_EVENT_PATH" | tr -d '"' | se
 echo "$dt: **pushing tag $new to repo $full_name"
 
 git_refs_response=$(
-curl -s -X POST "$git_refs_url" \
--H "Authorization: token $GITHUB_TOKEN" \
--d @- << EOF
+  curl -s -X POST "$git_refs_url" \
+    -H "Authorization: token $GITHUB_TOKEN" \
+    -d @- <<EOF
 
 {
   "ref": "refs/tags/$new",
@@ -215,13 +211,12 @@ curl -s -X POST "$git_refs_url" \
 EOF
 )
 
-git_ref_posted=$( echo "${git_refs_response}" | jq .ref | tr -d '"' )
+git_ref_posted=$(echo "${git_refs_response}" | jq .ref | tr -d '"')
 
 echo "::debug::${git_refs_response}"
-if [ "${git_ref_posted}" = "refs/tags/${new}" ]
-then
-    exit 0
+if [ "${git_ref_posted}" = "refs/tags/${new}" ]; then
+  exit 0
 else
-    echo "::error::Tag was not created properly."
-    exit 1
+  echo "::error::Tag was not created properly."
+  exit 1
 fi
