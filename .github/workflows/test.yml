@@ -32,7 +32,6 @@ jobs:
         uses: ./
         env:
           DRY_RUN: true
-          VERBOSE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
       - name: Check if the tag would have been created
@@ -55,7 +54,6 @@ jobs:
         uses: ./
         env:
           DRY_RUN: true
-          VERBOSE: true
           DEFAULT_BUMP: patch
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
@@ -79,7 +77,6 @@ jobs:
         uses: ./
         env:
           DRY_RUN: true
-          VERBOSE: true
           DEFAULT_BUMP: major
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
@@ -103,7 +100,6 @@ jobs:
         uses: ./
         env:
           DRY_RUN: true
-          VERBOSE: true
           DEFAULT_BUMP: major
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
@@ -129,7 +125,6 @@ jobs:
         uses: ./
         env:
           DRY_RUN: true
-          VERBOSE: true
           DEFAULT_BUMP: major
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
@@ -155,7 +150,6 @@ jobs:
         uses: ./
         env:
           DRY_RUN: true
-          VERBOSE: true
           DEFAULT_BUMP: major
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
@@ -181,7 +175,6 @@ jobs:
         uses: ./
         env:
           DRY_RUN: true
-          VERBOSE: true
           DEFAULT_BUMP: major
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
@@ -207,7 +200,6 @@ jobs:
         uses: ./
         env:
           DRY_RUN: true
-          VERBOSE: true
           DEFAULT_BUMP: major
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
@@ -232,7 +224,6 @@ jobs:
         uses: ./
         env:
           DRY_RUN: true
-          VERBOSE: true
           DEFAULT_BUMP: major
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
@@ -241,6 +232,86 @@ jobs:
         shell: bash
         run: |
           .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "1.4.0"
+  initial-tag-creation:
+    name: initial tag creation sets initial value regardless of bump tokens
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: "0"
+      - name: Create test repo
+        shell: bash
+        run: |
+          .github/workflows/tests/initial_tag_creation.sh
+      - name: Create a tag
+        id: create-tag
+        uses: ./
+        env:
+          DRY_RUN: true
+          VERBOSE: true
+          DEFAULT_BUMP: major
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+          USE_LAST_COMMIT_ONLY: false
+      - name: Check if the tag would have been created
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "0.0.0"
+  initial-tag-creation-custom-with-initial-version:
+    name: initial tag creation with custom initial version sets initial value regardless of bump tokens
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: "0"
+      - name: Create test repo
+        shell: bash
+        run: |
+          .github/workflows/tests/initial_tag_creation.sh
+      - name: Create a tag
+        id: create-tag
+        uses: ./
+        env:
+          DRY_RUN: true
+          VERBOSE: true
+          DEFAULT_BUMP: major
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+          USE_LAST_COMMIT_ONLY: false
+          INITIAL_VERSION: 6.7.8
+      - name: Check if the tag would have been created
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "0.0.0"
+  initial-tag-creation-with-prefix:
+    name: initial tag creation with prefix sets initial value regardless of bump tokens
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: "0"
+      - name: Create test repo
+        shell: bash
+        run: |
+          .github/workflows/tests/initial_tag_creation.sh
+      - name: Create a tag
+        id: create-tag
+        uses: ./
+        env:
+          DRY_RUN: true
+          VERBOSE: true
+          DEFAULT_BUMP: major
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+          USE_LAST_COMMIT_ONLY: false
+          PREFIX: prefix-
+      - name: Check if the tag would have been created
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "prefix-0.0.0"
   custom-tag-with-prefix-is-bumped-if-tag-with-given-prefix-already-exists:
     runs-on: ubuntu-latest
     steps:

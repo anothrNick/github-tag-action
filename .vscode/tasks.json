@@ -166,5 +166,50 @@
       ],
       "type": "shell",
     },
+    {
+      "label": "act - test initial-tag-creation",
+      "command": "act",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "args": [
+        "--rebuild",
+        "--job",
+        "initial-tag-creation",
+        "--env-file",
+        ".act/.env",
+      ],
+      "type": "shell",
+    },
+    {
+      "label": "act - test initial-tag-creation-custom-with-initial-version",
+      "command": "act",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "args": [
+        "--rebuild",
+        "--job",
+        "initial-tag-creation-custom-with-initial-version",
+        "--env-file",
+        ".act/.env",
+      ],
+      "type": "shell",
+    },
+    {
+      "label": "act - test initial-tag-creation-with-prefix",
+      "command": "act",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "args": [
+        "--rebuild",
+        "--job",
+        "initial-tag-creation-with-prefix",
+        "--env-file",
+        ".act/.env",
+      ],
+      "type": "shell",
+    },
   ]
 }
