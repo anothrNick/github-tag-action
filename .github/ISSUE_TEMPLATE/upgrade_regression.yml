@@ -1,5 +1,3 @@
-#### THIS FILE IS MANAGED BY AN AUTOMATED WORKFLOW ####
-
 name: ⬆️🐛 Upgrade Bug - Regression
 description: If you are upgrading to a new release version (stable or pre-release) and encounter a regression.
 labels: ["Needs: Triage :mag:", "Type: Upgrade Issue"]

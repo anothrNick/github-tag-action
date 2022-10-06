@@ -1,5 +1,3 @@
-#### THIS FILE IS MANAGED BY AN AUTOMATED WORKFLOW ####
-
 name: 🐛 Bug report
 description: Create a report to help us improve
 labels: ["bug"]
