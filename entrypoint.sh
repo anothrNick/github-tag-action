@@ -47,7 +47,7 @@ echo -e "\tMAJOR_STRING_TOKEN: ${major_string_token}"
 echo -e "\tMINOR_STRING_TOKEN: ${minor_string_token}"
 echo -e "\tPATCH_STRING_TOKEN: ${patch_string_token}"
 echo -e "\tNONE_STRING_TOKEN: ${none_string_token}"
-echo -e "*********************\n"
+echo -e "******************************************\n"
 
 # verbose, show everything
 # if $verbose TODO: restore
@@ -124,6 +124,9 @@ set_number_of_found_keywords() {
 
     if $verbose; then
         echo -e "\n********************************************"
+        echo -e "Commit messages taken into account:\n"
+        echo "${commit_messages_taken_into_account}"
+        echo -e "\n"
         echo "number of major_string_token tag occurrences ${number_of_major}"
         echo "number of minor_string_token tag occurrences ${number_of_minor}"
         echo "number of patch_string_token tag occurrences ${number_of_patch}"
@@ -233,7 +236,6 @@ if [ -z "$tag" ]
 then
     echo_previous_tags "No tag was found. INITIAL_VERSION will be used instead."
 
-    log=$(git log --pretty='%B' --)
     if [ -n "${prefix}" ]
     then
         tag="${prefix}${initial_version}"
@@ -254,7 +256,6 @@ then
     fi
 else
     echo_previous_tags "Previous tag was found."
-    log=$(git log "$tag"..HEAD --pretty='%B' --)
 fi
 
 # get current commit hash for tag
@@ -276,12 +277,6 @@ then
     echo "::set-output name=new_tag::$tag"
     echo "::set-output name=tag::$tag"
     exit 0
-fi
-
-# echo log if verbose is wanted
-if $verbose; then
-    echo "git log for commits between current tag and HEAD:"
-    echo "$log"
 fi
 
 # calculate new tag
