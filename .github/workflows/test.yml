@@ -333,7 +333,7 @@ jobs:
         shell: bash
         run: |
           .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "prefix-0.0.0"
-  custom-tag-with-prefix-is-bumped-if-tag-with-given-prefix-already-exists:
+  tag-with-prefix-is-bumped-if-tag-with-given-prefix-already-exists:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -343,7 +343,7 @@ jobs:
       - name: Create test repo
         shell: bash
         run: |
-          .github/workflows/tests/custom_tag_with_prefix_is_bumped_if_tag_with_given_prefix_already_exists.sh
+          .github/workflows/tests/tag_with_prefix_is_bumped_if_tag_with_given_prefix_already_exists.sh
       - name: Create a tag
         id: create-tag
         uses: ./
@@ -357,29 +357,3 @@ jobs:
         shell: bash
         run: |
           .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "prefix-1.1.2"
-  custom-tag-of-initial-value-with-prefix-is-created-if-tag-with-given-prefix-does-not-exist:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: "0"
-      - name: Create test repo
-        shell: bash
-        run: |
-          .github/workflows/tests/custom_tag_of_initial_value_with_prefix_is_created_if_tag_with_given_prefix_does_not_exist.sh
-      - name: Create a tag
-        id: create-tag
-        uses: ./
-        env:
-          DRY_RUN: true
-          VERBOSE: true
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SOURCE: test-repo
-          USE_LAST_COMMIT_ONLY: false
-          # PREFIX: prefix-
-          # INITIAL_VERSION: 5.6.7
-      - name: Check if the tag would have been created
-        shell: bash
-        run: |
-          .github/workflows/tests/_assert.sh ${{ steps.create-tag.outputs.new_tag }} "prefix-1.1.0"

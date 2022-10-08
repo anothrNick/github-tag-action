@@ -92,7 +92,7 @@
       "type": "shell",
     },
     {
-      "label": "act - test custom-tag-with-prefix-is-bumped-if-tag-with-given-prefix-already-exists",
+      "label": "act - test tag-with-prefix-is-bumped-if-tag-with-given-prefix-already-exists",
       "command": "act",
       "options": {
         "cwd": "${workspaceFolder}"
@@ -100,7 +100,7 @@
       "args": [
         "--rebuild",
         "--job",
-        "custom-tag-with-prefix-is-bumped-if-tag-with-given-prefix-already-exists",
+        "tag-with-prefix-is-bumped-if-tag-with-given-prefix-already-exists",
         "--env-file",
         ".act/.env",
       ],
