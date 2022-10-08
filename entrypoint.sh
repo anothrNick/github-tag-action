@@ -105,22 +105,20 @@ echo_previous_tags() {
 }
 
 set_number_of_found_keywords() {
-    if $verbose; then
-        echo -e "\n********************************************"
-        echo -e "Commit messages taken into account:"
-        # if $3; then
-            # echo "First commit: $2"
-            git log "$2" --pretty=format:%B | awk 'NF'
-        # else
-            # git log "$1"..."$2"~1 --pretty=format:%B | awk 'NF'
-        # fi
-        echo -e "********************************************\n"
-    fi
 
-    number_of_major=$(git log "$1"..."$2"~1 --pretty=format:%B | grep -E "${major_string_token}" -c)
-    number_of_minor=$(git log "$1"..."$2"~1 --pretty=format:%B | grep -E "${minor_string_token}" -c)
-    number_of_patch=$(git log "$1"..."$2"~1 --pretty=format:%B | grep -E "${patch_string_token}" -c)
-    number_of_commits=$(git log "$1"..."$2"~1 --pretty=format:%B | awk 'NF' | grep "" -c)
+    if [[ "${1}" == "${2}" ]]; then # handle the case of a repo with a single commit
+        commit_messages_taken_into_account=$(git log "$1"..."$2" --pretty=format:%B | awk 'NF')
+        number_of_major=$(git log "$1"..."$2" --pretty=format:%B | grep -E "${major_string_token}" -c)
+        number_of_minor=$(git log "$1"..."$2" --pretty=format:%B | grep -E "${minor_string_token}" -c)
+        number_of_patch=$(git log "$1"..."$2" --pretty=format:%B | grep -E "${patch_string_token}" -c)
+        number_of_commits=$(git log "$1"..."$2" --pretty=format:%B | awk 'NF' | grep "" -c)
+    else
+        commit_messages_taken_into_account=$(git log "$1"..."$2"~1 --pretty=format:%B | awk 'NF')
+        number_of_major=$(git log "$1"..."$2"~1 --pretty=format:%B | grep -E "${major_string_token}" -c)
+        number_of_minor=$(git log "$1"..."$2"~1 --pretty=format:%B | grep -E "${minor_string_token}" -c)
+        number_of_patch=$(git log "$1"..."$2"~1 --pretty=format:%B | grep -E "${patch_string_token}" -c)
+        number_of_commits=$(git log "$1"..."$2"~1 --pretty=format:%B | awk 'NF' | grep "" -c)
+    fi
 
     if $verbose; then
         echo -e "\n********************************************"
