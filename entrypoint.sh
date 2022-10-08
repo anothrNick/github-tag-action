@@ -108,12 +108,12 @@ set_number_of_found_keywords() {
     if $verbose; then
         echo -e "\n********************************************"
         echo -e "Commit messages taken into account:"
-        if $3; then
-            echo "First commit: $2"
+        # if $3; then
+            # echo "First commit: $2"
             git log "$2" --pretty=format:%B | awk 'NF'
-        else
-            git log "$1"..."$2"~1 --pretty=format:%B | awk 'NF'
-        fi
+        # else
+            # git log "$1"..."$2"~1 --pretty=format:%B | awk 'NF'
+        # fi
         echo -e "********************************************\n"
     fi
 
@@ -302,24 +302,23 @@ fi
 
 if [ "$tag" = "$initial_version" ] || [ "$tag" = "${prefix}${initial_version}" ]; then
     first_commit_of_repo=$(git rev-list --max-parents=0 HEAD)
-    is_first_commit_used=true
 
     if [ -z "$branch_latest_commit" ]; then
         echo "*set_number_of_found_keywords: first_commit_of_repo commit is_first_commit_used"
-        set_number_of_found_keywords "$first_commit_of_repo" "$commit" "$is_first_commit_used"
+        set_number_of_found_keywords "$first_commit_of_repo" "$commit"
     else
         echo "*set_number_of_found_keywords: branch_latest_commit first_commit_of_repo is_first_commit_used"
-        set_number_of_found_keywords "$branch_latest_commit" "$first_commit_of_repo" "$is_first_commit_used"
+        set_number_of_found_keywords "$branch_latest_commit" "$first_commit_of_repo"
     fi
 else
 
-    is_first_commit_used=false
     if [ -z "$branch_latest_commit" ]; then
         next_commit_after_current_tag=$(git log --pretty=format:"%H" --reverse --ancestry-path "$tag".."$commit" | sed -n 1p)
         if $verbose; then
             echo "next commit after current tag commit ${next_commit_after_current_tag}"
         fi
-        set_number_of_found_keywords "$commit" "$next_commit_after_current_tag" "$is_first_commit_used"
+         echo "*set_number_of_found_keywords: commit next_commit_after_current_tag is_first_commit_used"
+        set_number_of_found_keywords "$commit" "$next_commit_after_current_tag"
     else
         base_branch_commit_on_parent_branch=$(diff -u <(git rev-list --first-parent "$branch_latest_commit") <(git rev-list --first-parent "$commit") | sed -ne 's/^ //p' | head -1)
         first_separate_commit_on_branch=$(git log --pretty=format:"%H" --reverse --ancestry-path "$base_branch_commit_on_parent_branch".."$branch_latest_commit" | sed -n 1p)
@@ -329,7 +328,7 @@ else
             echo "first separate commit on branch ${first_separate_commit_on_branch}"
             echo -e "********************************************\n"
         fi
-        set_number_of_found_keywords "$branch_latest_commit" "$first_separate_commit_on_branch" "$is_first_commit_used"
+        set_number_of_found_keywords "$branch_latest_commit" "$first_separate_commit_on_branch"
     fi
 fi
 
