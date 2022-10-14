@@ -46,6 +46,10 @@ then
     set -x
 fi
 
+setOutput() {
+    echo "${1}=${2}" >> ${GITHUB_OUTPUT}
+}
+
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
 pre_release="$prerelease"
@@ -113,8 +117,8 @@ commit=$(git rev-parse HEAD)
 if [ "$tag_commit" == "$commit" ]
 then
     echo "No new commits since previous tag. Skipping..."
-    echo "::set-output name=new_tag::$tag"
-    echo "::set-output name=tag::$tag"
+    setOutput "new_tag" "$tag"
+    setOutput "tag" "$tag"
     exit 0
 fi
 
@@ -128,15 +132,15 @@ case "$log" in
     *$patch_string_token* ) new=$(semver -i patch "$tag"); part="patch";;
     *$none_string_token* ) 
         echo "Default bump was set to none. Skipping..."
-        echo "::set-output name=new_tag::$tag"
-        echo "::set-output name=tag::$tag"
+        setOutput "new_tag" "$tag"
+        setOutput "tag" "$tag"
         exit 0;;
     * ) 
         if [ "$default_semvar_bump" == "none" ]
         then
             echo "Default bump was set to none. Skipping..."
-            echo "::set-output name=new_tag::$tag"
-            echo "::set-output name=tag::$tag"
+            setOutput "new_tag" "$tag"
+            setOutput "tag" "$tag"
             exit 0 
         else 
             new=$(semver -i "${default_semvar_bump}" "$tag")
@@ -182,10 +186,10 @@ then
 fi
 
 # set outputs
-echo "::set-output name=new_tag::$new"
-echo "::set-output name=part::$part"
-echo "::set-output name=tag::$new" # this needs to go in v2 is breaking change
-echo "::set-output name=old_tag::$tag"
+setOutput "new_tag" "$new"
+setOutput "part" "$part"
+setOutput "tag" "$new"
+setOutput "old_tag" "$tag"
 
 # dry run exit without real changes
 if $dryrun
