@@ -119,7 +119,7 @@ then
 fi
 
 # get the merge commit message looking for #bumps
-log=$(git show -s --format=%s)
+log=$(git show -s "$tag"..HEAD --format=%s)
 echo "Last commit message: $log"
 
 case "$log" in
