@@ -188,7 +188,7 @@ fi
 # set outputs
 setOutput "new_tag" "$new"
 setOutput "part" "$part"
-setOutput "tag" "$new"  # this needs to go in v2 is breaking change
+setOutput "tag" "$new" # this needs to go in v2 is breaking change
 setOutput "old_tag" "$tag"
 
 # dry run exit without real changes
