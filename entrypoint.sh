@@ -403,8 +403,6 @@ then
     exit 0
 fi 
 
-echo "::set-output name=tag::$new"
-
 # create local git tag
 git tag "$new"
 
