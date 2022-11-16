@@ -157,16 +157,14 @@ bump_version() {
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
 pre_release="$prerelease"
-IFS=',' read -ra branch <<< "$release_branches"
+IFS=',' read -ra branch <<<"$release_branches"
 for b in "${branch[@]}"; do
     # check if ${current_branch} is in ${release_branches} | exact branch match
-    if [[ "$current_branch" == "$b" ]]
-    then
+    if [[ "$current_branch" == "$b" ]]; then
         pre_release="false"
     fi
     # verify non specific branch names like  .* release/* if wildcard filter then =~
-    if [ "$b" != "${b//[\[\]|.? +*]/}" ] && [[ "$current_branch" =~ $b ]]
-    then
+    if [ "$b" != "${b//[\[\]|.? +*]/}" ] && [[ "$current_branch" =~ $b ]]; then
         pre_release="false"
     fi
 done
@@ -180,16 +178,18 @@ preTagFmt="^$prefix?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)$"
 
 # get latest tag that looks like a semver (with or without prefix)
 case "$tag_context" in
-    *repo*) 
-        tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt" | head -n 1)"
-        pre_tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt" | head -n 1)"
-        ;;
-    *branch*) 
-        tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt" | head -n 1)"
-        pre_tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt" | head -n 1)"
-        ;;
-    * ) echo "Unrecognised context"
-        exit 1;;
+*repo*)
+    tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt" | head -n 1)"
+    pre_tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt" | head -n 1)"
+    ;;
+*branch*)
+    tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt" | head -n 1)"
+    pre_tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt" | head -n 1)"
+    ;;
+*)
+    echo "Unrecognised context"
+    exit 1
+    ;;
 esac
 
 # as defined in readme if CUSTOM_TAG is used any semver calculations are irrelevant.
@@ -246,19 +246,17 @@ fi
 
 # get current commit hash for tag
 
-if [ "$tag" = "$initial_version" ] || [ "$tag" = "${prefix}${initial_version}" ]
-then
+if [ "$tag" = "$initial_version" ] || [ "$tag" = "${prefix}${initial_version}" ]; then
     first_commit_of_repo=$(git rev-list --max-parents=0 HEAD)
     tag_commit=first_commit_of_repo
-else 
+else
     tag_commit=$(git rev-list -n 1 "$tag")
 fi
 
 # get current commit hash
 commit=$(git rev-parse HEAD)
 
-if [ "$tag_commit" == "$commit" ]
-then
+if [ "$tag_commit" == "$commit" ]; then
     echo "No new commits since previous tag. Skipping..."
     echo "::set-output name=new_tag::$tag"
     echo "::set-output name=tag::$tag"
@@ -281,14 +279,12 @@ if $verbose; then
     echo -e "********************************************\n"
 fi
 
-if [ "$tag" = "$initial_version" ] || [ "$tag" = "${prefix}${initial_version}" ]; then
+if [ "$tag" = "$initial_version" ] || [ "$tag" = "${prefix}${initial_version}" ]; then #TODO: Comment each branch
     first_commit_of_repo=$(git rev-list --max-parents=0 HEAD)
 
     if [ -z "$branch_latest_commit" ]; then
-        echo "*set_number_of_found_keywords: first_commit_of_repo commit is_first_commit_used"
         set_number_of_found_keywords "$first_commit_of_repo" "$commit"
     else
-        echo "*set_number_of_found_keywords: branch_latest_commit first_commit_of_repo is_first_commit_used"
         set_number_of_found_keywords "$branch_latest_commit" "$first_commit_of_repo"
     fi
 else
@@ -298,11 +294,11 @@ else
         if $verbose; then
             echo "next commit after current tag commit ${next_commit_after_current_tag}"
         fi
-         echo "*set_number_of_found_keywords: commit next_commit_after_current_tag is_first_commit_used"
         set_number_of_found_keywords "$commit" "$next_commit_after_current_tag"
     else
         base_branch_commit_on_parent_branch=$(diff -u <(git rev-list --first-parent "$branch_latest_commit") <(git rev-list --first-parent "$commit") | sed -ne 's/^ //p' | head -1)
         first_separate_commit_on_branch=$(git log --pretty=format:"%H" --reverse --ancestry-path "$base_branch_commit_on_parent_branch".."$branch_latest_commit" | sed -n 1p)
+
         if $verbose; then
             echo -e "\n********************************************"
             echo "base branch commit on parent branch ${base_branch_commit_on_parent_branch}"
@@ -350,22 +346,17 @@ if [ -z "$new" ]; then
     fi
 fi
 
-
-if $pre_release
-then
+if $pre_release; then
     # already a pre-release available, bump it
-    if [[ "$pre_tag" =~ $new ]] && [[ "$pre_tag" =~ $suffix ]]
-    then
-        if [ -n "${prefix}" ]
-        then
+    if [[ "$pre_tag" =~ $new ]] && [[ "$pre_tag" =~ $suffix ]]; then
+        if [ -n "${prefix}" ]; then
             new=${prefix}$(semver -i prerelease "${pre_tag}" --preid "${suffix}")
         else
             new=$(semver -i prerelease "${pre_tag}" --preid "${suffix}")
         fi
         echo -e "Bumping ${suffix} pre-tag ${pre_tag}. New pre-tag ${new}"
     else
-        if [ -n "${prefix}" ]
-        then
+        if [ -n "${prefix}" ]; then
             new="${prefix}$new-$suffix.0"
         else
             new="$new-$suffix.0"
@@ -374,8 +365,7 @@ then
     fi
     part="pre-$part"
 else
-    if [ -n "${prefix}" ]
-    then
+    if [ -n "${prefix}" ]; then
         new="${prefix}${new}"
     fi
     echo -e "Bumping tag ${tag} - New tag ${new}"
@@ -397,11 +387,10 @@ echo "::set-output name=tag::$new" # this needs to go in v2 is breaking change
 echo "::set-output name=old_tag::$tag"
 
 # use dry run to determine the next tag
-if $dryrun
-then
+if $dryrun; then
     echo "::set-output name=tag::$tag"
     exit 0
-fi 
+fi
 
 # create local git tag
 git tag "$new"
@@ -414,9 +403,9 @@ git_refs_url=$(jq .repository.git_refs_url "$GITHUB_EVENT_PATH" | tr -d '"' | se
 echo "$dt: **pushing tag $new to repo $full_name"
 
 git_refs_response=$(
-curl -s -X POST "$git_refs_url" \
--H "Authorization: token $GITHUB_TOKEN" \
--d @- << EOF
+    curl -s -X POST "$git_refs_url" \
+        -H "Authorization: token $GITHUB_TOKEN" \
+        -d @- <<EOF
 
 {
   "ref": "refs/tags/$new",
@@ -425,13 +414,12 @@ curl -s -X POST "$git_refs_url" \
 EOF
 )
 
-git_ref_posted=$( echo "${git_refs_response}" | jq .ref | tr -d '"' )
+git_ref_posted=$(echo "${git_refs_response}" | jq .ref | tr -d '"')
 
 echo "::debug::${git_refs_response}"
-if [ "${git_ref_posted}" = "refs/tags/${new}" ]
-then
-  exit 0
+if [ "${git_ref_posted}" = "refs/tags/${new}" ]; then
+    exit 0
 else
-  echo "::error::Tag was not created properly."
-  exit 1
+    echo "::error::Tag was not created properly."
+    exit 1
 fi
