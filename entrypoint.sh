@@ -230,27 +230,15 @@ if [ -n "$with_v" ]; then
 fi
 
 # if there are none, start tags at INITIAL_VERSION
-if [ -z "$tag" ]
-then
+if [ -z "$tag" ]; then
     echo_previous_tags "No tag was found. INITIAL_VERSION will be used instead."
 
-    if [ -n "${prefix}" ]
-    then
-        tag="${prefix}${initial_version}"
-    else
-        tag="$initial_version"
-    fi
+    tag="$initial_version"
     echo "tag to be created: $tag"
     echo "tag to be created, pre_release: $pre_release"
     echo "tag to be created, pre_tag: $pre_tag"
-    if [ -z "$pre_tag" ] && $pre_release
-    then
-        if [ -n "${prefix}" ]
-        then
-            pre_tag="$initial_version"
-        else
-            pre_tag="${prefix}$initial_version"
-        fi
+    if [ -z "$pre_tag" ] && $pre_release; then
+        pre_tag="${prefix}$initial_version"
     fi
 else
     echo_previous_tags "Previous tag was found."
