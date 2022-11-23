@@ -104,7 +104,7 @@ commit=$(git rev-parse HEAD)
 
 if [ "$tag_commit" == "$commit" ]; then
     echo "No new commits since previous tag. Skipping..."
-    echo ::set-output name=tag::$vtag
+    echo "tag=$vtag" >> $GITHUB_ENV
     exit 0
 fi
 
@@ -119,10 +119,10 @@ case "$log" in
     *#minor* ) new=$(semver -i minor $tag); part="minor";;
     *#patch* ) new=$(semver -i patch $tag); part="patch";;
     *#none* ) 
-        echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$vtag; echo ::set-output name=tag::$vtag; exit 0;;
+        echo "Default bump was set to none. Skipping..."; echo "new_tag=$vtag" >> $GITHUB_ENV; echo "tag=$vtag" >> $GITHUB_ENV; exit 0;;
     * ) 
         if [ "$default_semvar_bump" == "none" ]; then
-            echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$vtag; echo ::set-output name=tag::$vtag; exit 0 
+            echo "Default bump was set to none. Skipping..."; echo "new_tag=$vtag" >> $GITHUB_ENV; echo "tag=$vtag" >> $GITHUB_ENV; exit 0 
         else 
             new=$(semver -i "${default_semvar_bump}" $tag); part=$default_semvar_bump 
         fi 
@@ -165,17 +165,17 @@ else
 fi
 
 # set outputs
-echo ::set-output name=new_tag::$new
-echo ::set-output name=part::$part
+echo "new_tag=$new" >> $GITHUB_ENV
+echo "part=$part" >> $GITHUB_ENV
 
 # use dry run to determine the next tag
 if $dryrun
 then
-    echo ::set-output name=tag::$vtag
+    echo "tag=$vtag" >> $GITHUB_ENV
     exit 0
 fi 
 
-echo ::set-output name=tag::$new
+echo "tag=$new" >> $GITHUB_ENV
 
 # create local git tag
 git tag $new
