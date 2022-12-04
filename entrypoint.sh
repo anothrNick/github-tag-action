@@ -18,6 +18,7 @@ major_string_token=${MAJOR_STRING_TOKEN:-#major}
 minor_string_token=${MINOR_STRING_TOKEN:-#minor}
 patch_string_token=${PATCH_STRING_TOKEN:-#patch}
 none_string_token=${NONE_STRING_TOKEN:-#none}
+history=${HISTORY:-full}
 # since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses?
 git config --global --add safe.directory /github/workspace
 
@@ -39,6 +40,7 @@ echo -e "\tMAJOR_STRING_TOKEN: ${major_string_token}"
 echo -e "\tMINOR_STRING_TOKEN: ${minor_string_token}"
 echo -e "\tPATCH_STRING_TOKEN: ${patch_string_token}"
 echo -e "\tNONE_STRING_TOKEN: ${none_string_token}"
+echo -e "\tHISTORY: ${history}"
 
 # verbose, show everything
 if $verbose
@@ -123,8 +125,13 @@ then
 fi
 
 # get the merge commit message looking for #bumps
-log=$(git show -s --format=%B)
-echo "Last commit message: $log"
+if [ "$history" == 'last' ]
+then
+    log=$(git show -s --format=%B)
+else
+    log=$(git show -s --format=%B)
+fi
+echo "History: $log"
 
 case "$log" in
     *$major_string_token* ) new=$(semver -i major "$tag"); part="major";;
