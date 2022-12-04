@@ -18,7 +18,7 @@ major_string_token=${MAJOR_STRING_TOKEN:-#major}
 minor_string_token=${MINOR_STRING_TOKEN:-#minor}
 patch_string_token=${PATCH_STRING_TOKEN:-#patch}
 none_string_token=${NONE_STRING_TOKEN:-#none}
-history=${HISTORY:-full}
+branch_history=${BRANCH_HISTORY:-full}
 # since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses?
 git config --global --add safe.directory /github/workspace
 
@@ -40,7 +40,7 @@ echo -e "\tMAJOR_STRING_TOKEN: ${major_string_token}"
 echo -e "\tMINOR_STRING_TOKEN: ${minor_string_token}"
 echo -e "\tPATCH_STRING_TOKEN: ${patch_string_token}"
 echo -e "\tNONE_STRING_TOKEN: ${none_string_token}"
-echo -e "\tHISTORY: ${history}"
+echo -e "\tBRANCH_HISTORY: ${branch_history}"
 
 # verbose, show everything
 if $verbose
@@ -129,8 +129,8 @@ declare -A history_type=(
     ["last"]="$(git show -s --format=%B)" \
     ["full"]="$(git log master..HEAD --format=%B)" \
 )
-log=${history_type[${history}]}
-printf "History: \n%log" "$log"
+log=${history_type[${branch_history}]}
+printf "History:\n---\n%s\n---\n" "$log"
 
 case "$log" in
     *$major_string_token* ) new=$(semver -i major "$tag"); part="major";;
