@@ -125,13 +125,12 @@ then
 fi
 
 # get the merge commit message looking for #bumps
-if [ "$history" == 'last' ]
-then
-    log=$(git show -s --format=%B)
-else
-    log=$(git show -s --format=%B)
-fi
-echo "History: $log"
+declare -A history_type=( 
+    ["last"]="$(git show -s --format=%B)" \
+    ["full"]="$(git log master..HEAD --format=%B)" \
+)
+log=${history_type[${history}]}
+printf "History: \n%log" "$log"
 
 case "$log" in
     *$major_string_token* ) new=$(semver -i major "$tag"); part="major";;
