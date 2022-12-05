@@ -1,7 +1,6 @@
 name: Lint
 
 on:
-  workflow_dispatch:
   pull_request:
     types:
       - opened
@@ -17,7 +16,7 @@ permissions:
 jobs:
   lint-bash:
     name: Lint Bash scripts
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: reviewdog/action-shellcheck@v1
@@ -26,12 +25,12 @@ jobs:
           reporter: github-pr-review
           level: warning
           path: .
-          pattern: "*.sh"
+          pattern: '*.sh'
           fail_on_error: true
 
   lint-dockerfile:
     name: Lint Dockerfiles
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: hadolint
@@ -43,7 +42,7 @@ jobs:
           hadolint_ignore: DL3016 DL3018 # Ignore pinning apk and npm packages to specific version with @
 
   lint-actions:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Lint Github Actions
@@ -53,8 +52,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           reporter: github-pr-review
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tool_name: actionlint
-          level: warning
-          fail_on_error: true
-          filter_mode: added
