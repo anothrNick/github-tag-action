@@ -51,7 +51,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         ref: ${{ github.event.pull_request.merge_commit_sha }}
-        fetch-depth: "0"
+        fetch-depth: '0'
 
     - name: Bump version and push tag
       uses: anothrNick/github-tag-action@v1
