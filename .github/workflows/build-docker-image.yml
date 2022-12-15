@@ -31,7 +31,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           images: |
             ${{ env.IMAGE_NAME }}
-            ghcr.io/user${{ env.IMAGE_NAME }}
+            ghcr.io/user/${{ env.IMAGE_NAME }}
           tags: |
             type=schedule
             type=ref,event=branch
