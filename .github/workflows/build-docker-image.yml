@@ -30,8 +30,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           images: |
-            ${{ env.IMAGE_NAME }}
-            ghcr.io/user/${{ env.IMAGE_NAME }}
+            # ${{ env.IMAGE_NAME }}
+            ghcr.io/${{ github.actor }}/${{ github.repository }}
           tags: |
             type=schedule
             type=ref,event=branch
@@ -64,6 +64,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Output image, digest and metadata to summary
         run: |
