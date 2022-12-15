@@ -19,7 +19,7 @@ env:
 jobs:
   build:
     timeout-minutes: 15
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -30,7 +30,6 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           images: |
-            # ${{ env.IMAGE_NAME }}
             ghcr.io/${{ github.actor }}/${{ github.repository }}
           tags: |
             type=schedule
