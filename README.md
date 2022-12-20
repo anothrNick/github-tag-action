@@ -49,7 +49,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        ref: ${{ github.event.pull_request.head.sha }}
+        ref: ${{ github.sha }}
         fetch-depth: '0'
 
     - name: Bump version and push tag
@@ -83,6 +83,7 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` or newer to be sure you ret
 - **MINOR_STRING_TOKEN** _(optional)_ - Change the default `#minor` commit message string tag.
 - **PATCH_STRING_TOKEN** _(optional)_ - Change the default `#patch` commit message string tag.
 - **NONE_STRING_TOKEN** _(optional)_ - Change the default `#none` commit message string tag.
+- **BRANCH_HISTORY** _(optional)_ - Set the history of the branch for finding `#bumps`. Possible values `last` and `full` defaults to full history of the new branch.
 
 #### Outputs
 
