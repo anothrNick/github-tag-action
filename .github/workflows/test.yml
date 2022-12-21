@@ -166,13 +166,13 @@ jobs:
         shell: bash
         run: |
           .github/workflows/tests/_assert.sh ${{ steps.create-tag-several-commits-mix-tagged-and-not-tagged-commits.outputs.new_tag }} "1.3.0"
-      # several-commits-major-takes-precedence-over-path:
-      - name: "Create test repo: several-commits-major-takes-precedence-over-path"
+      # several-commits-major-takes-precedence-over-patch:
+      - name: "Create test repo: several-commits-major-takes-precedence-over-patch"
         shell: bash
         run: |
-          .github/workflows/tests/several_commits_major_takes_precedence_over_path.sh
-      - name: "Create a tag: several-commits-major-takes-precedence-over-path"
-        id: create-tag-several-commits-major-takes-precedence-over-path
+          .github/workflows/tests/several_commits_major_takes_precedence_over_patch.sh
+      - name: "Create a tag: several-commits-major-takes-precedence-over-patch"
+        id: create-tag-several-commits-major-takes-precedence-over-patch
         uses: ./
         env:
           DRY_RUN: true
@@ -183,7 +183,7 @@ jobs:
       - name: "Assert the created tag: "
         shell: bash
         run: |
-          .github/workflows/tests/_assert.sh ${{ steps.create-tag-several-commits-major-takes-precedence-over-path.outputs.new_tag }} "1.4.0"
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag-several-commits-major-takes-precedence-over-patch.outputs.new_tag }} "1.4.0"
       # initial-tag-creation:
       - name: "Create test repo: initial-tag-creation"
         shell: bash
