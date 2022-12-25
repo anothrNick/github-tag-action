@@ -129,7 +129,7 @@ fi
 # get the merge commit message looking for #bumps
 declare -A history_type=( 
     ["last"]="$(git show -s --format=%B)" \
-    ["full"]="$(git log ${default_branch}..HEAD --format=%B)" \
+    ["full"]="$(git log "${default_branch}"..HEAD --format=%B)" \
 )
 log=${history_type[${branch_history}]}
 printf "History:\n---\n%s\n---\n" "$log"
