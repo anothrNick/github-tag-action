@@ -4,6 +4,7 @@ set -o pipefail
 
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
+default_branch=${DEFAULT_BRANCH:-$GITHUB_BASE_REF} # get the default branch from github runner env vars
 with_v=${WITH_V:-false}
 release_branches=${RELEASE_BRANCHES:-master,main}
 custom_tag=${CUSTOM_TAG:-}
@@ -26,6 +27,7 @@ cd "${GITHUB_WORKSPACE}/${source}" || exit 1
 
 echo "*** CONFIGURATION ***"
 echo -e "\tDEFAULT_BUMP: ${default_semvar_bump}"
+echo -e "\tDEFAULT_BRANCH: ${default_branch}"
 echo -e "\tWITH_V: ${with_v}"
 echo -e "\tRELEASE_BRANCHES: ${release_branches}"
 echo -e "\tCUSTOM_TAG: ${custom_tag}"
@@ -127,7 +129,7 @@ fi
 # get the merge commit message looking for #bumps
 declare -A history_type=( 
     ["last"]="$(git show -s --format=%B)" \
-    ["full"]="$(git log master..HEAD --format=%B)" \
+    ["full"]="$(git log "${default_branch}"..HEAD --format=%B)" \
 )
 log=${history_type[${branch_history}]}
 printf "History:\n---\n%s\n---\n" "$log"
