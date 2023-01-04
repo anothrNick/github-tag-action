@@ -130,7 +130,7 @@ if [ -z "${default_branch}" ]
 then
     echo "The DEFAULT_BRANCH should be autodetected when tag-action runs on on PRs else must be defined, See: https://github.com/anothrNick/github-tag-action/pull/230, since is not defined we find it natively"
     default_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
-    echo "DEFAULT_BRANCH=${default_branch}"
+    echo "default_branch=${default_branch}"
     # re check this
     if [ -z "${default_branch}" ]
     then
