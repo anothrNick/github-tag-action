@@ -114,10 +114,9 @@ fi
 
 # get current commit hash for tag
 tag_commit=$(git rev-list -n 1 "$tag")
-
 # get current commit hash
 commit=$(git rev-parse HEAD)
-
+# skip if there are no new commits for non-pre_release
 if [ "$tag_commit" == "$commit" ]
 then
     echo "No new commits since previous tag. Skipping..."
@@ -159,6 +158,16 @@ esac
 
 if $pre_release
 then
+    # get current commit hash for tag
+    pre_tag_commit=$(git rev-list -n 1 "$pre_tag")
+    # skip if there are no new commits for pre_release
+    if [ "$pre_tag_commit" == "$commit" ]
+    then
+        echo "No new commits since previous pre_tag. Skipping..."
+        setOutput "new_tag" "$pre_tag"
+        setOutput "tag" "$pre_tag"
+        exit 0
+    fi
     # already a pre-release available, bump it
     if [[ "$pre_tag" =~ $new ]] && [[ "$pre_tag" =~ $suffix ]]
     then
