@@ -10,7 +10,7 @@ A Github Action to automatically bump and tag master, on merge, with the latest 
 
 [<img src="https://miro.medium.com/max/1200/1*_4Ex1uUhL93a3bHyC-TgPg.png" width="400">](https://itnext.io/creating-a-github-action-to-tag-commits-2722f1560dec)
 
-> 📣 [This project seeking maintainers!](https://github.com/anothrNick/github-tag-action/issues/238) 📣
+> 📣 [This project is seeking maintainers!](https://github.com/anothrNick/github-tag-action/issues/238) 📣
 
 ## Usage
 
