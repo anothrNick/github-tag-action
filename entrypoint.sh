@@ -19,7 +19,7 @@ major_string_token=${MAJOR_STRING_TOKEN:-#major}
 minor_string_token=${MINOR_STRING_TOKEN:-#minor}
 patch_string_token=${PATCH_STRING_TOKEN:-#patch}
 none_string_token=${NONE_STRING_TOKEN:-#none}
-branch_history=${BRANCH_HISTORY:-full}
+branch_history=${BRANCH_HISTORY:-compare}
 # since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses?
 git config --global --add safe.directory /github/workspace
 
@@ -143,6 +143,7 @@ fi
 declare -A history_type=( 
     ["last"]="$(git show -s --format=%B)" \
     ["full"]="$(git log "${default_branch}"..HEAD --format=%B)" \
+    ["compare"]="$(git log "${tag_commit}".."${commit}" --format=%B)" \
 )
 log=${history_type[${branch_history}]}
 printf "History:\n---\n%s\n---\n" "$log"
