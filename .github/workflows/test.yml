@@ -306,7 +306,6 @@ jobs:
         uses: ./
         env:
           DRY_RUN: true
-          VERBOSE: true
           DEFAULT_BUMP: major
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
@@ -325,7 +324,6 @@ jobs:
         uses: ./
         env:
           DRY_RUN: true
-          VERBOSE: true
           DEFAULT_BUMP: patch
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
@@ -344,7 +342,6 @@ jobs:
         uses: ./
         env:
           DRY_RUN: true
-          VERBOSE: true
           INITIAL_VERSION: 1.0.0
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
@@ -364,7 +361,6 @@ jobs:
         uses: ./
         env:
           DRY_RUN: true
-          VERBOSE: true
           INITIAL_VERSION: 1.0.0
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
