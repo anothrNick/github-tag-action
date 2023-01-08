@@ -73,13 +73,13 @@ jobs:
         shell: bash
         run: |
           .github/workflows/tests/_assert.sh ${{ steps.create-tag-default-bump-set-to-major.outputs.new_tag }} "2.0.0"
-      # custom-string-token-major:
-      - name: "Create test repo: custom-string-token-major"
+      # custom-string-token-major-multiple-commits:
+      - name: "Create test repo: custom-string-token-major-multiple-commits"
         shell: bash
         run: |
           .github/workflows/tests/custom_string_token.sh
-      - name: "Create a tag: custom-string-token-major"
-        id: create-tag-custom-string-token-major
+      - name: "Create a tag: custom-string-token-major-multiple-commits"
+        id: create-tag-custom-string-token-major-multiple-commits
         uses: ./
         env:
           DRY_RUN: true
@@ -88,17 +88,17 @@ jobs:
           SOURCE: test-repo
           USE_LAST_COMMIT_ONLY: false
           MAJOR_STRING_TOKEN: ma
-      - name: "Assert the created tag: custom-string-token-major"
+      - name: "Assert the created tag: custom-string-token-major-multiple-commits"
         shell: bash
         run: |
-          .github/workflows/tests/_assert.sh ${{ steps.create-tag-custom-string-token-major.outputs.new_tag }} "3.0.0"
-      # custom-string-token-minor:
-      - name: "Create test repo: custom-string-token-minor"
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag-custom-string-token-major-multiple-commits.outputs.new_tag }} "3.0.0"
+      # custom-string-token-minor-multiple-commits:
+      - name: "Create test repo: custom-string-token-minor-multiple-commits"
         shell: bash
         run: |
           .github/workflows/tests/custom_string_token.sh
-      - name: "Create a tag: custom-string-token-minor"
-        id: create-tag-custom-string-token-minor
+      - name: "Create a tag: custom-string-token-minor-multiple-commits"
+        id: create-tag-custom-string-token-minor-multiple-commits
         uses: ./
         env:
           DRY_RUN: true
@@ -107,17 +107,17 @@ jobs:
           SOURCE: test-repo
           USE_LAST_COMMIT_ONLY: false
           MINOR_STRING_TOKEN: mi
-      - name: "Assert the created tag: custom-string-token-minor"
+      - name: "Assert the created tag: custom-string-token-minor-multiple-commits"
         shell: bash
         run: |
-          .github/workflows/tests/_assert.sh ${{ steps.create-tag-custom-string-token-minor.outputs.new_tag }} "1.4.0"
-      # custom-string-token-patch:
-      - name: "Create test repo: custom-string-token-patch"
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag-custom-string-token-minor-multiple-commits.outputs.new_tag }} "1.4.0"
+      # custom-string-token-patch-multiple-commits:
+      - name: "Create test repo: custom-string-token-patch-multiple-commits"
         shell: bash
         run: |
           .github/workflows/tests/custom_string_token.sh
-      - name: "Create a tag: custom-string-token-patch"
-        id: create-tag-custom-string-token-patch
+      - name: "Create a tag: custom-string-token-patch-multiple-commits"
+        id: create-tag-custom-string-token-patch-multiple-commits
         uses: ./
         env:
           DRY_RUN: true
@@ -126,17 +126,17 @@ jobs:
           SOURCE: test-repo
           USE_LAST_COMMIT_ONLY: false
           PATCH_STRING_TOKEN: pa
-      - name: "Assert the created tag: custom-string-token-patch"
+      - name: "Assert the created tag: custom-string-token-patch-multiple-commits"
         shell: bash
         run: |
-          .github/workflows/tests/_assert.sh ${{ steps.create-tag-custom-string-token-patch.outputs.new_tag }} "1.1.2"
-      # several-commits-default-bump:
-      - name: "Create test repo: several-commits-default-bump"
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag-custom-string-token-patch-multiple-commits.outputs.new_tag }} "1.1.2"
+      # sdefault-bump-multiple-commits:
+      - name: "Create test repo: sdefault-bump-multiple-commits"
         shell: bash
         run: |
           .github/workflows/tests/several_commits_default_bump.sh
-      - name: "Create a tag: several-commits-default-bump"
-        id: create-tag-several-commits-default-bump
+      - name: "Create a tag: sdefault-bump-multiple-commits"
+        id: create-tag-sdefault-bump-multiple-commits
         uses: ./
         env:
           DRY_RUN: true
@@ -144,17 +144,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
           USE_LAST_COMMIT_ONLY: false
-      - name: "Assert the created tag: several-commits-default-bump"
+      - name: "Assert the created tag: sdefault-bump-multiple-commits"
         shell: bash
         run: |
-          .github/workflows/tests/_assert.sh ${{ steps.create-tag-several-commits-default-bump.outputs.new_tag }} "6.0.0"
-      # several-commits-mix-tagged-and-not-tagged-commits:
-      - name: "Create test repo: several-commits-mix-tagged-and-not-tagged-commits"
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag-sdefault-bump-multiple-commits.outputs.new_tag }} "6.0.0"
+      # mix-tagged-and-not-tagged-commits-mutliple-commits:
+      - name: "Create test repo: mix-tagged-and-not-tagged-commits-mutliple-commits"
         shell: bash
         run: |
           .github/workflows/tests/several_mixed_tagged_and_not_tagged_commits.sh
-      - name: "Create a tag: several-commits-mix-tagged-and-not-tagged-commits"
-        id: create-tag-several-commits-mix-tagged-and-not-tagged-commits
+      - name: "Create a tag: mix-tagged-and-not-tagged-commits-mutliple-commits"
+        id: create-tag-mix-tagged-and-not-tagged-commits-mutliple-commits
         uses: ./
         env:
           DRY_RUN: true
@@ -162,17 +162,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
           USE_LAST_COMMIT_ONLY: false
-      - name: "Assert the created tag: several-commits-mix-tagged-and-not-tagged-commits"
+      - name: "Assert the created tag: mix-tagged-and-not-tagged-commits-mutliple-commits"
         shell: bash
         run: |
-          .github/workflows/tests/_assert.sh ${{ steps.create-tag-several-commits-mix-tagged-and-not-tagged-commits.outputs.new_tag }} "1.3.0"
-      # several-commits-major-takes-precedence-over-patch:
-      - name: "Create test repo: several-commits-major-takes-precedence-over-patch"
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag-mix-tagged-and-not-tagged-commits-mutliple-commits.outputs.new_tag }} "1.3.0"
+      # major-takes-precedence-over-patch-multiple-commits:
+      - name: "Create test repo: major-takes-precedence-over-patch-multiple-commits"
         shell: bash
         run: |
           .github/workflows/tests/several_commits_major_takes_precedence_over_patch.sh
-      - name: "Create a tag: several-commits-major-takes-precedence-over-patch"
-        id: create-tag-several-commits-major-takes-precedence-over-patch
+      - name: "Create a tag: major-takes-precedence-over-patch-multiple-commits"
+        id: create-tag-major-takes-precedence-over-patch-multiple-commits
         uses: ./
         env:
           DRY_RUN: true
@@ -183,7 +183,7 @@ jobs:
       - name: "Assert the created tag: "
         shell: bash
         run: |
-          .github/workflows/tests/_assert.sh ${{ steps.create-tag-several-commits-major-takes-precedence-over-patch.outputs.new_tag }} "1.4.0"
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag-major-takes-precedence-over-patch-multiple-commits.outputs.new_tag }} "1.4.0"
       # initial-tag-creation:
       - name: "Create test repo: initial-tag-creation"
         shell: bash
@@ -197,7 +197,6 @@ jobs:
           DEFAULT_BUMP: major
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
-          USE_LAST_COMMIT_ONLY: true
       - name: "Assert the created tag: initial-tag-creation"
         shell: bash
         run: |
@@ -215,7 +214,6 @@ jobs:
           DEFAULT_BUMP: major
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
-          USE_LAST_COMMIT_ONLY: false
       - name: "Assert the created tag: initial-tag-creation-do-not-use-last-commit-only"
         shell: bash
         run: |
