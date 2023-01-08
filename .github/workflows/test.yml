@@ -241,23 +241,24 @@ jobs:
         shell: bash
         run: |
           .github/workflows/tests/_assert.sh ${{ steps.create-tag-initial-tag-creation.outputs.new_tag }} "0.0.0"
-      # initial-tag-creation-do-not-use-last-commit-only:
-      - name: "Create test repo: initial-tag-creation-do-not-use-last-commit-only"
+      # initial-tag-creation-sets-tag-to-initial-version-even-if-multiple-commits-used:
+      - name: "Create test repo: initial-tag-creation-sets-tag-to-initial-version-even-if-multiple-commits-used"
         shell: bash
         run: |
           .github/workflows/tests/initial_tag_creation.sh
-      - name: "Create a tag: initial-tag-creation-do-not-use-last-commit-only"
-        id: create-tag-initial-tag-creation-do-not-use-last-commit-only
+      - name: "Create a tag: initial-tag-creation-sets-tag-to-initial-version-even-if-multiple-commits-used"
+        id: create-tag-initial-tag-creation-sets-tag-to-initial-version-even-if-multiple-commits-used
         uses: ./
         env:
           DRY_RUN: true
           DEFAULT_BUMP: major
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
-      - name: "Assert the created tag: initial-tag-creation-do-not-use-last-commit-only"
+          USE_LAST_COMMIT_ONLY: false
+      - name: "Assert the created tag: initial-tag-creation-sets-tag-to-initial-version-even-if-multiple-commits-used"
         shell: bash
         run: |
-          .github/workflows/tests/_assert.sh ${{ steps.create-tag-initial-tag-creation-do-not-use-last-commit-only.outputs.new_tag }} "0.0.0"
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag-initial-tag-creation-sets-tag-to-initial-version-even-if-multiple-commits-used.outputs.new_tag }} "0.0.0"
       # initial-tag-creation-with-initial-version:
       - name: "Create test repo: initial-tag-creation-with-initial-version"
         shell: bash
