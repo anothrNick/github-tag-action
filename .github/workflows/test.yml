@@ -333,3 +333,43 @@ jobs:
         shell: bash
         run: |
           .github/workflows/tests/_assert.sh ${{ steps.create-tag-tag-with-prefix-is-bumped-if-tag-with-given-prefix-already-exists.outputs.new_tag }} "prefix-1.1.2"
+      # tag-with-v-correct-prefix-is-added:
+      - name: "Create test repo: tag-with-v-correct-prefix-is-added"
+        shell: bash
+        run: |
+          .github/workflows/tests/initial_tag_creation.sh
+      - name: "Create a tag: tag-with-v-correct-prefix-is-added"
+        id: create-tag-tag-with-v-correct-prefix-is-added
+        uses: ./
+        env:
+          DRY_RUN: true
+          VERBOSE: true
+          INITIAL_VERSION: 1.0.0
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+          # PREFIX: prefix-
+          WITH_V: true
+      - name: "Assert the created tag: tag-with-v-correct-prefix-is-added"
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag-tag-with-v-correct-prefix-is-added.outputs.new_tag }} "v1.0.0"
+      # tag-with-v-is-ignored-if-prefix-is-also-specified:
+      - name: "Create test repo: tag-with-v-is-ignored-if-prefix-is-also-specified"
+        shell: bash
+        run: |
+          .github/workflows/tests/initial_tag_creation.sh
+      - name: "Create a tag: tag-with-v-is-ignored-if-prefix-is-also-specified"
+        id: create-tag-tag-with-v-is-ignored-if-prefix-is-also-specified
+        uses: ./
+        env:
+          DRY_RUN: true
+          VERBOSE: true
+          INITIAL_VERSION: 1.0.0
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+          PREFIX: prefix-
+          WITH_V: true
+      - name: "Assert the created tag: tag-with-v-is-ignored-if-prefix-is-also-specified"
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag-tag-with-v-is-ignored-if-prefix-is-also-specified.outputs.new_tag }} "prefix-1.0.0"
