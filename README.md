@@ -101,7 +101,7 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` or newer to be sure you ret
 - **CUSTOM_TAG** *(optional)* - Set a custom tag, useful when generating tag based on f.ex FROM image in a docker image. **Setting this tag will invalidate any other settings set!**
 - **SOURCE** *(optional)* - Operate on a relative path under $GITHUB_WORKSPACE.
 - **DRY_RUN** *(optional)* - Determine the next version without tagging the branch. The workflow can use the outputs `new_tag` and `tag` in subsequent steps. Possible values are ```true``` and ```false``` (default).
-- **INITIAL_VERSION** *(optional)* - Set initial version before bump. Default `0.0.0`.
+- **INITIAL_VERSION** *(optional)* - Set initial version before bump. Default `0.0.0`. It must be in a valid semver version format (optionally it can also be prefixed with PREFIX param, but it's not necessary even if PREFIX is specified). If the format is incorrect error is thrown.
 - **TAG_CONTEXT** *(optional)* - Set the context of the previous tag. Possible values are `repo` (default) or `branch`.
 - **PRERELEASE** _(optional)_ - Define if workflow runs in prerelease mode, `false` by default. Note this will be overwritten if using complex suffix release branches.
 - **PRERELEASE_SUFFIX** *(optional)* - Suffix for your prerelease versions, `beta` by default. Note this will only be used if a prerelease branch.
