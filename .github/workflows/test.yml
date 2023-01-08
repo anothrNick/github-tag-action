@@ -92,6 +92,25 @@ jobs:
         shell: bash
         run: |
           .github/workflows/tests/_assert.sh ${{ steps.create-tag-custom-string-token-major-multiple-commits.outputs.new_tag }} "3.0.0"
+      # custom-string-token-major-single-commit:
+      - name: "Create test repo: custom-string-token-major-single-commit"
+        shell: bash
+        run: |
+          .github/workflows/tests/custom_string_token.sh
+      - name: "Create a tag: custom-string-token-major-single-commit"
+        id: create-tag-custom-string-token-major-single-commit
+        uses: ./
+        env:
+          DRY_RUN: true
+          DEFAULT_BUMP: major
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+          USE_LAST_COMMIT_ONLY: true
+          MAJOR_STRING_TOKEN: ma
+      - name: "Assert the created tag: custom-string-token-major-single-commit"
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag-custom-string-token-major-single-commit.outputs.new_tag }} "2.0.0"
       # custom-string-token-minor-multiple-commits:
       - name: "Create test repo: custom-string-token-minor-multiple-commits"
         shell: bash
