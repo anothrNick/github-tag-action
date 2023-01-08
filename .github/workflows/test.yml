@@ -92,6 +92,26 @@ jobs:
         shell: bash
         run: |
           .github/workflows/tests/_assert.sh ${{ steps.create-tag-custom-string-token-major-multiple-commits.outputs.new_tag }} "3.0.0"
+      # custom-tag-overrides-all-calculated-tags:
+      - name: "Create test repo: custom-tag-overrides-all-calculated-tags"
+        shell: bash
+        run: |
+          .github/workflows/tests/custom_string_token.sh
+      - name: "Create a tag: custom-tag-overrides-all-calculated-tags"
+        id: create-tag-custom-tag-overrides-all-calculated-tags
+        uses: ./
+        env:
+          DRY_RUN: true
+          DEFAULT_BUMP: major
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+          USE_LAST_COMMIT_ONLY: false
+          MAJOR_STRING_TOKEN: ma
+          CUSTOM_TAG: xyz
+      - name: "Assert the created tag: custom-tag-overrides-all-calculated-tags"
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag-custom-tag-overrides-all-calculated-tags.outputs.new_tag }} "xyz"
       # custom-string-token-major-single-commit:
       - name: "Create test repo: custom-string-token-major-single-commit"
         shell: bash
