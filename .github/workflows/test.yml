@@ -220,13 +220,13 @@ jobs:
         shell: bash
         run: |
           .github/workflows/tests/_assert.sh ${{ steps.create-tag-initial-tag-creation-do-not-use-last-commit-only.outputs.new_tag }} "0.0.0"
-      # initial-tag-creation-custom-with-initial-version:
-      - name: "Create test repo: initial-tag-creation-custom-with-initial-version"
+      # initial-tag-creation-with-initial-version:
+      - name: "Create test repo: initial-tag-creation-with-initial-version"
         shell: bash
         run: |
           .github/workflows/tests/initial_tag_creation.sh
-      - name: "Create a tag: initial-tag-creation-custom-with-initial-version"
-        id: create-tag-initial-tag-creation-custom-with-initial-version
+      - name: "Create a tag: initial-tag-creation-with-initial-version"
+        id: create-tag-initial-tag-creation-with-initial-version
         uses: ./
         env:
           DRY_RUN: true
@@ -234,10 +234,29 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
           INITIAL_VERSION: 6.7.8
-      - name: "Assert the created tag: initial-tag-creation-custom-with-initial-version"
+      - name: "Assert the created tag: initial-tag-creation-with-initial-version"
         shell: bash
         run: |
-          .github/workflows/tests/_assert.sh ${{ steps.create-tag-initial-tag-creation-custom-with-initial-version.outputs.new_tag }} "6.7.8"
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag-initial-tag-creation-with-initial-version.outputs.new_tag }} "6.7.8"
+      # initial-tag-creation-with-prefixed-initial-version:
+      - name: "Create test repo: initial-tag-creation-with-prefixed-initial-version"
+        shell: bash
+        run: |
+          .github/workflows/tests/initial_tag_creation.sh
+      - name: "Create a tag: initial-tag-creation-with-prefixed-initial-version"
+        id: create-tag-initial-tag-creation-with-prefixed-initial-version
+        uses: ./
+        env:
+          DRY_RUN: true
+          DEFAULT_BUMP: major
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+          INITIAL_VERSION: someprefix-6.7.8
+          PREFIX: someprefix-
+      - name: "Assert the created tag: initial-tag-creation-with-prefixed-initial-version"
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag-initial-tag-creation-with-prefixed-initial-version.outputs.new_tag }} "someprefix-6.7.8"
       # initial-tag-creation-with-prefix:
       - name: "Create test repo: initial-tag-creation-with-prefix"
         shell: bash

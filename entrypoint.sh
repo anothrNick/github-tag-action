@@ -233,6 +233,11 @@ fi
 if [ -z "$tag" ]; then
     echo_previous_tags "No tag was found. INITIAL_VERSION will be used instead."
 
+    pattern="^${prefix}[0-9]+\.[0-9]+\.[0-9]+$"
+    if [[ $initial_version =~ $pattern ]]; then
+        initial_version=${initial_version#"$prefix"}
+    fi
+
     tag="$initial_version"
     echo "tag to be created: $tag"
     echo "tag to be created, pre_release: $pre_release"
