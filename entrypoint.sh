@@ -233,9 +233,15 @@ fi
 if [ -z "$tag" ]; then
     echo_previous_tags "No tag was found. INITIAL_VERSION will be used instead."
 
-    pattern="^${prefix}[0-9]+\.[0-9]+\.[0-9]+$"
-    if [[ $initial_version =~ $pattern ]]; then
+    semver_pattern_with_prefix="^${prefix}[0-9]+\.[0-9]+\.[0-9]+$"
+    if [[ $initial_version =~ $semver_pattern_with_prefix ]]; then
         initial_version=${initial_version#"$prefix"}
+    fi
+
+    semver_pattern="^[0-9]+\.[0-9]+\.[0-9]+$"
+    if ! [[ $initial_version =~ $semver_pattern ]]; then
+        echo "::error::Provided INITIAL_VERSION has incorrect format"
+        exit 1
     fi
 
     tag="$initial_version"
