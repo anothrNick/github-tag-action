@@ -9,5 +9,5 @@ if [[ $OUTPUT_NEWTAG == "${CORRECT_TAG}" ]]; then
 else
     echo "The tag was not created correctly, expected $CORRECT_TAG got $OUTPUT_NEWTAG" >>"$GITHUB_STEP_SUMMARY"
     rm -rf test-repo
-    exit 1
+    exit 123
 fi
