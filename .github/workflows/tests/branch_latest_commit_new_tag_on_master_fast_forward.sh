@@ -27,5 +27,3 @@ git checkout my-feature-branch
 git rebase master
 
 git merge my-feature-branch --no-edit --ff-only
-
-git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
