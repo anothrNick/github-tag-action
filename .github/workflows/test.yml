@@ -428,3 +428,22 @@ jobs:
         shell: bash
         run: |
           .github/workflows/tests/_assert.sh ${{ steps.create-tag-merge-branch-new-tag-on-master-since-branching-off-merge-commit.outputs.new_tag }} "2.5.0"
+      # merge-branch-no-new-tags-on-master-since-branching-off-fast-forward:
+      - name: "Create test repo: merge-branch-no-new-tags-on-master-since-branching-off-fast-forward"
+        id: create-test-repo-merge-branch-no-new-tags-on-master-since-branching-off-fast-forward
+        shell: bash
+        run: |
+          .github/workflows/tests/branch_latest_commit_no_new_tags_on_master_fast_forward.sh
+      - name: "Create a tag: merge-branch-no-new-tags-on-master-since-branching-off-fast-forward"
+        id: create-tag-merge-branch-no-new-tags-on-master-since-branching-off-fast-forward
+        uses: ./
+        env:
+          DRY_RUN: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: test-repo
+          USE_LAST_COMMIT_ONLY: false
+          BRANCH_LATEST_COMMIT: ${{ steps.create-test-repo-merge-branch-no-new-tags-on-master-since-branching-off-fast-forward.outputs.LATEST_FEATURE_BRANCH_COMMIT_SHA }}
+      - name: "Assert the created tag: merge-branch-no-new-tags-on-master-since-branching-off-fast-forward"
+        shell: bash
+        run: |
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag-merge-branch-no-new-tags-on-master-since-branching-off-fast-forward.outputs.new_tag }} "1.3.0"
