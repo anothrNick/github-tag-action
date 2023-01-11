@@ -207,11 +207,11 @@ if [ -n "$custom_tag" ]; then
     echo -e "\tPrefix: $prefix"
     echo -e "\tPart incremented: [none - custom tag was created]\n\n"
 
-    echo ::set-output name=new_tag_without_prefix::"$newCustomTagWithoutPrefix"
-    echo ::set-output name=new_tag::"$newCustomTag"
+    echo "new_tag_without_prefix=$newCustomTagWithoutPrefix" >> "$GITHUB_OUTPUT"
+    echo "new_tag=$newCustomTag" >> "$GITHUB_OUTPUT"
 
     # set the old tag value as an output
-    echo ::set-output name=tag::"$tag"
+    echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
     push_new_tag_if_not_dry_run "$newCustomTag"
 fi
@@ -269,8 +269,8 @@ commit=$(git rev-parse HEAD)
 
 if [ "$tag_commit" == "$commit" ]; then
     echo "No new commits since previous tag. Skipping..."
-    echo "::set-output name=new_tag::$tag"
-    echo "::set-output name=tag::$tag"
+    echo "new_tag=$tag" >> "$GITHUB_OUTPUT"
+    echo "tag=$tag" >> "$GITHUB_OUTPUT"
     exit 0
 fi
 
@@ -391,15 +391,15 @@ echo -e "\tNew tag: $new"
 echo -e "\tPrefix: $prefix"
 echo -e "\tPart incremented: $part\n\n"
 
-echo "::set-output name=new_tag::$new"
-echo "::set-output name=new_tag_without_prefix::$new_tag_without_prefix"
-echo "::set-output name=part::$part"
-echo "::set-output name=tag::$new" # this needs to go in v2 is breaking change
-echo "::set-output name=old_tag::$tag"
+echo "new_tag=$new" >> "$GITHUB_OUTPUT"
+echo "new_tag_without_prefix=$new_tag_without_prefix" >> "$GITHUB_OUTPUT"
+echo "part=$part" >> "$GITHUB_OUTPUT"
+echo "tag=$new" >> "$GITHUB_OUTPUT" # this needs to go in v2 is breaking change
+echo "old_tag=$tag" >> "$GITHUB_OUTPUT"
 
 # use dry run to determine the next tag
 if $dryrun; then
-    echo "::set-output name=tag::$tag"
+    echo "tag=$tag" >> "$GITHUB_OUTPUT"
     exit 0
 fi
 
