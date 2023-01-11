@@ -365,7 +365,6 @@ jobs:
           INITIAL_VERSION: 1.0.0
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE: test-repo
-          # PREFIX: prefix-
           WITH_V: true
       - name: "Assert the created tag: tag-with-v-correct-prefix-is-added"
         shell: bash
