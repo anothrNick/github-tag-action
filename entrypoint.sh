@@ -214,11 +214,11 @@ if [ -n "$custom_tag" ]; then
     echo -e "\tPrefix: $prefix"
     echo -e "\tPart incremented: [none - custom tag was created]\n\n"
 
-    echo "new_tag_without_prefix=$newCustomTagWithoutPrefix" >> "$GITHUB_OUTPUT"
-    echo "new_tag=$newCustomTag" >> "$GITHUB_OUTPUT"
+    setOutput new_tag_without_prefix "$newCustomTagWithoutPrefix"
+    setOutput new_tag "$newCustomTag"
 
     # set the old tag value as an output
-    echo "tag=$tag" >> "$GITHUB_OUTPUT"
+    setOutput tag "$tag"
 
     push_new_tag_if_not_dry_run "$newCustomTag"
 fi
@@ -437,15 +437,15 @@ echo -e "\tNew tag: $new"
 echo -e "\tPrefix: $prefix"
 echo -e "\tPart incremented: $part\n\n"
 
-echo "new_tag=$new" >> "$GITHUB_OUTPUT"
-echo "new_tag_without_prefix=$new_tag_without_prefix" >> "$GITHUB_OUTPUT"
-echo "part=$part" >> "$GITHUB_OUTPUT"
-echo "tag=$new" >> "$GITHUB_OUTPUT" # this needs to go in v2 is breaking change
-echo "old_tag=$tag" >> "$GITHUB_OUTPUT"
+setOutput new_tag "$new"
+setOutput new_tag_without_prefix "$new_tag_without_prefix"
+setOutput part "$part"
+setOutput tag "$new" # this needs to go in v2 is breaking change
+setOutput old_tag "$tag"
 
 # use dry run to determine the next tag
 if $dryrun; then
-    echo "tag=$tag" >> "$GITHUB_OUTPUT"
+    setOutput tag "$tag"
     exit 0
 fi
 
