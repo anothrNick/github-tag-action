@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck disable=SC2153,2164
+# shellcheck disable=SC2153,2164,2129
 
 set -o pipefail
 
