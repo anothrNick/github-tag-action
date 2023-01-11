@@ -50,10 +50,10 @@ echo -e "\tNONE_STRING_TOKEN: ${none_string_token}"
 echo -e "******************************************\n"
 
 # verbose, show everything
-# if $verbose TODO: restore
-# then
-#     set -x
-# fi
+if $verbose
+then
+    set -x
+fi
 
 push_new_tag_if_not_dry_run() {
 
