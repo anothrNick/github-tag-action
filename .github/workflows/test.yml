@@ -38,7 +38,7 @@ jobs:
       - name: "Assert the created tag: default-bump-undefined"
         shell: bash
         run: |
-          .github/workflows/tests/_assert.sh "${{ steps.create-tag-default-bump-undefined.outputs.new_tag }}" 1.2.0
+          .github/workflows/tests/_assert.sh ${{ steps.create-tag-default-bump-undefined.outputs.new_tag }} "1.2.0"
       # default-bump-set-to-patch
       - name: "Create test repo: default-bump-set-to-patch"
         shell: bash
