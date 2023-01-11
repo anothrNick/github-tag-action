@@ -6,20 +6,23 @@ on:
       - closed
     branches:
       - master
+    paths:
+      - 'entrypoint.sh'
+      - 'action.yml'
+      - 'Dockerfile'
 
 jobs:
-  build:
+  bump-version:
     if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
-          ref: ${{ github.ref_name }}
 
       - name: version-tag
         id: tag
-        uses: anothrNick/github-tag-action@master # if we use 1 there is a too-be-fixed bug https://github.com/anothrNick/github-tag-action/actions/runs/3139501775/jobs/5099976842#step:1:35 alternatvelly we can use v1
+        uses: anothrNick/github-tag-action@master # if we use 1 there is a too-be-fixed bug https://github.com/anothrNick/github-tag-action/actions/runs/3139501775/jobs/5099976842#step:1:35 as alternative we could use v1
         env:
           VERBOSE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

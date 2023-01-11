@@ -6,6 +6,7 @@ set -o pipefail
 
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
+default_branch=${DEFAULT_BRANCH:-$GITHUB_BASE_REF} # get the default branch from github runner env vars
 with_v=${WITH_V}
 prefix=${PREFIX:-}
 release_branches=${RELEASE_BRANCHES:-master,main}
@@ -23,6 +24,7 @@ major_string_token=${MAJOR_STRING_TOKEN:-#major}
 minor_string_token=${MINOR_STRING_TOKEN:-#minor}
 patch_string_token=${PATCH_STRING_TOKEN:-#patch}
 none_string_token=${NONE_STRING_TOKEN:-#none}
+branch_history=${BRANCH_HISTORY:-compare}
 # since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses?
 git config --global --add safe.directory /github/workspace
 
@@ -30,6 +32,7 @@ cd "${GITHUB_WORKSPACE}/${source}" || exit 1
 
 echo "*** CONFIGURATION ***"
 echo -e "\tDEFAULT_BUMP: ${default_semvar_bump}"
+echo -e "\tDEFAULT_BRANCH: ${default_branch}"
 echo -e "\tWITH_V: ${with_v}"
 echo -e "\tPREFIX: ${prefix}"
 echo -e "\tRELEASE_BRANCHES: ${release_branches}"
@@ -47,7 +50,7 @@ echo -e "\tMAJOR_STRING_TOKEN: ${major_string_token}"
 echo -e "\tMINOR_STRING_TOKEN: ${minor_string_token}"
 echo -e "\tPATCH_STRING_TOKEN: ${patch_string_token}"
 echo -e "\tNONE_STRING_TOKEN: ${none_string_token}"
-echo -e "******************************************\n"
+echo -e "\tBRANCH_HISTORY: ${branch_history}"
 
 # verbose, show everything
 if $verbose
@@ -154,17 +157,23 @@ bump_version() {
     done
 }
 
+setOutput() {
+    echo "${1}=${2}" >> "${GITHUB_OUTPUT}"
+}
+
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
 pre_release="$prerelease"
-IFS=',' read -ra branch <<<"$release_branches"
+IFS=',' read -ra branch <<< "$release_branches"
 for b in "${branch[@]}"; do
     # check if ${current_branch} is in ${release_branches} | exact branch match
-    if [[ "$current_branch" == "$b" ]]; then
+    if [[ "$current_branch" == "$b" ]]
+    then
         pre_release="false"
     fi
     # verify non specific branch names like  .* release/* if wildcard filter then =~
-    if [ "$b" != "${b//[\[\]|.? +*]/}" ] && [[ "$current_branch" =~ $b ]]; then
+    if [ "$b" != "${b//[\[\]|.? +*]/}" ] && [[ "$current_branch" =~ $b ]]
+    then
         pre_release="false"
     fi
 done
@@ -178,18 +187,16 @@ preTagFmt="^$prefix?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)$"
 
 # get latest tag that looks like a semver (with or without prefix)
 case "$tag_context" in
-*repo*)
-    tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt" | head -n 1)"
-    pre_tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt" | head -n 1)"
-    ;;
-*branch*)
-    tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt" | head -n 1)"
-    pre_tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt" | head -n 1)"
-    ;;
-*)
-    echo "Unrecognised context"
-    exit 1
-    ;;
+    *repo*) 
+        tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt" | head -n 1)"
+        pre_tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt" | head -n 1)"
+        ;;
+    *branch*) 
+        tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt" | head -n 1)"
+        pre_tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt" | head -n 1)"
+        ;;
+    * ) echo "Unrecognised context"
+        exit 1;;
 esac
 
 # as defined in readme if CUSTOM_TAG is used any semver calculations are irrelevant.
@@ -269,9 +276,23 @@ commit=$(git rev-parse HEAD)
 
 if [ "$tag_commit" == "$commit" ]; then
     echo "No new commits since previous tag. Skipping..."
-    echo "new_tag=$tag" >> "$GITHUB_OUTPUT"
-    echo "tag=$tag" >> "$GITHUB_OUTPUT"
+    setOutput "new_tag" "$tag"
+    setOutput "tag" "$tag"
     exit 0
+fi
+
+# sanitize that the default_branch is set (via env var when running on PRs) else find it natively
+if [ -z "${default_branch}" ] && [ "$branch_history" == "full" ]
+then
+    echo "The DEFAULT_BRANCH should be autodetected when tag-action runs on on PRs else must be defined, See: https://github.com/anothrNick/github-tag-action/pull/230, since is not defined we find it natively"
+    default_branch=$(git branch -rl '*/master' '*/main' | cut -d / -f2)
+    echo "default_branch=${default_branch}"
+    # re check this
+    if [ -z "${default_branch}" ]
+    then
+        echo "::error::DEFAULT_BRANCH must not be null, something has gone wrong."
+        exit 1
+    fi
 fi
 
 # calculate new tag
@@ -320,6 +341,15 @@ else
     fi
 fi
 
+# get the merge commit message looking for #bumps
+declare -A history_type=( 
+    ["last"]="$(git show -s --format=%B)" \
+    ["full"]="$(git log "${default_branch}"..HEAD --format=%B)" \
+    ["compare"]="$(git log "${tag_commit}".."${commit}" --format=%B)" \
+)
+log=${history_type[${branch_history}]}
+printf "History:\n---\n%s\n---\n" "$log"
+
 tagWithoutPrefix=${tag#"$prefix"}
 
 if [ "$number_of_major" != 0 ]; then
@@ -358,6 +388,16 @@ if [ -z "$new" ]; then
 fi
 
 if $pre_release; then
+    # get current commit hash for tag
+    pre_tag_commit=$(git rev-list -n 1 "$pre_tag")
+    # skip if there are no new commits for pre_release
+    if [ "$pre_tag_commit" == "$commit" ]
+    then
+        echo "No new commits since previous pre_tag. Skipping..."
+        setOutput "new_tag" "$pre_tag"
+        setOutput "tag" "$pre_tag"
+        exit 0
+    fi
     # already a pre-release available, bump it
     if [[ "$pre_tag" =~ $new ]] && [[ "$pre_tag" =~ $suffix ]]; then
         if [ -n "${prefix}" ]; then
@@ -380,6 +420,12 @@ else
         new="${prefix}${new}"
     fi
     echo -e "Bumping tag ${tag} - New tag ${new}"
+fi
+
+# as defined in readme if CUSTOM_TAG is used any semver calculations are irrelevant.
+if [ -n "$custom_tag" ]
+then
+    new="$custom_tag"
 fi
 
 # set outputs
@@ -414,9 +460,9 @@ git_refs_url=$(jq .repository.git_refs_url "$GITHUB_EVENT_PATH" | tr -d '"' | se
 echo "$dt: **pushing tag $new to repo $full_name"
 
 git_refs_response=$(
-    curl -s -X POST "$git_refs_url" \
-        -H "Authorization: token $GITHUB_TOKEN" \
-        -d @- <<EOF
+curl -s -X POST "$git_refs_url" \
+-H "Authorization: token $GITHUB_TOKEN" \
+-d @- << EOF
 
 {
   "ref": "refs/tags/$new",
@@ -425,10 +471,11 @@ git_refs_response=$(
 EOF
 )
 
-git_ref_posted=$(echo "${git_refs_response}" | jq .ref | tr -d '"')
+git_ref_posted=$( echo "${git_refs_response}" | jq .ref | tr -d '"' )
 
 echo "::debug::${git_refs_response}"
-if [ "${git_ref_posted}" = "refs/tags/${new}" ]; then
+if [ "${git_ref_posted}" = "refs/tags/${new}" ]
+then
     exit 0
 else
     echo "::error::Tag was not created properly."
