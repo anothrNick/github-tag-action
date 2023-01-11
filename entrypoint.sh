@@ -153,7 +153,6 @@ bump_version() {
 
     for ((c = 1; c <= count; c++)); do
         new=$(semver -i "$1" "$new")
-        part=$1 # TODO: Is this line needed?
     done
 }
 
