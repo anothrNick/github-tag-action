@@ -116,7 +116,7 @@ tag_commit=$(git rev-list -n 1 "$tag")
 # get current commit hash
 commit=$(git rev-parse HEAD)
 
-if [ "$tag_commit" == "$commit" ] && [ $allow_tag_on_unchanged = false ]
+if [ "$tag_commit" == "$commit" ] && [ "$allow_tag_on_unchanged" == "false" ]
 then
     echo "No new commits since previous tag. Skipping..."
     setOutput "new_tag" "$tag"
