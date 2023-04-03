@@ -22,9 +22,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: '0'
+          fetch-depth: "0"
 
-      # Use the action to generate a tag for itself
       - name: Test action main
         id: test_main
         uses: ./
@@ -34,7 +33,6 @@ jobs:
           VERBOSE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Use the action to generate a tag for itself
       - name: Test action pre-release
         id: test_pre
         uses: ./
@@ -46,44 +44,8 @@ jobs:
           VERBOSE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Check if the action created the expected output
       - name: Check if the tag would have been created
         shell: bash
         run: |
-          set -x
-          MAIN_OUTPUT_TAG=${{ steps.test_main.outputs.old_tag }}
-          MAIN_OUTPUT_NEWTAG=${{ steps.test_main.outputs.new_tag }}
-          MAIN_OUTPUT_PART=${{ steps.test_main.outputs.part }}
-          PRE_OUTPUT_TAG=${{ steps.test_pre.outputs.old_tag }}
-          PRE_OUTPUT_NEWTAG=${{ steps.test_pre.outputs.new_tag }}
-          PRE_OUTPUT_PART=${{ steps.test_pre.outputs.part }}
-
-          echo "Outputs from running the action:" >> $GITHUB_STEP_SUMMARY
-          echo "MAIN Tag: $MAIN_OUTPUT_TAG" >> $GITHUB_STEP_SUMMARY
-          echo "MAIN New tag: $MAIN_OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
-          echo "MAIN Part: $MAIN_OUTPUT_PART" >> $GITHUB_STEP_SUMMARY
-          echo "PRE Tag: $PRE_OUTPUT_TAG" >> $GITHUB_STEP_SUMMARY
-          echo "PRE New tag: $PRE_OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
-          echo "PRE Part: $PRE_OUTPUT_PART" >> $GITHUB_STEP_SUMMARY
-
-          # check that the original tag got bumped either major, minor, patch
-          verlte() {
-            [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]
-          }
-          verlt() {
-            [ "$1" = "$2" ] && return 1 || verlte $1 $2
-          }
-
-          main="$(verlt $MAIN_OUTPUT_TAG $MAIN_OUTPUT_NEWTAG && true || false)"
-          pre="$(verlt $PRE_OUTPUT_TAG $PRE_OUTPUT_NEWTAG && true || false)"
-
-          if $main && $pre
-          then
-            echo "The tags were created correctly" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "Tags not created correctly" >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
-
-          # todo add test for #none bump
-
+          chmod +x .github/workflows/scripts/tag_check.sh
+          ./.github/workflows/scripts/tag_check.sh "${{ steps.test_main.outputs.old_tag }}" "${{ steps.test_main.outputs.new_tag }}" "${{ steps.test_main.outputs.part }}" "${{ steps.test_pre.outputs.old_tag }}" "${{ steps.test_pre.outputs.new_tag }}" "${{ steps.test_pre.outputs.part }}"
