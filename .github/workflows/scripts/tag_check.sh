@@ -18,28 +18,28 @@ echo "PRE New tag: $PRE_OUTPUT_NEWTAG" >>"$GITHUB_STEP_SUMMARY"
 echo "PRE Part: $PRE_OUTPUT_PART" >>"$GITHUB_STEP_SUMMARY"
 
 verlte() {
-    [ "$1" = "$(echo -e "$1\n$2" | sort -V | head -n1)" ]
+	[ "$1" = "$(echo -e "$1\n$2" | sort -V | head -n1)" ]
 }
 verlt() {
-    [ "$1" = "$2" ] && return 1 || verlte "$1" "$2"
+	[ "$1" = "$2" ] && return 1 || verlte "$1" "$2"
 }
 
 main="$(verlt "$MAIN_OUTPUT_TAG" "$MAIN_OUTPUT_NEWTAG" && true || false)"
 pre="$(verlt "$PRE_OUTPUT_TAG" "$PRE_OUTPUT_NEWTAG" && true || false)"
 
 if $main && $pre; then
-    echo "The tags were created correctly" >>"$GITHUB_STEP_SUMMARY"
+	echo "The tags were created correctly" >>"$GITHUB_STEP_SUMMARY"
 else
-    echo "Tags not created correctly" >>"$GITHUB_STEP_SUMMARY"
-    exit 1
+	echo "Tags not created correctly" >>"$GITHUB_STEP_SUMMARY"
+	exit 1
 fi
 
 # Test for #none bump
-if [[ "$MAIN_OUTPUT_PART" == "none" ]]; then
-    if [[ "$MAIN_OUTPUT_TAG" == "$MAIN_OUTPUT_NEWTAG" ]]; then
-        echo "None bump test passed" >>"$GITHUB_STEP_SUMMARY"
-    else
-        echo "None bump test failed" >>"$GITHUB_STEP_SUMMARY"
-        exit 1
-    fi
+if [[ $MAIN_OUTPUT_PART == "none" ]]; then
+	if [[ $MAIN_OUTPUT_TAG == "$MAIN_OUTPUT_NEWTAG" ]]; then
+		echo "None bump test passed" >>"$GITHUB_STEP_SUMMARY"
+	else
+		echo "None bump test failed" >>"$GITHUB_STEP_SUMMARY"
+		exit 1
+	fi
 fi
