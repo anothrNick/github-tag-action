@@ -1,72 +1,45 @@
-# Code of Conduct - github-tag-action
+# Code of Conduct - GitHub Tag Action
 
 ## Our Pledge
 
-In the interest of fostering an open and welcoming environment, we as
-contributors and maintainers pledge to make participation in our project and
-our community a harassment-free experience for everyone, regardless of age, body
-size, disability, ethnicity, sex characteristics, gender identity and expression,
-level of experience, education, socio-economic status, nationality, personal
-appearance, race, religion, or sexual identity and orientation.
+As contributors and maintainers, we are committed to fostering an open and welcoming environment. We pledge to make participation in our project and our community a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, religion, or sexual identity and orientation.
 
 ## Our Standards
 
-Examples of behavior that contributes to a positive environment for our
-community include:
+Examples of behaviors that contribute to a positive environment for our community include:
 
-- Demonstrating empathy and kindness toward other people
+- Demonstrating empathy and kindness toward others
 - Being respectful of differing opinions, viewpoints, and experiences
 - Giving and gracefully accepting constructive feedback
-- Accepting responsibility and apologizing to those affected by our mistakes,
-  and learning from the experience
-- Focusing on what is best not just for us as individuals, but for the
-  overall community
+- Accepting responsibility, apologizing to those affected by our mistakes, and learning from the experience
+- Focusing on what is best not only for us as individuals but also for the overall community
 
 Examples of unacceptable behavior include:
 
-- The use of sexualized language or imagery, and sexual attention or
-  advances
+- The use of sexualized language or imagery and unwelcome sexual attention or advances
 - Trolling, insulting or derogatory comments, and personal or political attacks
 - Public or private harassment
-- Publishing others' private information, such as a physical or email
-  address, without their explicit permission
-- Other conduct which could reasonably be considered inappropriate in a
-  professional setting
+- Publishing others' private information, such as a physical or email address, without their explicit permission
+- Any other conduct reasonably considered inappropriate in a professional setting
 
 ## Our Responsibilities
 
-Project maintainers are responsible for clarifying and enforcing our standards of
-acceptable behavior and will take appropriate and fair corrective action in
-response to any instances of unacceptable behavior.
+Project maintainers are responsible for clarifying and enforcing our standards of acceptable behavior. They will take appropriate and fair corrective action in response to unacceptable behavior.
 
-Project maintainers have the right and responsibility to remove, edit, or reject
-comments, commits, code, wiki edits, issues, and other contributions that are
-not aligned to this Code of Conduct, or to ban
-temporarily or permanently any contributor for other behaviors that they deem
-inappropriate, threatening, offensive, or harmful.
+Project maintainers are responsible for removing, editing, or rejecting comments, commits, code, wiki edits, issues, and other contributions that do not align with this Code of Conduct. They may also temporarily or permanently ban any contributor for inappropriate, threatening, offensive, or harmful behaviors.
 
 ## Scope
 
-This Code of Conduct applies within all community spaces, and also applies when
-an individual is officially representing the community in public spaces.
-Examples of representing our community include using an official e-mail address,
-posting via an official social media account, or acting as an appointed
-representative at an online or offline event.
+This Code of Conduct applies within all community spaces and when an individual officially represents the community in public spaces. Representing our community includes:
+
+- Using an official email address.
+- Posting via an official social media account.
+- Acting as an appointed representative at online or offline events.
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement by logging an issue,
-or contacting one or more of the maintainers directly.
+To report abusive, harassing, or otherwise unacceptable behavior, don't hesitate to contact the community leaders responsible for enforcement by logging an issue or getting one or more of the maintainers directly.
 
 All complaints will be reviewed and investigated to the best of our capacity and ability.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
-
-## Attribution
-
-This Code of Conduct is adapted from the [Contributor Covenant](https://contributor-covenant.org/), version
-[1.4](https://www.contributor-covenant.org/version/1/4/code-of-conduct/code_of_conduct.md) and
-[2.0](https://www.contributor-covenant.org/version/2/0/code_of_conduct/code_of_conduct.md),
-and was generated by [contributing-gen](https://github.com/bttger/contributing-gen).
+Community leaders must respect the privacy and security of the reporter of any incident.
