@@ -12,7 +12,7 @@ inputs:
     required: false
 runs:
   using: "docker"
-  image: "ghcr.io/beholdenkey/github-tag-action:master"
+  image: "ghcr.io/anothrNick/github-tag-action:master"
 
 outputs:
   new_tag:
