@@ -7,9 +7,9 @@ on:
     branches:
       - master
     paths:
-      - 'entrypoint.sh'
-      - 'action.yml'
-      - 'Dockerfile'
+      - "entrypoint.sh"
+      - "action.yml"
+      - "Dockerfile"
 
 jobs:
   bump-version:
@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: '0'
+          fetch-depth: "0"
 
       - name: version-tag
         id: tag

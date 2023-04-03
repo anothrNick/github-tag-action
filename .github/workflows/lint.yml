@@ -25,7 +25,7 @@ jobs:
           reporter: github-pr-review
           level: warning
           path: .
-          pattern: '*.sh'
+          pattern: "*.sh"
           fail_on_error: true
 
   lint-dockerfile:

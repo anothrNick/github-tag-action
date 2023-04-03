@@ -11,38 +11,38 @@ appearance, race, religion, or sexual identity and orientation.
 
 ## Our Standards
 
-Examples of behaviour that contributes to a positive environment for our
+Examples of behavior that contributes to a positive environment for our
 community include:
 
-* Demonstrating empathy and kindness toward other people
-* Being respectful of differing opinions, viewpoints, and experiences
-* Giving and gracefully accepting constructive feedback
-* Accepting responsibility and apologising to those affected by our mistakes,
+- Demonstrating empathy and kindness toward other people
+- Being respectful of differing opinions, viewpoints, and experiences
+- Giving and gracefully accepting constructive feedback
+- Accepting responsibility and apologizing to those affected by our mistakes,
   and learning from the experience
-* Focusing on what is best not just for us as individuals, but for the
+- Focusing on what is best not just for us as individuals, but for the
   overall community
 
-Examples of unacceptable behaviour include:
+Examples of unacceptable behavior include:
 
-* The use of sexualised language or imagery, and sexual attention or
+- The use of sexualized language or imagery, and sexual attention or
   advances
-* Trolling, insulting or derogatory comments, and personal or political attacks
-* Public or private harassment
-* Publishing others' private information, such as a physical or email
+- Trolling, insulting or derogatory comments, and personal or political attacks
+- Public or private harassment
+- Publishing others' private information, such as a physical or email
   address, without their explicit permission
-* Other conduct which could reasonably be considered inappropriate in a
+- Other conduct which could reasonably be considered inappropriate in a
   professional setting
 
 ## Our Responsibilities
 
 Project maintainers are responsible for clarifying and enforcing our standards of
-acceptable behaviour and will take appropriate and fair corrective action in
-response to any instances of unacceptable behaviour.
+acceptable behavior and will take appropriate and fair corrective action in
+response to any instances of unacceptable behavior.
 
 Project maintainers have the right and responsibility to remove, edit, or reject
 comments, commits, code, wiki edits, issues, and other contributions that are
 not aligned to this Code of Conduct, or to ban
-temporarily or permanently any contributor for other behaviours that they deem
+temporarily or permanently any contributor for other behaviors that they deem
 inappropriate, threatening, offensive, or harmful.
 
 ## Scope
@@ -55,7 +55,7 @@ representative at an online or offline event.
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behaviour may be
+Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement by logging an issue,
 or contacting one or more of the maintainers directly.
 
