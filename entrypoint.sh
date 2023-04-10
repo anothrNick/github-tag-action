@@ -154,15 +154,19 @@ case "$log" in
     *$patch_string_token* ) new=$(semver -i patch "$tag"); part="patch";;
     *$none_string_token* ) 
         echo "Default bump was set to none. Skipping..."
+        setOutput "old_tag" "$tag"
         setOutput "new_tag" "$tag"
         setOutput "tag" "$tag"
+        setOutput "part" "$default_semvar_bump"
         exit 0;;
     * ) 
         if [ "$default_semvar_bump" == "none" ]
         then
             echo "Default bump was set to none. Skipping..."
+            setOutput "old_tag" "$tag"
             setOutput "new_tag" "$tag"
             setOutput "tag" "$tag"
+            setOutput "part" "$default_semvar_bump"
             exit 0 
         else 
             new=$(semver -i "${default_semvar_bump}" "$tag")
