@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -o pipefail
+set -eo pipefail
 
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
