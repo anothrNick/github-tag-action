@@ -178,7 +178,7 @@ esac
 if $pre_release
 then
     # get current commit hash for tag
-    pre_tag_commit=$(git rev-list -n 1 "$pre_tag")
+    pre_tag_commit=$(git rev-list -n 1 "$pre_tag" || true)
     # skip if there are no new commits for pre_release
     if [ "$pre_tag_commit" == "$commit" ]
     then
