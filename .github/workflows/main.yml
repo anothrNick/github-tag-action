@@ -22,7 +22,7 @@ jobs:
 
       - name: version-tag
         id: tag
-        uses: anothrNick/github-tag-action@master # if we use 1 there is a too-be-fixed bug https://github.com/anothrNick/github-tag-action/actions/runs/3139501775/jobs/5099976842#step:1:35 as alternative we could use v1
+        uses: kuzmacska/github-tag-action@master # if we use 1 there is a too-be-fixed bug https://github.com/kuzmacska/github-tag-action/actions/runs/3139501775/jobs/5099976842#step:1:35 as alternative we could use v1
         env:
           VERBOSE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -48,6 +48,6 @@ jobs:
           # update major tag
           git tag -f "$major"
           git push -f origin "$major"
-          # add vX as 1 is linked to short sha bug https://github.com/anothrNick/github-tag-action/actions/runs/3139501775/jobs/5099976842#step:1:35
+          # add vX as 1 is linked to short sha bug https://github.com/kuzmacska/github-tag-action/actions/runs/3139501775/jobs/5099976842#step:1:35
           git tag -f "v$major"
           git push -f origin "v$major"
