@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -o pipefail
+set -eo pipefail
 
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
@@ -81,12 +81,12 @@ preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)$"
 # get latest tag that looks like a semver (with or without v)
 case "$tag_context" in
     *repo*) 
-        tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt" | head -n 1)"
-        pre_tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt" | head -n 1)"
+        tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | (grep -E "$tagFmt" || true) | head -n 1)"
+        pre_tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | (grep -qs -E "$preTagFmt" || true) | head -n 1)"
         ;;
     *branch*) 
-        tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt" | head -n 1)"
-        pre_tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt" | head -n 1)"
+        tag="$(git tag --list --merged HEAD --sort=-v:refname | (grep -E "$tagFmt" || true) | head -n 1)"
+        pre_tag="$(git tag --list --merged HEAD --sort=-v:refname | (grep -qs -E "$preTagFmt" || true) | head -n 1)"
         ;;
     * ) echo "Unrecognised context"
         exit 1;;
@@ -178,7 +178,7 @@ esac
 if $pre_release
 then
     # get current commit hash for tag
-    pre_tag_commit=$(git rev-list -n 1 "$pre_tag")
+    pre_tag_commit=$(git rev-list -n 1 "$pre_tag" || true)
     # skip if there are no new commits for pre_release
     if [ "$pre_tag_commit" == "$commit" ]
     then
