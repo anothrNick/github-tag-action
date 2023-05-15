@@ -35,7 +35,7 @@ jobs:
         fetch-depth: '0'
 
     - name: Bump version and push tag
-      uses: anothrNick/github-tag-action@1.64.0 # Don't use @master unless you're happy to test the latest version
+      uses: anothrNick/github-tag-action@1.64.0 # Don't use @master or @v1 unless you're happy to test the latest version
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # if you don't want to set write permissions use a PAT token
         WITH_V: false
@@ -59,14 +59,16 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        ref: ${{ github.sha }}
+        ref: ${{ github.sha }} # required for better experience using pre-releases
         fetch-depth: '0'
 
     - name: Bump version and push tag
-      uses: anothrNick/github-tag-action@1.64.0 # Don't use @master unless you're happy to test the latest version
+      uses: anothrNick/github-tag-action@1.64.0 # Don't use @master or @v1 unless you're happy to test the latest version
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # if you don't want to set write permissions use a PAT token
         WITH_V: true
+        PRERELEASE: true
+
 ```
 
 Depending if you choose example 1 or example 2 is how crafted version bumps operate when reading the commit log.
@@ -89,7 +91,7 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` or newer to be sure you ret
 - **DRY_RUN** _(optional)_ - Determine the next version without tagging the branch. The workflow can use the outputs `new_tag` and `tag` in subsequent steps. Possible values are `true` and `false` (default).
 - **INITIAL_VERSION** _(optional)_ - Set initial version before bump. Default `0.0.0`.
 - **TAG_CONTEXT** _(optional)_ - Set the context of the previous tag. Possible values are `repo` (default) or `branch`.
-- **PRERELEASE** _(optional)_ - Define if workflow runs in prerelease mode, `false` by default. Note this will be overwritten if using complex suffix release branches.
+- **PRERELEASE** _(optional)_ - Define if workflow runs in prerelease mode, `false` by default. Note this will be overwritten if using complex suffix release branches. Use it with checkout `ref: ${{ github.sha }}` for consistency see [issue 266](https://github.com/anothrNick/github-tag-action/issues/266).
 - **PRERELEASE_SUFFIX** _(optional)_ - Suffix for your prerelease versions, `beta` by default. Note this will only be used if a prerelease branch.
 - **VERBOSE** _(optional)_ - Print git logs. For some projects these logs may be very large. Possible values are `true` (default) and `false`.
 - **MAJOR_STRING_TOKEN** _(optional)_ - Change the default `#major` commit message string tag.
@@ -127,8 +129,9 @@ If `#none` is contained in the merge commit message, it will skip bumping regard
   - Get latest tag
   - Bump tag with minor version unless the merge commit message contains `#major` or `#patch`
   - Pushes tag to github
-  - If triggered on your repo's default branch (`master` or `main` if unchanged), the bump version will be a release tag.
+  - If triggered on your repo's default branch (`master` or `main` if unchanged), the bump version will be a release tag. see [issue 266](https://github.com/anothrNick/github-tag-action/issues/266).
   - If triggered on any other branch, a prerelease will be generated, depending on the bump, starting with `*-<PRERELEASE_SUFFIX>.1`, `*-<PRERELEASE_SUFFIX>.2`, ...
+  - To create a repository release you need another workflow like [automatic-releases](https://github.com/marketplace/actions/automatic-releases).
 
 ## Contributing
 
