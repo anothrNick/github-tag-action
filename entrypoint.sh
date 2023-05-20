@@ -78,19 +78,24 @@ git fetch --tags
 tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$"
 preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)$"
 
-# get latest tag that looks like a semver (with or without v)
+# get the git refs
+git_refs=
 case "$tag_context" in
-    *repo*) 
-        tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | (grep -E "$tagFmt" || true) | head -n 1)"
-        pre_tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | (grep -E "$preTagFmt" || true) | head -n 1)"
+    *repo*)
+        git_refs=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)')
         ;;
-    *branch*) 
-        tag="$(git tag --list --merged HEAD --sort=-v:refname | (grep -E "$tagFmt" || true) | head -n 1)"
-        pre_tag="$(git tag --list --merged HEAD --sort=-v:refname | (grep -E "$preTagFmt" || true) | head -n 1)"
+    *branch*)
+        git_refs=$(git tag --list --merged HEAD --sort=-v:refname)
         ;;
     * ) echo "Unrecognised context"
         exit 1;;
 esac
+
+# get the latest tag that looks like a semver (with or without v)
+matching_tag_refs=$((grep -E "$tagFmt" <<< $git_refs) || true)
+matching_pre_tag_refs=$((grep -E "$preTagFmt" <<< $git_refs) || true)
+tag=$(head -n 1 <<< $matching_tag_refs)
+pre_tag=$(head -n 1 <<< $matching_pre_tag_refs)
 
 # if there are none, start tags at INITIAL_VERSION
 if [ -z "$tag" ]
