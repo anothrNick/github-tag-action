@@ -1,8 +1,14 @@
+<!--- Provide a general summary of your changes in the Title above -->
+<!--- See [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). -->
 # Summary of changes
 
-Do any of the followings changes break current behaviour or configuration?
+<!--- Describe your changes -->
 
-- **YES** / NO
+## Breaking Changes
+
+Do any of the included changes break current behaviour or configuration?
+
+(**YES** / NO)
 
 ## How changes have been tested
 

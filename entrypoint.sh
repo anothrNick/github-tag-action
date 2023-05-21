@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
-set -o pipefail
+set -eo pipefail
 
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
+default_branch=${DEFAULT_BRANCH:-$GITHUB_BASE_REF} # get the default branch from github runner env vars
 with_v=${WITH_V:-false}
 release_branches=${RELEASE_BRANCHES:-master,main}
 custom_tag=${CUSTOM_TAG:-}
@@ -18,6 +19,7 @@ major_string_token=${MAJOR_STRING_TOKEN:-#major}
 minor_string_token=${MINOR_STRING_TOKEN:-#minor}
 patch_string_token=${PATCH_STRING_TOKEN:-#patch}
 none_string_token=${NONE_STRING_TOKEN:-#none}
+branch_history=${BRANCH_HISTORY:-compare}
 # since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses?
 git config --global --add safe.directory /github/workspace
 
@@ -25,6 +27,7 @@ cd "${GITHUB_WORKSPACE}/${source}" || exit 1
 
 echo "*** CONFIGURATION ***"
 echo -e "\tDEFAULT_BUMP: ${default_semvar_bump}"
+echo -e "\tDEFAULT_BRANCH: ${default_branch}"
 echo -e "\tWITH_V: ${with_v}"
 echo -e "\tRELEASE_BRANCHES: ${release_branches}"
 echo -e "\tCUSTOM_TAG: ${custom_tag}"
@@ -39,6 +42,7 @@ echo -e "\tMAJOR_STRING_TOKEN: ${major_string_token}"
 echo -e "\tMINOR_STRING_TOKEN: ${minor_string_token}"
 echo -e "\tPATCH_STRING_TOKEN: ${patch_string_token}"
 echo -e "\tNONE_STRING_TOKEN: ${none_string_token}"
+echo -e "\tBRANCH_HISTORY: ${branch_history}"
 
 # verbose, show everything
 if $verbose
@@ -74,19 +78,24 @@ git fetch --tags
 tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$"
 preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)$"
 
-# get latest tag that looks like a semver (with or without v)
+# get the git refs
+git_refs=
 case "$tag_context" in
     *repo*)
-        tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt" | head -n 1)"
-        pre_tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt" | head -n 1)"
+        git_refs=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)')
         ;;
     *branch*)
-        tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt" | head -n 1)"
-        pre_tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt" | head -n 1)"
+        git_refs=$(git tag --list --merged HEAD --sort=-v:refname)
         ;;
     * ) echo "Unrecognised context"
         exit 1;;
 esac
+
+# get the latest tag that looks like a semver (with or without v)
+matching_tag_refs=$( (grep -E "$tagFmt" <<< "$git_refs") || true)
+matching_pre_tag_refs=$( (grep -E "$preTagFmt" <<< "$git_refs") || true)
+tag=$(head -n 1 <<< "$matching_tag_refs")
+pre_tag=$(head -n 1 <<< "$matching_pre_tag_refs")
 
 # if there are none, start tags at INITIAL_VERSION
 if [ -z "$tag" ]
@@ -109,11 +118,10 @@ then
 fi
 
 # get current commit hash for tag
-tag_commit=$(git rev-list -n 1 "$tag")
-
+tag_commit=$(git rev-list -n 1 "$tag" || true )
 # get current commit hash
 commit=$(git rev-parse HEAD)
-
+# skip if there are no new commits for non-pre_release
 if [ "$tag_commit" == "$commit" ]
 then
     echo "No new commits since previous tag. Skipping..."
@@ -122,9 +130,28 @@ then
     exit 0
 fi
 
+# sanitize that the default_branch is set (via env var when running on PRs) else find it natively
+if [ -z "${default_branch}" ] && [ "$branch_history" == "full" ]
+then
+    echo "The DEFAULT_BRANCH should be autodetected when tag-action runs on on PRs else must be defined, See: https://github.com/anothrNick/github-tag-action/pull/230, since is not defined we find it natively"
+    default_branch=$(git branch -rl '*/master' '*/main' | cut -d / -f2)
+    echo "default_branch=${default_branch}"
+    # re check this
+    if [ -z "${default_branch}" ]
+    then
+        echo "::error::DEFAULT_BRANCH must not be null, something has gone wrong."
+        exit 1
+    fi
+fi
+
 # get the merge commit message looking for #bumps
-log=$(git show -s --format=%B)
-echo "Last commit message: $log"
+declare -A history_type=(
+    ["last"]="$(git show -s --format=%B)" \
+    ["full"]="$(git log "${default_branch}"..HEAD --format=%B)" \
+    ["compare"]="$(git log "${tag_commit}".."${commit}" --format=%B)" \
+)
+log=${history_type[${branch_history}]}
+printf "History:\n---\n%s\n---\n" "$log"
 
 case "$log" in
     *$major_string_token* ) new=$(semver -i major "$tag"); part="major";;
@@ -132,13 +159,16 @@ case "$log" in
     *$patch_string_token* ) new=$(semver -i patch "$tag"); part="patch";;
     *$none_string_token* )
         echo "Default bump was set to none. Skipping..."
+        setOutput "old_tag" "$tag"
         setOutput "new_tag" "$tag"
         setOutput "tag" "$tag"
+        setOutput "part" "$default_semvar_bump"
         exit 0;;
     * )
         if [ "$default_semvar_bump" == "none" ]
         then
             echo "Default bump was set to none. Skipping..."
+            setOutput "old_tag" "$tag"
             setOutput "new_tag" "$tag"
             setOutput "tag" "$tag"
             exit 0
@@ -151,6 +181,16 @@ esac
 
 if $pre_release
 then
+    # get current commit hash for tag
+    pre_tag_commit=$(git rev-list -n 1 "$pre_tag" || true)
+    # skip if there are no new commits for pre_release
+    if [ "$pre_tag_commit" == "$commit" ]
+    then
+        echo "No new commits since previous pre_tag. Skipping..."
+        setOutput "new_tag" "$pre_tag"
+        setOutput "tag" "$pre_tag"
+        exit 0
+    fi
     # already a pre-release available, bump it
     if [[ "$pre_tag" =~ $new ]] && [[ "$pre_tag" =~ $suffix ]]
     then
@@ -201,6 +241,7 @@ fi
 git tag "$new"
 
 # push new tag ref to github
+# this needs permissions in the workflow as contents: write
 dt=$(date '+%Y-%m-%dT%H:%M:%SZ')
 full_name=$GITHUB_REPOSITORY
 git_refs_url=$(jq .repository.git_refs_url "$GITHUB_EVENT_PATH" | tr -d '"' | sed 's/{\/sha}//g')
