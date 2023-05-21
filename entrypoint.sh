@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -eo pipefail
 
@@ -171,6 +171,7 @@ case "$log" in
             setOutput "old_tag" "$tag"
             setOutput "new_tag" "$tag"
             setOutput "tag" "$tag"
+            setOutput "part" "$default_semvar_bump"
             exit 0
         else
             new=$(semver -i "${default_semvar_bump}" "$tag")
