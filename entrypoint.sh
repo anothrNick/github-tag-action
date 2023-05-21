@@ -92,10 +92,10 @@ case "$tag_context" in
 esac
 
 # get the latest tag that looks like a semver (with or without v)
-matching_tag_refs=$((grep -E "$tagFmt" <<< $git_refs) || true)
-matching_pre_tag_refs=$((grep -E "$preTagFmt" <<< $git_refs) || true)
-tag=$(head -n 1 <<< $matching_tag_refs)
-pre_tag=$(head -n 1 <<< $matching_pre_tag_refs)
+matching_tag_refs=$( (grep -E "$tagFmt" <<< "$git_refs") || true)
+matching_pre_tag_refs=$( (grep -E "$preTagFmt" <<< "$git_refs") || true)
+tag=$(head -n 1 <<< "$matching_tag_refs")
+pre_tag=$(head -n 1 <<< "$matching_pre_tag_refs")
 
 # if there are none, start tags at INITIAL_VERSION
 if [ -z "$tag" ]
@@ -145,7 +145,7 @@ then
 fi
 
 # get the merge commit message looking for #bumps
-declare -A history_type=( 
+declare -A history_type=(
     ["last"]="$(git show -s --format=%B)" \
     ["full"]="$(git log "${default_branch}"..HEAD --format=%B)" \
     ["compare"]="$(git log "${tag_commit}".."${commit}" --format=%B)" \
@@ -157,14 +157,14 @@ case "$log" in
     *$major_string_token* ) new=$(semver -i major "$tag"); part="major";;
     *$minor_string_token* ) new=$(semver -i minor "$tag"); part="minor";;
     *$patch_string_token* ) new=$(semver -i patch "$tag"); part="patch";;
-    *$none_string_token* ) 
+    *$none_string_token* )
         echo "Default bump was set to none. Skipping..."
         setOutput "old_tag" "$tag"
         setOutput "new_tag" "$tag"
         setOutput "tag" "$tag"
         setOutput "part" "$default_semvar_bump"
         exit 0;;
-    * ) 
+    * )
         if [ "$default_semvar_bump" == "none" ]
         then
             echo "Default bump was set to none. Skipping..."
@@ -172,11 +172,11 @@ case "$log" in
             setOutput "new_tag" "$tag"
             setOutput "tag" "$tag"
             setOutput "part" "$default_semvar_bump"
-            exit 0 
-        else 
+            exit 0
+        else
             new=$(semver -i "${default_semvar_bump}" "$tag")
-            part=$default_semvar_bump 
-        fi 
+            part=$default_semvar_bump
+        fi
         ;;
 esac
 
