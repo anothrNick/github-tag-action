@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -o pipefail
 
@@ -76,11 +76,11 @@ preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)$"
 
 # get latest tag that looks like a semver (with or without v)
 case "$tag_context" in
-    *repo*) 
+    *repo*)
         tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$tagFmt" | head -n 1)"
         pre_tag="$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)' | grep -E "$preTagFmt" | head -n 1)"
         ;;
-    *branch*) 
+    *branch*)
         tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$tagFmt" | head -n 1)"
         pre_tag="$(git tag --list --merged HEAD --sort=-v:refname | grep -E "$preTagFmt" | head -n 1)"
         ;;
@@ -130,22 +130,22 @@ case "$log" in
     *$major_string_token* ) new=$(semver -i major "$tag"); part="major";;
     *$minor_string_token* ) new=$(semver -i minor "$tag"); part="minor";;
     *$patch_string_token* ) new=$(semver -i patch "$tag"); part="patch";;
-    *$none_string_token* ) 
+    *$none_string_token* )
         echo "Default bump was set to none. Skipping..."
         setOutput "new_tag" "$tag"
         setOutput "tag" "$tag"
         exit 0;;
-    * ) 
+    * )
         if [ "$default_semvar_bump" == "none" ]
         then
             echo "Default bump was set to none. Skipping..."
             setOutput "new_tag" "$tag"
             setOutput "tag" "$tag"
-            exit 0 
-        else 
+            exit 0
+        else
             new=$(semver -i "${default_semvar_bump}" "$tag")
-            part=$default_semvar_bump 
-        fi 
+            part=$default_semvar_bump
+        fi
         ;;
 esac
 
