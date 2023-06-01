@@ -82,7 +82,7 @@ preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)$"
 git_refs=
 case "$tag_context" in
     *repo*)
-        git_refs=$(git for-each-ref --sort=-committerdate --format '%(refname:lstrip=2)')
+        git_refs=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)')
         ;;
     *branch*)
         git_refs=$(git tag --list --merged HEAD --sort=-committerdate)
