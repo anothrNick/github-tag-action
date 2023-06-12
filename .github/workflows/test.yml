@@ -191,7 +191,8 @@ jobs:
           # needs to be the latest tag of the repo when bump is none
           main3="$([ "$MAIN3_OUTPUT_TAG" = "$MAIN3_OUTPUT_NEWTAG" ] && true || false)"
           main4="$([ "$MAIN4_OUTPUT_TAG" = "$MAIN4_OUTPUT_NEWTAG" ] && true || false)"
-          main5="$([ "$MAIN5_OUTPUT_TAG" = "$MAIN5_OUTPUT_NEWTAG" ] && true || false)"
+          # needs to be a greater tag in bump patch
+          main5="$(verlt $MAIN5_OUTPUT_TAG $MAIN5_OUTPUT_NEWTAG && true || false)"
 
           if $main1 && $pre1 && $main2 && $pre2 && $main3 && $main4 && $main5
           then
