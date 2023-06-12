@@ -10,6 +10,7 @@ release_branches=${RELEASE_BRANCHES:-master,main}
 custom_tag=${CUSTOM_TAG:-}
 source=${SOURCE:-.}
 dryrun=${DRY_RUN:-false}
+git_api_tagging=${GIT_API_TAGGING:-true}
 initial_version=${INITIAL_VERSION:-0.0.0}
 tag_context=${TAG_CONTEXT:-repo}
 prerelease=${PRERELEASE:-false}
@@ -33,6 +34,7 @@ echo -e "\tRELEASE_BRANCHES: ${release_branches}"
 echo -e "\tCUSTOM_TAG: ${custom_tag}"
 echo -e "\tSOURCE: ${source}"
 echo -e "\tDRY_RUN: ${dryrun}"
+echo -e "\tGIT_API_TAGGING: ${git_api_tagging}"
 echo -e "\tINITIAL_VERSION: ${initial_version}"
 echo -e "\tTAG_CONTEXT: ${tag_context}"
 echo -e "\tPRERELEASE: ${prerelease}"
@@ -238,36 +240,42 @@ then
     exit 0
 fi
 
+echo "EVENT: creating local tag $new"
 # create local git tag
-git tag "$new"
+git tag -f "$new" || exit 1
+echo "EVENT: pushing tag $new to origin"
 
-# push new tag ref to github
-# this needs permissions in the workflow as contents: write
-dt=$(date '+%Y-%m-%dT%H:%M:%SZ')
-full_name=$GITHUB_REPOSITORY
-git_refs_url=$(jq .repository.git_refs_url "$GITHUB_EVENT_PATH" | tr -d '"' | sed 's/{\/sha}//g')
+if $git_api_tagging
+then
+    # use git api to push
+    dt=$(date '+%Y-%m-%dT%H:%M:%SZ')
+    full_name=$GITHUB_REPOSITORY
+    git_refs_url=$(jq .repository.git_refs_url "$GITHUB_EVENT_PATH" | tr -d '"' | sed 's/{\/sha}//g')
 
-echo "$dt: **pushing tag $new to repo $full_name"
+    echo "$dt: **pushing tag $new to repo $full_name"
 
-git_refs_response=$(
-curl -s -X POST "$git_refs_url" \
--H "Authorization: token $GITHUB_TOKEN" \
--d @- << EOF
-
+    git_refs_response=$(
+    curl -s -X POST "$git_refs_url" \
+    -H "Authorization: token $GITHUB_TOKEN" \
+    -d @- << EOF
 {
-  "ref": "refs/tags/$new",
-  "sha": "$commit"
+    "ref": "refs/tags/$new",
+    "sha": "$commit"
 }
 EOF
 )
 
-git_ref_posted=$( echo "${git_refs_response}" | jq .ref | tr -d '"' )
+    git_ref_posted=$( echo "${git_refs_response}" | jq .ref | tr -d '"' )
 
-echo "::debug::${git_refs_response}"
-if [ "${git_ref_posted}" = "refs/tags/${new}" ]
-then
-    exit 0
+    echo "::debug::${git_refs_response}"
+    if [ "${git_ref_posted}" = "refs/tags/${new}" ]
+    then
+        exit 0
+    else
+        echo "::error::Tag was not created properly."
+        exit 1
+    fi
 else
-    echo "::error::Tag was not created properly."
-    exit 1
+    # use git cli to push
+    git push -f origin "$new" || exit 1
 fi

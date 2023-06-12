@@ -28,6 +28,7 @@ jobs:
         env:
           VERBOSE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_API_TAGGING: false # uses git cli
 
       # auto releases is not working atm and is deleting releases due branch tags
       - name: automatic-draft-release
