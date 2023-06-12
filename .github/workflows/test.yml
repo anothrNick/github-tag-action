@@ -193,7 +193,7 @@ jobs:
           main4="$([ "$MAIN4_OUTPUT_TAG" = "$MAIN4_OUTPUT_NEWTAG" ] && true || false)"
           main5="$([ "$MAIN5_OUTPUT_TAG" = "$MAIN5_OUTPUT_NEWTAG" ] && true || false)"
 
-          if $main1 && $pre1 && $main2 && $pre2 && $main3 && $main4
+          if $main1 && $pre1 && $main2 && $pre2 && $main3 && $main4 && $main5
           then
             echo -e "\n>>>>The tags were created correctly" >> $GITHUB_STEP_SUMMARY
           else
