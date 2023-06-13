@@ -1,10 +1,11 @@
-FROM node:18-alpine
-LABEL "repository"="https://github.com/anothrNick/github-tag-action"
-LABEL "homepage"="https://github.com/anothrNick/github-tag-action"
+ARG image_tag=latest
+#^ TODO: @sammcj pass this through the action, test and document and make sure old images around for a period of time
+
+# hadolint ignore=DL3007
+FROM ghcr.io/anothrnick/github-tag-action:$image_tag
+
+LABEL "repository"="https://github.com/anothrnick/github-tag-action"
+LABEL "homepage"="https://github.com/anothrnick/github-tag-action"
 LABEL "maintainer"="Nick Sjostrom"
 
-RUN apk --no-cache add bash git curl jq && npm install -g semver
-
-COPY entrypoint.sh /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
+# This Dockerfile is empty, it simply pulls a prebuilt image to speed up the Action.

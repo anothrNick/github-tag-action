@@ -1,0 +1,37 @@
+# Local config
+.env
+
+# Editors
+.project
+.settings
+**/.favorites.json
+**/.vscode
+**/*.Session.vim
+**/*.sw[a-z]
+**/*.vim
+**/*~
+.mu_repo
+
+# Temp files
+**/.temp
+**/.tmp
+tmp/
+.tmp
+
+# Logs
+*.log
+
+# OS generated files
+**/._*
+**/.AppleDouble
+**/.dccache
+**/.dropbox
+**/.DS_Store
+**/.DS_STORE
+**/.lnk
+**/.LSOverride
+**/$RECYCLE.BIN/
+**/Desktop.ini
+**/*.lock
+**/*.pid
+**/.cache

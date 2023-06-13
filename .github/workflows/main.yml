@@ -1,6 +1,7 @@
 name: Bump version
 
 on:
+  workflow_dispatch:
   pull_request:
     types:
       - closed
@@ -14,7 +15,7 @@ on:
 jobs:
   bump-version:
     if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
