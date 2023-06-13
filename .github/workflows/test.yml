@@ -66,6 +66,16 @@ jobs:
           DEFAULT_BUMP: none
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Test action main5 (with_v true)
+        id: test_main5
+        uses: ./
+        env:
+          DRY_RUN: true
+          WITH_V: true
+          VERBOSE: true
+          DEFAULT_BUMP: patch
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       # Use the action to generate a tag for itself
       - name: Test action pre1-release (with_v true)
         id: test_pre1
@@ -118,6 +128,10 @@ jobs:
           MAIN4_OUTPUT_NEWTAG=${{ steps.test_main4.outputs.new_tag }}
           MAIN4_OUTPUT_PART=${{ steps.test_main4.outputs.part }}
 
+          MAIN5_OUTPUT_TAG=${{ steps.test_main5.outputs.old_tag }}
+          MAIN5_OUTPUT_NEWTAG=${{ steps.test_main5.outputs.new_tag }}
+          MAIN5_OUTPUT_PART=${{ steps.test_main5.outputs.part }}
+
           echo -e "> MAIN tests with_v, default bump:\n" >> $GITHUB_STEP_SUMMARY
 
           echo "MAIN1 with_v Tag: $MAIN1_OUTPUT_TAG" >> $GITHUB_STEP_SUMMARY
@@ -154,6 +168,12 @@ jobs:
           echo "MAIN4 with_v New tag: $MAIN4_OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
           echo "MAIN4 with_v Part: $MAIN4_OUTPUT_PART" >> $GITHUB_STEP_SUMMARY
 
+          echo -e "> MAIN tests with_v, bump patch:\n" >> $GITHUB_STEP_SUMMARY
+
+          echo "MAIN5 with_v Tag: $MAIN5_OUTPUT_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "MAIN5 with_v New tag: $MAIN5_OUTPUT_NEWTAG" >> $GITHUB_STEP_SUMMARY
+          echo "MAIN5 with_v Part: $MAIN5_OUTPUT_PART" >> $GITHUB_STEP_SUMMARY
+
           # check that the original tag got bumped either major, minor, patch
           verlte() {
             [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]
@@ -171,8 +191,10 @@ jobs:
           # needs to be the latest tag of the repo when bump is none
           main3="$([ "$MAIN3_OUTPUT_TAG" = "$MAIN3_OUTPUT_NEWTAG" ] && true || false)"
           main4="$([ "$MAIN4_OUTPUT_TAG" = "$MAIN4_OUTPUT_NEWTAG" ] && true || false)"
+          # needs to be a greater tag in bump patch
+          main5="$(verlt $MAIN5_OUTPUT_TAG $MAIN5_OUTPUT_NEWTAG && true || false)"
 
-          if $main1 && $pre1 && $main2 && $pre2 && $main3 && $main4
+          if $main1 && $pre1 && $main2 && $pre2 && $main3 && $main4 && $main5
           then
             echo -e "\n>>>>The tags were created correctly" >> $GITHUB_STEP_SUMMARY
           else
