@@ -21,7 +21,7 @@ jobs:
       with:
         fetch-depth: '0'
     - name: Bump version and push tag
-      uses: ext-fork-github-tag-action@1.0.0
+      uses: ext-fork-github-tag-action@sds-1.0.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: true
