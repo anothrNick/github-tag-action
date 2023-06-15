@@ -2,13 +2,8 @@
 
 A Github Action to automatically bump and tag master, on merge, with the latest SemVer formatted version.
 
-[![Build Status](https://github.com/anothrNick/github-tag-action/workflows/Bump%20version/badge.svg)](https://github.com/anothrNick/github-tag-action/workflows/Bump%20version/badge.svg)
-[![Stable Version](https://img.shields.io/github/v/tag/anothrNick/github-tag-action)](https://img.shields.io/github/v/tag/anothrNick/github-tag-action)
-[![Latest Release](https://img.shields.io/github/v/release/anothrNick/github-tag-action?color=%233D9970)](https://img.shields.io/github/v/release/anothrNick/github-tag-action?color=%233D9970)
+> **IMPORTANT:** This is a fork of [anothrNick/github-tag-action](https://github.com/anothrNick/github-tag-action), and is branched fo development from tag [1.36.0](https://github.com/anothrNick/github-tag-action/releases/tag/1.36.0) (commit hash [ce4b5ffa38e072fa7a901e417253c438fcc2ccce](https://github.com/anothrNick/github-tag-action/tree/ce4b5ffa38e072fa7a901e417253c438fcc2ccce)).
 
-> Medium Post: [Creating A Github Action to Tag Commits](https://itnext.io/creating-a-github-action-to-tag-commits-2722f1560dec)
-
-[<img src="https://miro.medium.com/max/1200/1*_4Ex1uUhL93a3bHyC-TgPg.png" width="400">](https://itnext.io/creating-a-github-action-to-tag-commits-2722f1560dec)
 
 ### Usage
 
@@ -20,13 +15,13 @@ on:
       - master
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
       with:
         fetch-depth: '0'
     - name: Bump version and push tag
-      uses: anothrNick/github-tag-action@1.36.0
+      uses: ext-fork-github-tag-action@1.0.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: true
@@ -53,6 +48,7 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` to be sure you retrieve all
 #### Outputs
 
 - **new_tag** - The value of the newly created tag.
+
 - **tag** - The value of the latest tag after running this action.
 - **part** - The part of version which was bumped.
 
@@ -82,13 +78,3 @@ If `#none` is contained in the commit message, it will skip bumping regardless `
 ### Credits
 
 [fsaintjacques/semver-tool](https://github.com/fsaintjacques/semver-tool)
-
-### Projects using github-tag-action
-
-A list of projects using github-tag-action for reference.
-
-- another/github-tag-action (uses itself to create tags)
-
-- [anothrNick/json-tree-service](https://github.com/anothrNick/json-tree-service)
-
-  > Access JSON structure with HTTP path parameters as keys/indices to the JSON.

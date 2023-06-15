@@ -77,9 +77,13 @@ tag_commit=$(git rev-list -n 1 $tag)
 commit=$(git rev-parse HEAD)
 
 if [ "$tag_commit" == "$commit" ]; then
-    echo "No new commits since previous tag. Skipping..."
-    echo ::set-output name=tag::$tag
-    exit 0
+    #
+    # Inform the user that the commit hash is the same as the tag,
+    # but do not exit.
+    #
+    # This allows users to apply multiple tags to the same commit.
+    #
+    echo "No new commits since previous tag."
 fi
 
 # echo log if verbose is wanted
@@ -93,12 +97,20 @@ case "$log" in
     *#minor* ) new=$(semver -i minor $tag); part="minor";;
     *#patch* ) new=$(semver -i patch $tag); part="patch";;
     *#none* ) 
-        echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0;;
+        echo "Default bump was set to none. Skipping..."
+        echo "new_tag=$tag" >> $GITHUB_OUTPUT
+        echo "tag=$tag" >> $GITHUB_OUTPUT
+        exit 0
+        ;;
     * ) 
         if [ "$default_semvar_bump" == "none" ]; then
-            echo "Default bump was set to none. Skipping..."; echo ::set-output name=new_tag::$tag; echo ::set-output name=tag::$tag; exit 0 
+            echo "Default bump was set to none. Skipping..."
+            echo "new_tag=$tag" >> $GITHUB_OUTPUT
+            echo "tag=$tag" >> $GITHUB_OUTPUT
+            exit 0 
         else 
-            new=$(semver -i "${default_semvar_bump}" $tag); part=$default_semvar_bump 
+            new=$(semver -i "${default_semvar_bump}" $tag)
+            part=$default_semvar_bump 
         fi 
         ;;
 esac
@@ -138,17 +150,23 @@ else
 fi
 
 # set outputs
-echo ::set-output name=new_tag::$new
-echo ::set-output name=part::$part
+echo "new_tag=$new" >> $GITHUB_OUTPUT
+echo "part=$part" >> $GITHUB_OUTPUT
+
+if $pre_release
+then
+    echo "tag=$pre_tag" >> $GITHUB_OUTPUT
+else
+    echo "tag=$tag" >> $GITHUB_OUTPUT
+fi
+
 
 # use dry run to determine the next tag
 if $dryrun
 then
-    echo ::set-output name=tag::$tag
     exit 0
 fi 
 
-echo ::set-output name=tag::$new
 
 # create local git tag
 git tag $new
