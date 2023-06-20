@@ -42,7 +42,7 @@ jobs:
 ```
 
 ```yaml
-# example 2: on merge to master
+# example 2: on merge to master from pull request (recommended)
 name: Bump version
 on:
   pull_request:
@@ -53,13 +53,14 @@ on:
 
 jobs:
   build:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-22.04
     permissions:
       contents: write
     steps:
     - uses: actions/checkout@v3
       with:
-        ref: ${{ github.sha }} # required for better experience using pre-releases
+        ref: ${{ github.event.pull_request.merge_commit_sha }}
         fetch-depth: '0'
 
     - name: Bump version and push tag
