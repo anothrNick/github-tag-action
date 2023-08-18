@@ -57,7 +57,6 @@ fi
 setOutput() {
     echo "${1}=${2}" >> "${GITHUB_OUTPUT}"
 }
-pwd
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
 pre_release="$prerelease"
