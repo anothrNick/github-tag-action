@@ -166,13 +166,13 @@ tag_commit=$(git rev-list -n 1 "$tag" || true )
 # get current commit hash
 commit=$(git rev-parse HEAD)
 # skip if there are no new commits for non-pre_release
-#if [ "$tag_commit" == "$commit" ]
-#then
-#    echo "No new commits since previous tag. Skipping..."
-#    setOutput "new_tag" "$tag"
-#    setOutput "tag" "$tag"
-#    exit 0
-#fi
+if [ "$tag_commit" == "$commit" ]
+then
+    echo "No new commits since previous tag. Skipping..."
+    setOutput "new_tag" "$tag"
+    setOutput "tag" "$tag"
+    exit 0
+fi
 
 # sanitize that the default_branch is set (via env var when running on PRs) else find it natively
 if [ -z "${default_branch}" ] && [ "$branch_history" == "full" ]
