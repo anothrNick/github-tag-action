@@ -79,12 +79,20 @@ echo "pre_release = $pre_release"
 # fetch tags
 git fetch --tags
 
-tagFmt=''
+if [ -z "$major_sticky_version" ] && ! [ -z "$minor_sticky_version" ]
+then
+    echo "invalid sticky version"
+    exit 1
+fi
+
+tagFmt=
+sticky_prefix=
 if [ -z "$major_sticky_version" ]
 then
   tagFmt='[0-9]+'
 else
   tagFmt="$major_sticky_version"
+  sticky_prefix="$major_sticky_version"
 fi
 
 if [ -z "$minor_sticky_version" ]
@@ -92,6 +100,7 @@ then
   tagFmt="$tagFmt\.[0-9]+"
 else
   tagFmt="$tagFmt\.$minor_sticky_version"
+  sticky_prefix="$sticky_prefix.$minor_sticky_version"
 fi
 
 preTagFmt="$tagFmt\.[0-9]+(-$suffix\.[0-9]+)$"
@@ -99,15 +108,20 @@ tagFmt="$tagFmt\.[0-9]+$"
 
 if $with_v
 then
-  tagFmt="^v$tagFmt"
-  preTagFmt="^v$preTagFmt"
+    tagFmt="^v$tagFmt"
+    preTagFmt="^v$preTagFmt"
 else
-  tagFmt="^$tagFmt"
-  preTagFmt="^$preTagFmt"
+    tagFmt="^$tagFmt"
+    preTagFmt="^$preTagFmt"
 fi
 
-echo "tagFmt = $tagFmt"
-echo "preTagFmt = $preTagFmt"
+case "$initial_version" in
+    "$sticky_prefix"* )
+        initial_version="$initial_version";;
+    * ) echo "fixing initial version $initial_version"
+        initial_version="$major_sticky_version.${minor_sticky_version:-0}.0"
+        echo "initial_version=$initial_version";;
+esac
 
 # get the git refs
 git_refs=
@@ -153,13 +167,13 @@ tag_commit=$(git rev-list -n 1 "$tag" || true )
 # get current commit hash
 commit=$(git rev-parse HEAD)
 # skip if there are no new commits for non-pre_release
-if [ "$tag_commit" == "$commit" ]
-then
-    echo "No new commits since previous tag. Skipping..."
-    setOutput "new_tag" "$tag"
-    setOutput "tag" "$tag"
-    exit 0
-fi
+#if [ "$tag_commit" == "$commit" ]
+#then
+#    echo "No new commits since previous tag. Skipping..."
+#    setOutput "new_tag" "$tag"
+#    setOutput "tag" "$tag"
+#    exit 0
+#fi
 
 # sanitize that the default_branch is set (via env var when running on PRs) else find it natively
 if [ -z "${default_branch}" ] && [ "$branch_history" == "full" ]
@@ -184,31 +198,38 @@ declare -A history_type=(
 log=${history_type[${branch_history}]}
 printf "History:\n---\n%s\n---\n" "$log"
 
+part=
 case "$log" in
-    *$major_string_token* ) new=$(semver -i major "$tag"); part="major";;
-    *$minor_string_token* ) new=$(semver -i minor "$tag"); part="minor";;
-    *$patch_string_token* ) new=$(semver -i patch "$tag"); part="patch";;
-    *$none_string_token* )
+    *$major_string_token* ) part="major";;
+    *$minor_string_token* ) part="minor";;
+    *$patch_string_token* ) part="patch";;
+    *$none_string_token* ) part="none";;
+    * ) part="$default_semvar_bump";;
+esac
+
+if ! [ -z "$major_sticky_version" ] && [ "$part" == "major" ];
+then
+    part="minor";
+fi
+
+if ! [ -z "$minor_sticky_version" ] && [ "$part" == "minor" ];
+then
+    part="patch";
+fi
+
+
+
+case "$part" in
+    major ) new=$(semver -i major "$tag"); part="major";;
+    minor ) new=$(semver -i minor "$tag"); part="minor";;
+    patch ) new=$(semver -i patch "$tag"); part="patch";;
+    * )
         echo "Default bump was set to none. Skipping..."
         setOutput "old_tag" "$tag"
         setOutput "new_tag" "$tag"
         setOutput "tag" "$tag"
         setOutput "part" "$default_semvar_bump"
         exit 0;;
-    * )
-        if [ "$default_semvar_bump" == "none" ]
-        then
-            echo "Default bump was set to none. Skipping..."
-            setOutput "old_tag" "$tag"
-            setOutput "new_tag" "$tag"
-            setOutput "tag" "$tag"
-            setOutput "part" "$default_semvar_bump"
-            exit 0
-        else
-            new=$(semver -i "${default_semvar_bump}" "$tag")
-            part=$default_semvar_bump
-        fi
-        ;;
 esac
 
 if $pre_release
