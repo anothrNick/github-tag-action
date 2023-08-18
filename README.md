@@ -104,6 +104,8 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` or newer to be sure you ret
   - `full`: attempt to show all history, does not work on rebase and squash due missing HEAD [should be deprecated in v2 is breaking many workflows]
   - `last`: show the single last commit
   - `compare`: show all commits since previous repo tag number
+- **MAJOR_STICKY_VERSION** _(optional)_ - Set the `X` part of `X.Y.Z` version to be constant
+- **MINOR_STICKY_VERSION** _(optional)_ - Set the `Y` part of `X.Y.Z` version to be constant. Should be used with `MAJOR_STICKY_VERSION`
 
 ### Outputs
 
