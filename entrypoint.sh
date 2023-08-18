@@ -21,6 +21,8 @@ minor_string_token=${MINOR_STRING_TOKEN:-#minor}
 patch_string_token=${PATCH_STRING_TOKEN:-#patch}
 none_string_token=${NONE_STRING_TOKEN:-#none}
 branch_history=${BRANCH_HISTORY:-compare}
+major_sticky_version=${MAJOR_STICKY_VERSION}
+minor_sticky_version=${MINOR_STICKY_VERSION}
 # since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses?
 git config --global --add safe.directory /github/workspace
 
@@ -55,7 +57,7 @@ fi
 setOutput() {
     echo "${1}=${2}" >> "${GITHUB_OUTPUT}"
 }
-
+pwd
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
 pre_release="$prerelease"
@@ -77,8 +79,35 @@ echo "pre_release = $pre_release"
 # fetch tags
 git fetch --tags
 
-tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$"
-preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)$"
+tagFmt=''
+if [ -z "$major_sticky_version" ]
+then
+  tagFmt='[0-9]+'
+else
+  tagFmt="$major_sticky_version"
+fi
+
+if [ -z "$minor_sticky_version" ]
+then
+  tagFmt="$tagFmt\.[0-9]+"
+else
+  tagFmt="$tagFmt\.$minor_sticky_version"
+fi
+
+preTagFmt="$tagFmt\.[0-9]+(-$suffix\.[0-9]+)$"
+tagFmt="$tagFmt\.[0-9]+$"
+
+if $with_v
+then
+  tagFmt="^v$tagFmt"
+  preTagFmt="^v$preTagFmt"
+else
+  tagFmt="^$tagFmt"
+  preTagFmt="^$preTagFmt"
+fi
+
+echo "tagFmt = $tagFmt"
+echo "preTagFmt = $preTagFmt"
 
 # get the git refs
 git_refs=
