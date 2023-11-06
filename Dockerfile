@@ -1,10 +1,10 @@
-FROM node:12-alpine3.15
+FROM node:18-alpine
 LABEL "repository"="https://github.com/anothrNick/github-tag-action"
 LABEL "homepage"="https://github.com/anothrNick/github-tag-action"
 LABEL "maintainer"="Nick Sjostrom"
 
-COPY entrypoint.sh /entrypoint.sh
+RUN apk --no-cache add bash git curl jq && npm install -g semver
 
-RUN apk update && apk add bash git curl jq && npm install -g semver
+COPY entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
