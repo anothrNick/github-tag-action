@@ -46,6 +46,7 @@ echo -e "\tMINOR_STRING_TOKEN: ${minor_string_token}"
 echo -e "\tPATCH_STRING_TOKEN: ${patch_string_token}"
 echo -e "\tNONE_STRING_TOKEN: ${none_string_token}"
 echo -e "\tBRANCH_HISTORY: ${branch_history}"
+echo -e "\tPREFIX: ${prefix}"
 
 # verbose, show everything
 if $verbose
@@ -76,10 +77,15 @@ done
 echo "pre_release = $pre_release"
 
 # fetch tags
-git fetch --tags
+if $prefix
+then
+    git fetch --tags '^refs/tags/'"$prefix"'*'
+else
+    git fetch --tags
+fi
 
-tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$"
-preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)$"
+tagFmt="^$prefix?[0-9]+\.[0-9]+\.[0-9]+$"
+preTagFmt="^$prefix?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)$"
 
 # get the git refs
 git_refs=
@@ -107,7 +113,7 @@ then
     then
         tag="v$initial_version"
     else
-        tag="$initial_version"
+        tag="$prefix$initial_version"
     fi
     if [ -z "$pre_tag" ] && $pre_release
     then
@@ -115,7 +121,7 @@ then
         then
             pre_tag="v$initial_version"
         else
-            pre_tag="$initial_version"
+            pre_tag="$prefix$initial_version"
         fi
     fi
 fi
