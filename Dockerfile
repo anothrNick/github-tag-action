@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM public.ecr.aws/docker/library/node:18-buster
 LABEL "repository"="https://github.com/anothrNick/github-tag-action"
 LABEL "homepage"="https://github.com/anothrNick/github-tag-action"
 LABEL "maintainer"="Nick Sjostrom"
