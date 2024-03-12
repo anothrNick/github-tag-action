@@ -104,7 +104,7 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` or newer to be sure you ret
   - `full`: attempt to show all history, does not work on rebase and squash due missing HEAD [should be deprecated in v2 is breaking many workflows]
   - `last`: show the single last commit
   - `compare`: show all commits since previous repo tag number
-- **FORCE** _(optional)_ - Enforce the brach creation even if there are no changes from the tag.
+- **FORCE_WITHOUT_CHANGES** _(optional)_ - Enforce the brach creation even if there are no changes from the tag.
 
 ### Outputs
 
