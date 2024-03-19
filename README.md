@@ -30,12 +30,12 @@ jobs:
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: '0'
 
     - name: Bump version and push tag
-      uses: anothrNick/github-tag-action@1.64.0 # Don't use @master or @v1 unless you're happy to test the latest version
+      uses: anothrNick/github-tag-action@v1 # Don't use @master or @v1 unless you're happy to test the latest version
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # if you don't want to set write permissions use a PAT token
         WITH_V: false
@@ -58,13 +58,13 @@ jobs:
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: ${{ github.event.pull_request.merge_commit_sha }}
         fetch-depth: '0'
 
     - name: Bump version and push tag
-      uses: anothrNick/github-tag-action@1.64.0 # Don't use @master or @v1 unless you're happy to test the latest version
+      uses: anothrNick/github-tag-action@v1 # Don't use @master or @v1 unless you're happy to test the latest version
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # if you don't want to set write permissions use a PAT token
         WITH_V: true
