@@ -105,7 +105,6 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` or newer to be sure you ret
   - `last`: show the single last commit
   - `compare`: show all commits since previous repo tag number
 - **FORCE_WITHOUT_CHANGES** _(optional)_ - Enforce the brach creation even if there are no changes from the tag.
-- **FORCE_WITHOUT_CHANGES_PRE** _(optional)_ - Similar to force without changes, for pre-releases.
 
 ### Outputs
 
