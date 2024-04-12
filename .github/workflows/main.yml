@@ -1,15 +1,15 @@
 name: Bump version
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - closed
     branches:
       - master
     paths:
-      - 'entrypoint.sh'
-      - 'action.yml'
-      - 'Dockerfile'
+      - "entrypoint.sh"
+      - "action.yml"
+      - "Dockerfile"
 
 jobs:
   bump-version:
@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: '0'
+          fetch-depth: "0"
 
       - name: version-tag
         id: tag
