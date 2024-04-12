@@ -125,6 +125,7 @@ then
 fi
 
 # get current commit hash for tag
+# Quick comment to test workflow
 tag_commit=$(git rev-list -n 1 "$tag" || true )
 # get current commit hash
 commit=$(git rev-parse HEAD)
