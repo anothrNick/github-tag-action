@@ -192,7 +192,7 @@ then
     # get current commit hash for tag
     pre_tag_commit=$(git rev-list -n 1 "$pre_tag" || true)
     # skip if there are no new commits for pre_release
-    if [ "$pre_tag_commit" == "$commit" ] &&  [ "$pre_force_without_changes" == "false" ] 
+    if [ "$pre_tag_commit" == "$commit" ] &&  [ "$force_without_changes_pre" == "false" ] 
     then
         echo "No new commits since previous pre_tag. Skipping..."
         setOutput "new_tag" "$pre_tag"
