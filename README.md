@@ -110,6 +110,7 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` or newer to be sure you ret
 ### Outputs
 
 - **new_tag** - The value of the newly created tag.
+- **old_tag** - The value of the last semantic version tag before the version bump. Empty if no version bump is performed.
 - **tag** - The value of the latest tag after running this action.
 - **part** - The part of version which was bumped.
 
