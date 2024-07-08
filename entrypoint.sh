@@ -104,7 +104,7 @@ matching_pre_tag_refs=$( (grep -E "$preTagFmt" <<< "$git_refs") || true)
 tag=$(head -n 1 <<< "$matching_tag_refs")
 pre_tag=$(head -n 1 <<< "$matching_pre_tag_refs")
 
-# if there are none, start tags at INITIAL_VERSION
+# if there are none, start tags at initial version
 if [ -z "$tag" ]
 then
     if $with_v
