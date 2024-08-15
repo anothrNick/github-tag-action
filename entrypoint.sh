@@ -63,6 +63,7 @@ setOutput() {
 
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
+release=false
 pre_release="$prerelease"
 IFS=',' read -ra branch <<< "$release_branches"
 for b in "${branch[@]}"; do
@@ -70,14 +71,17 @@ for b in "${branch[@]}"; do
     if [[ "$current_branch" == "$b" ]]
     then
         pre_release="false"
+        release=true
     fi
     # verify non specific branch names like  .* release/* if wildcard filter then =~
     if [ "$b" != "${b//[\[\]|.? +*]/}" ] && [[ "$current_branch" =~ $b ]]
     then
         pre_release="false"
+        release=true
     fi
 done
 echo "pre_release = $pre_release"
+echo "release = ${release}"
 
 # fetch tags
 git fetch --tags
@@ -224,6 +228,10 @@ else
     then
         new="v$new"
     fi
+    if ! $release
+    then
+      new="v${new}-${current_branch}"
+    fi
     echo -e "Bumping tag ${tag} - New tag ${new}"
 fi
 
@@ -240,7 +248,7 @@ setOutput "tag" "$new" # this needs to go in v2 is breaking change
 setOutput "old_tag" "$tag"
 
 # dry run exit without real changes
-if $dryrun
+if $dryrun || ! $release
 then
     exit 0
 fi
