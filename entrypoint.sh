@@ -230,7 +230,7 @@ else
     fi
     if ! $release
     then
-      new="v${new}-${current_branch}"
+      new="${new}-${current_branch}"
     fi
     echo -e "Bumping tag ${tag} - New tag ${new}"
 fi
