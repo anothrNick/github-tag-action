@@ -23,6 +23,7 @@ none_string_token=${NONE_STRING_TOKEN:-#none}
 branch_history=${BRANCH_HISTORY:-compare}
 force_without_changes=${FORCE_WITHOUT_CHANGES:-false}
 force_without_changes_pre=${FORCE_WITHOUT_CHANGES:-false}
+tag_message=${TAG_MESSAGE:-""}
 
 # since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses?
 git config --global --add safe.directory /github/workspace
@@ -50,6 +51,7 @@ echo -e "\tNONE_STRING_TOKEN: ${none_string_token}"
 echo -e "\tBRANCH_HISTORY: ${branch_history}"
 echo -e "\tFORCE_WITHOUT_CHANGES: ${force_without_changes}"
 echo -e "\tFORCE_WITHOUT_CHANGES_PRE: ${force_without_changes_pre}"
+echo -e "\tTAG_MESSAGE: ${tag_message}"
 
 # verbose, show everything
 if $verbose
@@ -245,9 +247,16 @@ then
     exit 0
 fi
 
-echo "EVENT: creating local tag $new"
-# create local git tag
-git tag -f "$new" || exit 1
+# Modify the tag creation part
+if [ -n "$tag_message" ]
+then
+    echo "EVENT: creating local tag $new with message: $tag_message"
+    git tag -a "$new" -m "$tag_message" || exit 1
+else
+    echo "EVENT: creating local tag $new"
+    git tag -f "$new" || exit 1
+fi
+
 echo "EVENT: pushing tag $new to origin"
 
 if $git_api_tagging
