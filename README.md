@@ -38,7 +38,6 @@ jobs:
       uses: anothrNick/github-tag-action@v1 # Don't use @master or @v1 unless you're happy to test the latest version
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # if you don't want to set write permissions use a PAT token
-        WITH_V: false
 ```
 
 ```yaml
@@ -67,7 +66,7 @@ jobs:
       uses: anothrNick/github-tag-action@v1 # Don't use @master or @v1 unless you're happy to test the latest version
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # if you don't want to set write permissions use a PAT token
-        WITH_V: true
+        TAG_PREFIX: v
         PRERELEASE: true
 
 ```
@@ -93,7 +92,7 @@ _NOTE: set the fetch-depth for `actions/checkout@v2` or newer to be sure you ret
 - **GIT_API_TAGGING** _(optional)_ - Set if using git cli or git api calls for tag push operations. Possible values are `false` and `true` (default).
 - **INITIAL_VERSION** _(optional)_ - Set initial version before bump. Default `0.0.0`. MAKE SURE NOT TO USE vX.X.X here if combined TAG_PREFIX
 - **TAG_CONTEXT** _(optional)_ - Set the context of the previous tag. Possible values are `repo` (default) or `branch`.
-- **TAG_PREFIX** _(optional)_ - Prefix to add to the tag. eg `v` to create `v0.0.0`, WITH_V takes precidance for backwards compatibility
+- **TAG_PREFIX** _(optional)_ - Prefix to add to the tag. eg `v` to create `v0.0.0`. This takes precidance over WITH_V
 - **PRERELEASE** _(optional)_ - Define if workflow runs in prerelease mode, `false` by default. Note this will be overwritten if using complex suffix release branches. Use it with checkout `ref: ${{ github.sha }}` for consistency see [issue 266](https://github.com/anothrNick/github-tag-action/issues/266).
 - **PRERELEASE_SUFFIX** _(optional)_ - Suffix for your prerelease versions, `beta` by default. Note this will only be used if a prerelease branch.
 - **VERBOSE** _(optional)_ - Print git logs. For some projects these logs may be very large. Possible values are `true` (default) and `false`.

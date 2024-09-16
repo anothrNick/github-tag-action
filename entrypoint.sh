@@ -87,16 +87,15 @@ git fetch --tags
 # Set no tag prefix (not even v)
 tagPrefix=""
 
+if $with_v
+then
+    tagPrefix="v"
+fi
+
 # If a tag_prefix is supplied use that
 if [[ "${tag_prefix}" != "false" ]]
 then
   tagPrefix=$tag_prefix
-fi
-
-# with_v superseeds tag_prefix
-if $with_v
-then
-    tagPrefix="v"
 fi
 
 tagFmt="^$tagPrefix?[0-9]+\.[0-9]+\.[0-9]+$"
