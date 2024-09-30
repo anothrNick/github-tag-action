@@ -163,9 +163,9 @@ log=${history_type[${branch_history}]}
 printf "History:\n---\n%s\n---\n" "$log"
 
 case "$log" in
-    *$major_string_token* ) new=$(semver -i major "$tag"); part="major";;
-    *$minor_string_token* ) new=$(semver -i minor "$tag"); part="minor";;
-    *$patch_string_token* ) new=$(semver -i patch "$tag"); part="patch";;
+    *$major_string_token* ) new=$(semver bump major "$tag"); part="major";;
+    *$minor_string_token* ) new=$(semver bump minor "$tag"); part="minor";;
+    *$patch_string_token* ) new=$(semver bump patch "$tag"); part="patch";;
     *$none_string_token* )
         echo "Default bump was set to none. Skipping..."
         setOutput "old_tag" "$tag"
@@ -183,7 +183,7 @@ case "$log" in
             setOutput "part" "$default_semvar_bump"
             exit 0
         else
-            new=$(semver -i "${default_semvar_bump}" "$tag")
+            new=$(semver bump "${default_semvar_bump}" "$tag")
             part=$default_semvar_bump
         fi
         ;;
@@ -206,9 +206,9 @@ then
     then
         if $with_v
         then
-            new=v$(semver -i prerelease "${pre_tag}" --preid "${suffix}")
+            new=v$(semver bump prerelease "${suffix}".. "${pre_tag}")
         else
-            new=$(semver -i prerelease "${pre_tag}" --preid "${suffix}")
+            new=$(semver bump prerelease "${suffix}".. "${pre_tag}")
         fi
         echo -e "Bumping ${suffix} pre-tag ${pre_tag}. New pre-tag ${new}"
     else
