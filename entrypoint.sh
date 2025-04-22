@@ -22,7 +22,7 @@ patch_string_token=${PATCH_STRING_TOKEN:-#patch}
 none_string_token=${NONE_STRING_TOKEN:-#none}
 branch_history=${BRANCH_HISTORY:-compare}
 force_without_changes=${FORCE_WITHOUT_CHANGES:-false}
-force_without_changes_pre=${FORCE_WITHOUT_CHANGES:-false}
+force_without_changes_pre=${FORCE_WITHOUT_CHANGES_PRE:-false}
 tag_message=${TAG_MESSAGE:-""}
 
 # since https://github.blog/2022-04-12-git-security-vulnerability-announced/ runner uses?
