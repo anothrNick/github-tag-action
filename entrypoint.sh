@@ -13,6 +13,7 @@ dryrun=${DRY_RUN:-false}
 git_api_tagging=${GIT_API_TAGGING:-true}
 initial_version=${INITIAL_VERSION:-0.0.0}
 tag_context=${TAG_CONTEXT:-repo}
+tag_prefix=${TAG_PREFIX:-false}
 prerelease=${PRERELEASE:-false}
 suffix=${PRERELEASE_SUFFIX:-beta}
 verbose=${VERBOSE:-false}
@@ -41,6 +42,7 @@ echo -e "\tDRY_RUN: ${dryrun}"
 echo -e "\tGIT_API_TAGGING: ${git_api_tagging}"
 echo -e "\tINITIAL_VERSION: ${initial_version}"
 echo -e "\tTAG_CONTEXT: ${tag_context}"
+echo -e "\tTAG_PREFIX: ${tag_prefix}"
 echo -e "\tPRERELEASE: ${prerelease}"
 echo -e "\tPRERELEASE_SUFFIX: ${suffix}"
 echo -e "\tVERBOSE: ${verbose}"
@@ -84,8 +86,22 @@ echo "pre_release = $pre_release"
 # fetch tags
 git fetch --tags
 
-tagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+$"
-preTagFmt="^v?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)$"
+# Set no tag prefix (not even v)
+tagPrefix=""
+
+if $with_v
+then
+    tagPrefix="v"
+fi
+
+# If a tag_prefix is supplied use that
+if [[ "${tag_prefix}" != "false" ]]
+then
+  tagPrefix=$tag_prefix
+fi
+
+tagFmt="^$tagPrefix?[0-9]+\.[0-9]+\.[0-9]+$"
+preTagFmt="^$tagPrefix?[0-9]+\.[0-9]+\.[0-9]+(-$suffix\.[0-9]+)$"
 
 # get the git refs
 git_refs=
@@ -109,20 +125,10 @@ pre_tag=$(head -n 1 <<< "$matching_pre_tag_refs")
 # if there are none, start tags at initial version
 if [ -z "$tag" ]
 then
-    if $with_v
-    then
-        tag="v$initial_version"
-    else
-        tag="$initial_version"
-    fi
+    tag="$tagPrefix$initial_version"
     if [ -z "$pre_tag" ] && $pre_release
     then
-        if $with_v
-        then
-            pre_tag="v$initial_version"
-        else
-            pre_tag="$initial_version"
-        fi
+        pre_tag="$tagPrefix$initial_version"
     fi
 fi
 
@@ -131,7 +137,7 @@ tag_commit=$(git rev-list -n 1 "$tag" || true )
 # get current commit hash
 commit=$(git rev-parse HEAD)
 # skip if there are no new commits for non-pre_release
-if [ "$tag_commit" == "$commit" ] && [ "$force_without_changes" == "false" ] 
+if [ "$tag_commit" == "$commit" ] && [ "$force_without_changes" == "false" ]
 then
     echo "No new commits since previous tag. Skipping..."
     setOutput "new_tag" "$tag"
@@ -162,10 +168,16 @@ declare -A history_type=(
 log=${history_type[${branch_history}]}
 printf "History:\n---\n%s\n---\n" "$log"
 
+if [ -z "$tagPrefix" ]
+then
+  current_tag=${tag}
+else
+  current_tag="$(echo ${tag}| sed "s/${tagPrefix}//g")"
+fi
 case "$log" in
-    *$major_string_token* ) new=$(semver -i major "$tag"); part="major";;
-    *$minor_string_token* ) new=$(semver -i minor "$tag"); part="minor";;
-    *$patch_string_token* ) new=$(semver -i patch "$tag"); part="patch";;
+    *$major_string_token* ) new=${tagPrefix}$(semver -i major "${current_tag}"); part="major";;
+    *$minor_string_token* ) new=${tagPrefix}$(semver -i minor "${current_tag}"); part="minor";;
+    *$patch_string_token* ) new=${tagPrefix}$(semver -i patch "${current_tag}"); part="patch";;
     *$none_string_token* )
         echo "Default bump was set to none. Skipping..."
         setOutput "old_tag" "$tag"
@@ -183,7 +195,7 @@ case "$log" in
             setOutput "part" "$default_semvar_bump"
             exit 0
         else
-            new=$(semver -i "${default_semvar_bump}" "$tag")
+            new=${tagPrefix}$(semver -i "${default_semvar_bump}" "${current_tag}")
             part=$default_semvar_bump
         fi
         ;;
@@ -194,7 +206,7 @@ then
     # get current commit hash for tag
     pre_tag_commit=$(git rev-list -n 1 "$pre_tag" || true)
     # skip if there are no new commits for pre_release
-    if [ "$pre_tag_commit" == "$commit" ] &&  [ "$force_without_changes_pre" == "false" ] 
+    if [ "$pre_tag_commit" == "$commit" ] &&  [ "$force_without_changes_pre" == "false" ]
     then
         echo "No new commits since previous pre_tag. Skipping..."
         setOutput "new_tag" "$pre_tag"
@@ -204,28 +216,14 @@ then
     # already a pre-release available, bump it
     if [[ "$pre_tag" =~ $new ]] && [[ "$pre_tag" =~ $suffix ]]
     then
-        if $with_v
-        then
-            new=v$(semver -i prerelease "${pre_tag}" --preid "${suffix}")
-        else
-            new=$(semver -i prerelease "${pre_tag}" --preid "${suffix}")
-        fi
+        new=${tagPrefix}$(semver -i prerelease "${pre_tag}" --preid "${suffix}")
         echo -e "Bumping ${suffix} pre-tag ${pre_tag}. New pre-tag ${new}"
     else
-        if $with_v
-        then
-            new="v$new-$suffix.0"
-        else
-            new="$new-$suffix.0"
-        fi
+        new="${tagPrefix}${new}-${suffix}.0"
         echo -e "Setting ${suffix} pre-tag ${pre_tag} - With pre-tag ${new}"
     fi
     part="pre-$part"
 else
-    if $with_v
-    then
-        new="v$new"
-    fi
     echo -e "Bumping tag ${tag} - New tag ${new}"
 fi
 
