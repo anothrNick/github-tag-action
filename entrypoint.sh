@@ -219,7 +219,7 @@ then
         new=${tagPrefix}$(semver -i prerelease "${pre_tag}" --preid "${suffix}")
         echo -e "Bumping ${suffix} pre-tag ${pre_tag}. New pre-tag ${new}"
     else
-        new="${tagPrefix}${new}-${suffix}.0"
+        new="${new}-${suffix}.0"
         echo -e "Setting ${suffix} pre-tag ${pre_tag} - With pre-tag ${new}"
     fi
     part="pre-$part"
