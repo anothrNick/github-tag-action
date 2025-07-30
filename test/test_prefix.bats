@@ -49,3 +49,32 @@ run_entry() {
   assert_line "Bumping tag 1.0.0 - New tag 1.1.0"
 }
 
+@test "Creates a new tag with 'v' prefix" {
+  # Arrange
+  export SOURCE="$SOURCE"
+  export DRY_RUN="true"
+  export TAG_PREFIX="v"
+
+  # Act
+  run run_entry
+
+  # Assert
+  assert_success
+  assert_line "Bumping tag v0.0.0 - New tag v0.1.0"
+}
+
+@test "Bumps a tag with 'v' prefix" {
+  # Arrange
+  export SOURCE="$SOURCE"
+  export DRY_RUN="true"
+  export TAG_PREFIX="v"
+  git tag "v1.0.0" && git commit -m "bump" --allow-empty >/dev/null
+
+  # Act
+  run run_entry
+
+  # Assert
+  assert_success
+  assert_line "Bumping tag v1.0.0 - New tag v1.1.0"
+}
+
