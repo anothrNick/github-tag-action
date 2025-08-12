@@ -119,8 +119,9 @@ esac
 # get the latest tag that looks like a semver (with or without v)
 matching_tag_refs=$( (grep -E "$tagFmt" <<< "$git_refs") || true)
 matching_pre_tag_refs=$( (grep -E "$preTagFmt" <<< "$git_refs") || true)
-tag=$(head -n 1 <<< "$matching_tag_refs")
-pre_tag=$(head -n 1 <<< "$matching_pre_tag_refs")
+# Sort matching tags by version to ensure we get the highest version when multiple tags exist on same commit
+tag=$(echo "$matching_tag_refs" | sort -V | tail -n 1)
+pre_tag=$(echo "$matching_pre_tag_refs" | sort -V | tail -n 1)
 
 # if there are none, start tags at initial version
 if [ -z "$tag" ]
