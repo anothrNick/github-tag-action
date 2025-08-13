@@ -110,7 +110,7 @@ case "$tag_context" in
         git_refs=$(git for-each-ref --sort=-v:refname --format '%(refname:lstrip=2)')
         ;;
     *branch*)
-        git_refs=$(git tag --list --merged HEAD --sort=-committerdate)
+        git_refs=$(git tag --list --merged HEAD --sort=committerdate)
         ;;
     * ) echo "Unrecognised context"
         exit 1;;
@@ -119,9 +119,8 @@ esac
 # get the latest tag that looks like a semver (with or without v)
 matching_tag_refs=$( (grep -E "$tagFmt" <<< "$git_refs") || true)
 matching_pre_tag_refs=$( (grep -E "$preTagFmt" <<< "$git_refs") || true)
-# Sort matching tags by version to ensure we get the highest version when multiple tags exist on same commit
-tag=$(echo "$matching_tag_refs" | sort -V | tail -n 1)
-pre_tag=$(echo "$matching_pre_tag_refs" | sort -V | tail -n 1)
+tag=$(tail -n 1 <<< "$matching_tag_refs")
+pre_tag=$(tail -n 1 <<< "$matching_pre_tag_refs")
 
 # if there are none, start tags at initial version
 if [ -z "$tag" ]
@@ -240,7 +239,7 @@ setOutput "part" "$part"
 setOutput "tag" "$new" # this needs to go in v2 is breaking change
 setOutput "old_tag" "$tag"
 
-# dry run exit without real changes
+# dry run exit without real changes
 if $dryrun
 then
     exit 0
