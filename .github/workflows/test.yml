@@ -202,3 +202,31 @@ jobs:
             exit 1
           fi
 
+  test-bats:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: '0'
+
+      - name: Install Dependencies
+        run: npm install -g semver
+
+      - name: Setup Bats
+        id: setup-bats
+        uses: bats-core/bats-action@3.0.1
+        with:
+          support-path: "${{ github.workspace }}/tests/bats-support"
+          assert-path: "${{ github.workspace }}/tests/bats-assert"
+          detik-install: false
+          file-install: false
+
+      - name: Run tests
+        shell: bash
+        env:
+          BATS_LIB_PATH: ${{ steps.setup-bats.outputs.lib-path }}
+        run: |
+          echo "Prefix Tests:"
+          bats test/test_prefix.bats 

@@ -1,0 +1,18 @@
+# macOS
+.DS_Store
+
+# VSCode
+.vscode/
+
+# Rider/JetBrains IDE
+.idea/
+*.sln.iml
+*.user
+*.suo
+*.sln.docstates
+.idea_modules/
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf

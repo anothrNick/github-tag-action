@@ -172,7 +172,7 @@ if [ -z "$tagPrefix" ]
 then
   current_tag=${tag}
 else
-  current_tag="$(echo ${tag}| sed "s/${tagPrefix}//g")"
+  current_tag="$(echo ${tag}| sed "s;${tagPrefix};;g")"
 fi
 case "$log" in
     *$major_string_token* ) new=${tagPrefix}$(semver -i major "${current_tag}"); part="major";;
